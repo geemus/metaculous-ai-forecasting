@@ -13,7 +13,7 @@ require 'json'
 # https://ruby-doc.org/3.4.1/String.html#method-i-match
 def extract_xml(tag, text)
   match = text.match(%r{<#{tag}>([\s\S]*?)</#{tag}>})
-  match[1] if match
+  match[1].strip if match
 end
 
 # https://docs.perplexity.ai/api-reference/chat-completions-post
@@ -42,8 +42,8 @@ def prompt_perplexity(prompt)
             The superforecaster will give you a question they intend to forecast on.
             To be a great assistant, you generate a concise but detailed rundown of the most relevant news, including if the question would resolve Yes or No based on current information.
             You do not produce forecasts yourself.
-            Before answering, show step-by-step reasoning in clear, logical order within <cot> tags.
-            Provide your answer in <research> tags.
+            Before answering, show step-by-step reasoning in clear, logical order wrapped in <cot> tags.
+            Provide your answer wrapped in <research> tags.
           SYSTEM
         },
         {
@@ -67,14 +67,35 @@ question = {
 }
 
 # https://github.com/ruby/erb
-research_prompt_template = ERB.new <<~RESEARCH_PROMPT
-  <question><%= question[:title] %></question>
-  <description><%= question[:description] %></description>
+research_prompt_template = ERB.new(<<~RESEARCH_PROMPT, trim_mode: '-')
+  <question>
+  <%= question[:title] %>
+  </question>
+
+  <description>
+  <%= question[:description] %>
+  </description>
 RESEARCH_PROMPT
 
+puts
 puts '# submitting research prompt'
 research_prompt = research_prompt_template.result(binding)
+puts research_prompt
 research_json = prompt_perplexity(research_prompt)
 
+puts
 puts '## research'
-puts extract_xml('research', research_json['choices'][0]['message']['content'])
+
+# TODO: ? include result['last_updated']
+research_output_template = ERB.new(<<~RESEARCH_OUTPUT, trim_mode: '-')
+  <research>
+  <%= extract_xml('research', research_json['choices'][0]['message']['content']) %>
+  </research>
+
+  <sources>
+  <% research_json['search_results'].each do |result| -%>
+  - <%= result['date'] %>: [<%= result['title'] %>](<%= result['url'] %>) <%= result['snippet'] %>
+  <% end -%>
+  </sources>
+RESEARCH_OUTPUT
+puts research_output_template.result(binding)
