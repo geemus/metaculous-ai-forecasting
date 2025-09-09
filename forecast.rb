@@ -86,14 +86,15 @@ puts research_prompt
 puts
 Formatador.display_line '[bold][green]# Submitting Research Prompt…[/]'
 research_json = prompt_perplexity(research_prompt)
+research_content = research_json['choices'].map { |choice| choice['message']['content'] }.join("\n")
 
-Formatador.display_line("[red] #{research_json['choices'][0]['message']['content']} [/]") if ENV['DEBUG']
+Formatador.display_line("[red] #{research_content} [/]") if ENV['DEBUG']
 
 puts
 Formatador.display_line '[bold][green]## Research Output[/]'
 research_output_template = ERB.new(<<~RESEARCH_OUTPUT, trim_mode: '-')
   <summary>
-  <%= extract_xml('summary', research_json['choices'][0]['message']['content']) %>
+  <%= extract_xml('summary', research_content) %>
   </summary>
 
   <sources>
