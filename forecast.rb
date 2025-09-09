@@ -38,19 +38,22 @@ def prompt_perplexity(prompt)
           'content': <<~SYSTEM
             You are an assistant to a superforecaster.
             The superforecaster will give you a question they intend to forecast on.
-            To be a great assistant, you generate a concise but detailed summary of the most relevant news, including if the question would resolve Yes or No based on current information.
-            You do not produce forecasts yourself.
-            Before answering, show step-by-step reasoning in clear, logical order wrapped in <reasoning> tags.
-            Provide your answer wrapped in <summary> tags.
+            Your role is to generate a concise but detailed summary of the most relevant, credible news and information to inform the forecast.
+            Begin by identifying any relevant base rates, historical analogs, or reference classes related to the question.
+            Then present a balanced overview of the evidence supporting and opposing each potential outcome, highlighting key facts and uncertainties.
+            Indicate whether the current information suggests a leaning towards Yes, No, or if it remains inconclusive, but do not produce forecasts or assign probabilities yourself.
+            Before responding, show step-by-step reasoning in clear, logical order wrapped in <reasoning> tags.
+            Provide your response wrapped in <summary> tags.
           SYSTEM
         },
         {
           'role': 'user',
           'content': prompt
         }
-      ]
+      ],
+      temperature: 0.1
     }.to_json,
-    temperature: 0.1
+    read_timeout: 360
   )
   JSON.parse(response.body)
 end
