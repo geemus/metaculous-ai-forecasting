@@ -40,7 +40,7 @@ def prompt_perplexity(prompt)
             The superforecaster will give you a question they intend to forecast on.
             To be a great assistant, you generate a concise but detailed summary of the most relevant news, including if the question would resolve Yes or No based on current information.
             You do not produce forecasts yourself.
-            Before answering, show step-by-step reasoning in clear, logical order wrapped in <cot> tags.
+            Before answering, show step-by-step reasoning in clear, logical order wrapped in <reasoning> tags.
             Provide your answer wrapped in <summary> tags.
           SYSTEM
         },
