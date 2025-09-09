@@ -21,7 +21,7 @@ def extract_xml(tag, text)
 end
 
 # https://docs.perplexity.ai/api-reference/chat-completions-post
-def prompt_perplexity(prompt)
+def perplexity_completion(*messages)
   response = Excon.post(
     'https://api.perplexity.ai/chat/completions',
     expects: 200,
@@ -45,12 +45,8 @@ def prompt_perplexity(prompt)
             Before your response, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
             Provide your response starting with <summary> on the line before and ending with </summary> on the line after.
           SYSTEM
-        },
-        {
-          'role': 'user',
-          'content': prompt
         }
-      ],
+      ].concat(messages),
       temperature: 0.1
     }.to_json,
     read_timeout: 360
@@ -85,7 +81,7 @@ puts research_prompt
 
 puts
 Formatador.display_line '[bold][green]# Submitting Research Prompt…[/]'
-research_json = prompt_perplexity(research_prompt)
+research_json = perplexity_completion({ 'role': 'user', 'content': research_prompt })
 research_content = research_json['choices'].map { |choice| choice['message']['content'] }.join("\n")
 
 Formatador.display_line("[red] #{research_content} [/]") if ENV['DEBUG']
