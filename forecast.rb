@@ -42,8 +42,8 @@ def prompt_perplexity(prompt)
             Begin by identifying any relevant base rates, historical analogs, or reference classes related to the question.
             Then present a balanced overview of the evidence supporting and opposing each potential outcome, highlighting key facts and uncertainties.
             Indicate whether the current information suggests a leaning towards Yes, No, or if it remains inconclusive, but do not produce forecasts or assign probabilities yourself.
-            Before responding, show step-by-step reasoning in clear, logical order wrapped in <reasoning> tags.
-            Provide your response wrapped in <summary> tags.
+            Before your response, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
+            Provide your response starting with <summary> on the line before and ending with </summary> on the line after.
           SYSTEM
         },
         {
