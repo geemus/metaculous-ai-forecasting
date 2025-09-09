@@ -31,7 +31,7 @@ def prompt_perplexity(prompt)
       'content-type': 'application/json'
     },
     body: {
-      model: 'sonar',
+      model: 'sonar-pro',
       messages: [
         {
           'role': 'system',
