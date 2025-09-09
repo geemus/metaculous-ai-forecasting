@@ -7,7 +7,11 @@ Bundler.setup
 
 require 'erb'
 require 'excon'
+require 'formatador'
 require 'json'
+
+Thread.current[:formatador] = Formatador.new
+Thread.current[:formatador].instance_variable_set(:@indent, 0)
 
 # https://github.com/anthropics/anthropic-cookbook/blob/main/patterns/agents/util.py
 # https://ruby-doc.org/3.4.1/String.html#method-i-match
@@ -78,15 +82,16 @@ research_prompt_template = ERB.new(<<~RESEARCH_PROMPT, trim_mode: '-')
 RESEARCH_PROMPT
 
 puts
-puts '# submitting research prompt…'
+Formatador.display_line '[bold][green]# Research Prompt[/]'
 research_prompt = research_prompt_template.result(binding)
 puts research_prompt
+
+puts
+Formatador.display_line '[bold][green]# Submitting Research Prompt…[/]'
 research_json = prompt_perplexity(research_prompt)
 
 puts
-puts '## research'
-
-# TODO: ? include result['last_updated']
+Formatador.display_line '[bold][green]## Research Output[/]'
 research_output_template = ERB.new(<<~RESEARCH_OUTPUT, trim_mode: '-')
   <research>
   <%= extract_xml('research', research_json['choices'][0]['message']['content']) %>

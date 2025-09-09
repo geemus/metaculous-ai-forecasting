@@ -4,3 +4,4 @@ source 'https://rubygems.org'
 
 gem 'erb'
 gem 'excon'
+gem 'formatador'
