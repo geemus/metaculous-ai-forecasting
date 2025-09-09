@@ -35,19 +35,13 @@ def prompt_perplexity(prompt)
       messages: [
         {
           'role': 'system',
-          # 'content': <<-SYSTEM
-          # You are an assistant to a superforecaster.
-          # The superforecaster will give you a question they intend to forecast on.
-          # To be a great assistant, you generate a concise but detailed rundown of the most relevant news, including if the question would resolve Yes or No based on current information.
-          # You do not produce forecasts yourself.
-          # SYSTEM
           'content': <<~SYSTEM
             You are an assistant to a superforecaster.
             The superforecaster will give you a question they intend to forecast on.
-            To be a great assistant, you generate a concise but detailed rundown of the most relevant news, including if the question would resolve Yes or No based on current information.
+            To be a great assistant, you generate a concise but detailed summary of the most relevant news, including if the question would resolve Yes or No based on current information.
             You do not produce forecasts yourself.
             Before answering, show step-by-step reasoning in clear, logical order wrapped in <cot> tags.
-            Provide your answer wrapped in <research> tags.
+            Provide your answer wrapped in <summary> tags.
           SYSTEM
         },
         {
@@ -93,9 +87,9 @@ research_json = prompt_perplexity(research_prompt)
 puts
 Formatador.display_line '[bold][green]## Research Output[/]'
 research_output_template = ERB.new(<<~RESEARCH_OUTPUT, trim_mode: '-')
-  <research>
-  <%= extract_xml('research', research_json['choices'][0]['message']['content']) %>
-  </research>
+  <summary>
+  <%= extract_xml('summary', research_json['choices'][0]['message']['content']) %>
+  </summary>
 
   <sources>
   <% research_json['search_results'].each do |result| -%>
