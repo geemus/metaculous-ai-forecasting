@@ -94,7 +94,7 @@ research_output_template = ERB.new(<<~RESEARCH_OUTPUT, trim_mode: '-')
 
   <sources>
   <% research_json['search_results'].each do |result| -%>
-  - <%= result['date'] %>: [<%= result['title'] %>](<%= result['url'] %>) <%= result['snippet'] %>
+  - [<%= result['title'] %>](<%= result['url'] %>) <%= result['snippet'] %> (Published: <%= result['date'] %>, Updated: <%= result['last_updated'] %>)
   <% end -%>
   </sources>
 RESEARCH_OUTPUT
