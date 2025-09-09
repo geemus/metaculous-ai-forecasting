@@ -34,7 +34,7 @@ def anthropic_completion(*messages)
     body: {
       # model: 'claude-opus-4-1-20250805',
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 1024,
+      max_tokens: 2048,
       messages: messages,
       system: <<~SYSTEM,
         You are an experienced superforecaster.
@@ -115,9 +115,7 @@ research_prompt_template = ERB.new(<<~RESEARCH_PROMPT, trim_mode: '-')
 
   Criteria for determining outcome, which have not yet been met:
   <criteria>
-  <%= question[:resolution_criteria] %>
-
-  <%= question[:fine_print] %>
+  <%= [question[:resolution_criteria], question[:fine_print]].compact.join("\n\n").strip %>
   </criteria>
 RESEARCH_PROMPT
 
@@ -169,9 +167,7 @@ forecast_prompt_template = ERB.new(<<~FORECAST_PROMPT, trim_mode: '-')
 
   Criteria for determining outcome, which have not yet been met:
   <criteria>
-  <%= question[:resolution_criteria] %>
-
-  <%= question[:fine_print] %>
+  <%= [question[:resolution_criteria], question[:fine_print]].compact.join("\n\n").strip %>
   </criteria>
 
   Here is a summary of relevant data from your research assistant:
@@ -179,7 +175,7 @@ forecast_prompt_template = ERB.new(<<~FORECAST_PROMPT, trim_mode: '-')
   <%= research_output %>
   </research>
 
-  - Today is <%= Time.now.strftime('%Y-%m-%d') %>. Consider the time remaining before the outcome of the question in known.
+  - Today is <%= Time.now.strftime('%Y-%m-%d') %>. Consider the time remaining before the outcome of the question will become known.
   - Provide your response starting with <forecast> on the line before and ending with </forecast> on the line after.
   - Provide your final probabilistic prediction with <probability> on the line before and ending with </probability> on the line after, only include the probability itself.
 FORECAST_PROMPT
