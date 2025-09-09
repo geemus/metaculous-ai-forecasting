@@ -87,6 +87,8 @@ puts
 Formatador.display_line '[bold][green]# Submitting Research Prompt…[/]'
 research_json = prompt_perplexity(research_prompt)
 
+Formatador.display_line("[red] #{research_json['choices'][0]['message']['content']} [/]") if ENV['DEBUG']
+
 puts
 Formatador.display_line '[bold][green]## Research Output[/]'
 research_output_template = ERB.new(<<~RESEARCH_OUTPUT, trim_mode: '-')
