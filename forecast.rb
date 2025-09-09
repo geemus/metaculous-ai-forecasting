@@ -78,7 +78,7 @@ research_prompt_template = ERB.new(<<~RESEARCH_PROMPT, trim_mode: '-')
 RESEARCH_PROMPT
 
 puts
-puts '# submitting research prompt'
+puts '# submitting research prompt…'
 research_prompt = research_prompt_template.result(binding)
 puts research_prompt
 research_json = prompt_perplexity(research_prompt)
