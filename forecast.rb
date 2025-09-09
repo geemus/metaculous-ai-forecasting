@@ -75,12 +75,12 @@ research_prompt_template = ERB.new(<<~RESEARCH_PROMPT, trim_mode: '-')
 RESEARCH_PROMPT
 
 puts
-Formatador.display_line '[bold][green]# Research Prompt[/]'
+Formatador.display_line '[bold][green]# Target Forecasting Question[/]'
 research_prompt = research_prompt_template.result(binding)
 puts research_prompt
 
 puts
-Formatador.display_line '[bold][green]# Submitting Research Prompt…[/]'
+Formatador.display_line '[bold][green]# Researcher: Researching…[/]'
 research_json = perplexity_completion({ 'role': 'user', 'content': research_prompt })
 research_content = research_json['choices'].map { |choice| choice['message']['content'] }.join("\n")
 
