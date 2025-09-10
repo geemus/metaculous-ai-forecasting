@@ -101,27 +101,27 @@ question = {
   'type': 'binary'
 }
 
-# https://github.com/ruby/erb
-research_prompt_template = ERB.new(<<~RESEARCH_PROMPT, trim_mode: '-')
-  Question:
+forecast_prompt_template = ERB.new(<<~FORECAST_PROMPT_TEMPLATE, trim_mode: '-')
+  Forecast Question:
   <question>
   <%= question[:title] %>
   </question>
 
-  Background:
+  Forecast Background:
   <background>
   <%= question[:description] %>
   </background>
 
-  Criteria for determining outcome, which have not yet been met:
+  Criteria for determining forecast outcome, which have not yet been met:
   <criteria>
   <%= [question[:resolution_criteria], question[:fine_print]].compact.join("\n\n").strip %>
   </criteria>
-RESEARCH_PROMPT
+FORECAST_PROMPT_TEMPLATE
+forecast_prompt = forecast_prompt_template.result(binding)
 
 puts
 Formatador.display_line '[bold][green]# Researcher: Research Prompt[/]'
-research_prompt = research_prompt_template.result(binding)
+research_prompt = forecast_prompt
 puts research_prompt
 
 puts
@@ -155,20 +155,7 @@ Formatador.display_line '[bold][green]## Superforecaster: Forecast Prompt[/]'
 forecast_prompt_template = ERB.new(<<~FORECAST_PROMPT, trim_mode: '-')
   Create a forecast based on the following information.
 
-  Question:
-  <question>
-  <%= question[:title] %>
-  </question>
-
-  Background:
-  <background>
-  <%= question[:description] %>
-  </background>
-
-  Criteria for determining outcome, which have not yet been met:
-  <criteria>
-  <%= [question[:resolution_criteria], question[:fine_print]].compact.join("\n\n").strip %>
-  </criteria>
+  <%= forecast_prompt -%>
 
   Here is a summary of relevant data from your research assistant:
   <research>
