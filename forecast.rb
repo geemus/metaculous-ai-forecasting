@@ -92,30 +92,48 @@ def perplexity_completion(*messages)
   JSON.parse(response.body)
 end
 
+def get_metaculus_post(post_id)
+  response = Excon.get(
+    "https://www.metaculus.com/api/posts/#{post_id}/",
+    expects: 200,
+    headers: {
+      'accept': 'application/json',
+      # 'authorization': "Token #{ENV['METACULUS_API_TOKEN']}"
+    }
+  )
+  JSON.parse(response.body)
+end
+
 # metaculous 578 for initial testing
-question = {
-  'title': 'Will humans go extinct before 2100?',
-  'description': "While the general feeling of most people, especially now that the cold war is (mostly) over, is that the risk of human extinction is extremely small, experts have assigned a significantly higher probability to the event.\n\nIn 2008 an [informal poll at the Global Catastrophic Risk Conference at the University of Oxford](https://www.webcitation.org/6YxiCAV0p?url=http://www.fhi.ox.ac.uk/gcr-report.pdf) yielded a median probability of human extinction by 2100 of 19%. Yet, one might want to be cautious when using this result as a good estimate of the true probability of human extinction, as there may be a powerful selection effect at play. Only those who assign a high probability to human extinction are likely to attend the Global Catastrophic Risk Conference in the first place, meaning that the survey was effectively sampling opinions from one extreme tail of the opinion distribution on the subject. Indeed, the conference report itself stated that the findings should be taken 'with a grain of salt'.",
-  'fine_print': '',
-  'resolution_criteria': "This question will resolve as **Yes** if there are no known humans alive on January 1, 2100.  For these purposes we'll define humans as biological creatures who have as their ancestors – via a chain of live births from mothers –  circa 2000 humans OR who could mate with circa 2000 humans to produce viable offspring. (So AIs, ems, genetically engineered beings of a different species brought up in artificial wombs, etc. would not count).  Any living humans living anywhere in the observable universe (or multiverse) (who are known to the entities operating Metaculus) on that date will be sufficient to resolve the question negatively.\n\nN.B. Even though it is obviously the case that if human extinction occurs Metaculus points won't be very valuable anymore and that it will be practically impossible to check for true human extinction (zero humans left), I would like to ask people not to let this fact influence their prediction and to predict in good faith",
-  'type': 'binary'
-}
+metaculus_json = get_metaculus_post(578)
+metaculus_latest_aggregations = metaculus_json.dig('question', 'aggregations', 'recency_weighted', 'latest')
+metaculus_latest_count = metaculus_latest_aggregations['forecaster_count']
+metaculus_latest_mean = (metaculus_latest_aggregations['means'].first * 100).round
+metaculus_latest_median = (metaculus_latest_aggregations['centers'].first * 100).round
+question = metaculus_json['question']
 
 forecast_prompt_template = ERB.new(<<~FORECAST_PROMPT_TEMPLATE, trim_mode: '-')
   Forecast Question:
   <question>
-  <%= question[:title] %>
+  <%= question['title'] %>
   </question>
 
   Forecast Background:
   <background>
-  <%= question[:description] %>
+  <%= question['description'] %>
   </background>
 
   Criteria for determining forecast outcome, which have not yet been met:
   <criteria>
-  <%= [question[:resolution_criteria], question[:fine_print]].compact.join("\n\n").strip %>
+  <%= [question['resolution_criteria'], question['fine_print']].compact.join("\n\n").strip %>
   </criteria>
+
+  Existing Metaculus Forecasts Aggregate:
+  <aggregate>
+    <count><%= metaculus_latest_count %></count>
+    <mean><%= metaculus_latest_mean %>%</mean>
+    <median><%= metaculus_latest_median %>%</median>
+  </aggregate>
 FORECAST_PROMPT_TEMPLATE
 forecast_prompt = forecast_prompt_template.result(binding)
 
@@ -210,4 +228,4 @@ puts forecast_content
 
 puts
 Formatador.display_line '[bold][green]## Forecast[/]'
-puts "#{question[:title]} #{extract_xml('probability', forecast_content)}"
+puts "#{question['title']} #{extract_xml('probability', forecast_content)}"
