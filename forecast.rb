@@ -262,8 +262,8 @@ forecast_prompt_template = ERB.new(<<~FORECAST_PROMPT, trim_mode: '-')
   <%= revision_output %>
   </research>
 
-  - Today is <%= Time.now.strftime('%Y-%m-%d') %>. Consider the time remaining before the outcome of the question will become known.
   - Before providing your forecast, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
+  - Today is <%= Time.now.strftime('%B %d, %Y') %>. Consider the time remaining before the outcome of the question will become known.
   - Provide your response starting with <forecast> on the line before and ending with </forecast> on the line after.
   - Provide your final probabilistic prediction with <probability> on the line before and ending with </probability> on the line after, only include the probability itself.
 FORECAST_PROMPT
