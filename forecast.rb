@@ -125,9 +125,23 @@ research_prompt = forecast_prompt
 puts research_prompt
 
 puts
-Formatador.display_line '[bold][green]# Researcher: Researching…[/]'
+Formatador.display '[bold][green]# Researcher: Researching…[/] '
+research_duration = Time.now
 research_json = perplexity_completion({ 'role': 'user', 'content': research_prompt })
+research_duration = Time.now - research_duration
 research_content = research_json['choices'].map { |choice| choice['message']['content'] }.join("\n")
+Formatador.display_line(
+  format(
+    '[light_green](%<input_tokens>d -> %<output_tokens>d tokens in %<minutes>dm %<seconds>ds @ $%<cost>0.2f)[/]',
+    {
+      input_tokens: research_json.dig('usage', 'prompt_tokens'),
+      output_tokens: research_json.dig('usage', 'total_tokens') - research_json.dig('usage', 'prompt_tokens'),
+      minutes: research_duration / 60,
+      seconds: research_duration % 60,
+      cost: research_json.dig('usage', 'cost', 'total_cost')
+    }
+  )
+)
 
 research_output_template = ERB.new(<<~RESEARCH_OUTPUT, trim_mode: '-')
   <summary>
@@ -170,10 +184,27 @@ forecast_prompt = forecast_prompt_template.result(binding)
 puts forecast_prompt
 
 puts
-Formatador.display_line '[bold][green]## Superforecaster: Forecasting…[/]'
+Formatador.display '[bold][green]## Superforecaster: Forecasting…[/] '
+forecast_duration = Time.now
 forecast_json = anthropic_completion({ 'role': 'user', 'content': forecast_prompt })
+forecast_duration = Time.now - forecast_duration
 forecast_text_array = forecast_json['content'].select { |content| content['type'] == 'text' }
 forecast_content = forecast_text_array.map { |content| content['text'] }.join("\n")
+# NOTE: Anthropic API doesn't appear to return cost data
+Formatador.display_line(
+  format(
+    '[light_green](%<input_tokens>d -> %<output_tokens>d tokens in %<minutes>dm %<seconds>ds)[/]',
+    {
+      input_tokens:
+        forecast_json.dig('usage', 'input_tokens') +
+        forecast_json.dig('usage', 'cache_creation_input_tokens') +
+        forecast_json.dig('usage', 'cache_read_input_tokens'),
+      output_tokens: forecast_json.dig('usage', 'output_tokens'),
+      minutes: forecast_duration / 60,
+      seconds: forecast_duration % 60
+    }
+  )
+)
 
 puts forecast_content
 
