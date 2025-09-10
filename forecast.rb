@@ -60,6 +60,9 @@ def anthropic_completion(*messages)
     read_timeout: 360
   )
   JSON.parse(response.body)
+rescue Excon::Error => e
+  puts e
+  exit
 end
 
 # NOTE: Anthropic API doesn't appear to return cost data
@@ -112,6 +115,9 @@ def perplexity_completion(*messages)
     read_timeout: 360
   )
   JSON.parse(response.body)
+rescue Excon::Error => e
+  puts e
+  exit
 end
 
 def display_perplexity_meta(json, duration)
