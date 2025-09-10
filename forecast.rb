@@ -186,7 +186,6 @@ research_json = perplexity_completion({ 'role': 'user', 'content': research_prom
 research_duration = Time.now - research_duration
 research_content = research_json['choices'].map { |choice| choice['message']['content'] }.join("\n")
 display_perplexity_meta(research_json, research_duration)
-puts research_content
 
 research_output_template = ERB.new(<<~RESEARCH_OUTPUT, trim_mode: '-')
   <summary>
@@ -200,6 +199,7 @@ research_output_template = ERB.new(<<~RESEARCH_OUTPUT, trim_mode: '-')
   </sources>
 RESEARCH_OUTPUT
 research_output = research_output_template.result(binding)
+puts research_output
 
 puts
 Formatador.display_line '[bold][green]## Superforecaster: Research Feedback Prompt[/]'
@@ -223,7 +223,7 @@ research_feedback_duration = Time.now - research_feedback_duration
 research_feedback_text_array = research_feedback_json['content'].select { |content| content['type'] == 'text' }
 research_feedback_content = research_feedback_text_array.map { |content| content['text'] }.join("\n")
 display_anthropic_meta(research_feedback_json, research_feedback_duration)
-puts research_feedback_content
+puts extract_xml('feedback', research_feedback_content)
 
 puts
 Formatador.display '[bold][green]# Researcher: Revising Research…[/] '
@@ -236,7 +236,6 @@ revision_json = perplexity_completion(
 revision_duration = Time.now - revision_duration
 revision_content = revision_json['choices'].map { |choice| choice['message']['content'] }.join("\n")
 display_perplexity_meta(revision_json, revision_duration)
-puts revision_content
 
 revision_output_template = ERB.new(<<~REVISION_OUTPUT, trim_mode: '-')
   <summary>
@@ -250,6 +249,7 @@ revision_output_template = ERB.new(<<~REVISION_OUTPUT, trim_mode: '-')
   </sources>
 REVISION_OUTPUT
 revision_output = revision_output_template.result(binding)
+puts revision_output
 
 Formatador.display_line '[bold][green]## Superforecaster: Forecast Prompt[/]'
 forecast_prompt_template = ERB.new(<<~FORECAST_PROMPT, trim_mode: '-')
@@ -278,7 +278,7 @@ forecast_duration = Time.now - forecast_duration
 forecast_text_array = forecast_json['content'].select { |content| content['type'] == 'text' }
 forecast_content = forecast_text_array.map { |content| content['text'] }.join("\n")
 display_anthropic_meta(forecast_json, forecast_duration)
-puts forecast_content
+puts extract_xml('forecast', forecast_content)
 
 puts
 Formatador.display_line '[bold][green]## Forecast[/]'
