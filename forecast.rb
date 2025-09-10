@@ -160,6 +160,7 @@ Formatador.display_line(
     }
   )
 )
+puts research_content
 
 research_output_template = ERB.new(<<~RESEARCH_OUTPUT, trim_mode: '-')
   <summary>
@@ -173,14 +174,6 @@ research_output_template = ERB.new(<<~RESEARCH_OUTPUT, trim_mode: '-')
   </sources>
 RESEARCH_OUTPUT
 research_output = research_output_template.result(binding)
-
-if ENV['DEBUG']
-  puts
-  Formatador.display_line("[red] #{research_content} [/]")
-  puts
-  Formatador.display_line '[bold][green]## Researcher: Research Output[/]'
-  puts research_output
-end
 
 puts
 Formatador.display_line '[bold][green]## Superforecaster: Forecast Prompt[/]'
@@ -223,7 +216,6 @@ Formatador.display_line(
     }
   )
 )
-
 puts forecast_content
 
 puts
