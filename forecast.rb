@@ -20,6 +20,10 @@ def extract_xml(tag, text)
   match[1].strip if match
 end
 
+def strip_xml(tag, text)
+  text.gsub(%r{<#{tag}>([\s\S]*?)</#{tag}>}, '')
+end
+
 # https://docs.anthropic.com/en/api/messages
 def anthropic_completion(*messages)
   response = Excon.post(
