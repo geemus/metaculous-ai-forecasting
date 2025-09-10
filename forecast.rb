@@ -147,7 +147,7 @@ research_prompt = forecast_prompt
 puts research_prompt
 
 puts
-Formatador.display '[bold][green]# Researcher: Researching…[/] '
+Formatador.display '[bold][green]# Researcher: Drafting Research…[/] '
 research_duration = Time.now
 research_json = perplexity_completion({ 'role': 'user', 'content': research_prompt })
 research_duration = Time.now - research_duration
@@ -180,6 +180,79 @@ RESEARCH_OUTPUT
 research_output = research_output_template.result(binding)
 
 puts
+Formatador.display_line '[bold][green]## Superforecaster: Research Feedback Prompt[/]'
+research_feedback_prompt_template = ERB.new(<<~RESEARCH_FEEDBACK_PROMPT, trim_mode: '-')
+  Provide feedback to your assistant on this research for one of your forecasts:
+  <research>
+  <%= research_output %>
+  </research>
+
+  - Before providing feedback, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
+  - Provide feedback on how to improve this research starting with <feedback> on the line before and ending with </feedback> on the line after.
+RESEARCH_FEEDBACK_PROMPT
+research_feedback_prompt = research_feedback_prompt_template.result(binding)
+puts research_feedback_prompt
+
+puts
+Formatador.display '[bold][green]## Superforecaster: Reviewing Research…[/] '
+research_feedback_duration = Time.now
+research_feedback_json = anthropic_completion({ 'role': 'user', 'content': research_feedback_prompt })
+research_feedback_duration = Time.now - research_feedback_duration
+research_feedback_text_array = research_feedback_json['content'].select { |content| content['type'] == 'text' }
+research_feedback_content = research_feedback_text_array.map { |content| content['text'] }.join("\n")
+Formatador.display_line(
+  format(
+    '[light_green](%<input_tokens>d -> %<output_tokens>d tokens in %<minutes>dm %<seconds>ds)[/]',
+    {
+      input_tokens:
+        research_feedback_json.dig('usage', 'input_tokens') +
+        research_feedback_json.dig('usage', 'cache_creation_input_tokens') +
+        research_feedback_json.dig('usage', 'cache_read_input_tokens'),
+      output_tokens: research_feedback_json.dig('usage', 'output_tokens'),
+      minutes: research_feedback_duration / 60,
+      seconds: research_feedback_duration % 60
+    }
+  )
+)
+puts research_feedback_content
+
+puts
+Formatador.display '[bold][green]# Researcher: Revising Research…[/] '
+revision_duration = Time.now
+revision_json = perplexity_completion(
+  { 'role': 'user', 'content': research_prompt },
+  { 'role': 'assistant', 'content': strip_xml('reasoning', research_content) },
+  { 'role': 'user', 'content': extract_xml('feedback', research_feedback_content) }
+)
+revision_duration = Time.now - revision_duration
+revision_content = revision_json['choices'].map { |choice| choice['message']['content'] }.join("\n")
+Formatador.display_line(
+  format(
+    '[light_green](%<input_tokens>d -> %<output_tokens>d tokens in %<minutes>dm %<seconds>ds @ $%<cost>0.2f)[/]',
+    {
+      input_tokens: revision_json.dig('usage', 'prompt_tokens'),
+      output_tokens: revision_json.dig('usage', 'total_tokens') - revision_json.dig('usage', 'prompt_tokens'),
+      minutes: revision_duration / 60,
+      seconds: revision_duration % 60,
+      cost: revision_json.dig('usage', 'cost', 'total_cost')
+    }
+  )
+)
+puts revision_content
+
+revision_output_template = ERB.new(<<~REVISION_OUTPUT, trim_mode: '-')
+  <summary>
+  <%= extract_xml('summary', revision_content) %>
+  </summary>
+
+  <sources>
+  <% revision_json['search_results'].each do |result| -%>
+  - [<%= result['title'] %>](<%= result['url'] %>) <%= result['snippet'] %> (Published: <%= result['date'] %>, Updated: <%= result['last_updated'] %>)
+  <% end -%>
+  </sources>
+REVISION_OUTPUT
+revision_output = revision_output_template.result(binding)
+
 Formatador.display_line '[bold][green]## Superforecaster: Forecast Prompt[/]'
 forecast_prompt_template = ERB.new(<<~FORECAST_PROMPT, trim_mode: '-')
   Create a forecast based on the following information.
@@ -188,10 +261,11 @@ forecast_prompt_template = ERB.new(<<~FORECAST_PROMPT, trim_mode: '-')
 
   Here is a summary of relevant data from your research assistant:
   <research>
-  <%= research_output %>
+  <%= revision_output %>
   </research>
 
   - Today is <%= Time.now.strftime('%Y-%m-%d') %>. Consider the time remaining before the outcome of the question will become known.
+  - Before providing your forecast, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
   - Provide your response starting with <forecast> on the line before and ending with </forecast> on the line after.
   - Provide your final probabilistic prediction with <probability> on the line before and ending with </probability> on the line after, only include the probability itself.
 FORECAST_PROMPT
