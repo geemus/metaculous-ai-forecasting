@@ -62,6 +62,24 @@ def anthropic_completion(*messages)
   JSON.parse(response.body)
 end
 
+# NOTE: Anthropic API doesn't appear to return cost data
+def display_anthropic_meta(json, duration)
+  Formatador.display_line(
+    format(
+      '[light_green](%<input_tokens>d -> %<output_tokens>d tokens in %<minutes>dm %<seconds>ds)[/]',
+      {
+        input_tokens:
+          json.dig('usage', 'input_tokens') +
+          json.dig('usage', 'cache_creation_input_tokens') +
+          json.dig('usage', 'cache_read_input_tokens'),
+        output_tokens: json.dig('usage', 'output_tokens'),
+        minutes: duration / 60,
+        seconds: duration % 60
+      }
+    )
+  )
+end
+
 # https://docs.perplexity.ai/api-reference/chat-completions-post
 def perplexity_completion(*messages)
   response = Excon.post(
@@ -94,6 +112,21 @@ def perplexity_completion(*messages)
     read_timeout: 360
   )
   JSON.parse(response.body)
+end
+
+def display_perplexity_meta(json, duration)
+  Formatador.display_line(
+    format(
+      '[light_green](%<input_tokens>d -> %<output_tokens>d tokens in %<minutes>dm %<seconds>ds @ $%<cost>0.2f)[/]',
+      {
+        input_tokens: json.dig('usage', 'prompt_tokens'),
+        output_tokens: json.dig('usage', 'total_tokens') - json.dig('usage', 'prompt_tokens'),
+        minutes: duration / 60,
+        seconds: duration % 60,
+        cost: json.dig('usage', 'cost', 'total_cost')
+      }
+    )
+  )
 end
 
 def get_metaculus_post(post_id)
@@ -152,18 +185,7 @@ research_duration = Time.now
 research_json = perplexity_completion({ 'role': 'user', 'content': research_prompt })
 research_duration = Time.now - research_duration
 research_content = research_json['choices'].map { |choice| choice['message']['content'] }.join("\n")
-Formatador.display_line(
-  format(
-    '[light_green](%<input_tokens>d -> %<output_tokens>d tokens in %<minutes>dm %<seconds>ds @ $%<cost>0.2f)[/]',
-    {
-      input_tokens: research_json.dig('usage', 'prompt_tokens'),
-      output_tokens: research_json.dig('usage', 'total_tokens') - research_json.dig('usage', 'prompt_tokens'),
-      minutes: research_duration / 60,
-      seconds: research_duration % 60,
-      cost: research_json.dig('usage', 'cost', 'total_cost')
-    }
-  )
-)
+display_perplexity_meta(research_json, research_duration)
 puts research_content
 
 research_output_template = ERB.new(<<~RESEARCH_OUTPUT, trim_mode: '-')
@@ -200,20 +222,7 @@ research_feedback_json = anthropic_completion({ 'role': 'user', 'content': resea
 research_feedback_duration = Time.now - research_feedback_duration
 research_feedback_text_array = research_feedback_json['content'].select { |content| content['type'] == 'text' }
 research_feedback_content = research_feedback_text_array.map { |content| content['text'] }.join("\n")
-Formatador.display_line(
-  format(
-    '[light_green](%<input_tokens>d -> %<output_tokens>d tokens in %<minutes>dm %<seconds>ds)[/]',
-    {
-      input_tokens:
-        research_feedback_json.dig('usage', 'input_tokens') +
-        research_feedback_json.dig('usage', 'cache_creation_input_tokens') +
-        research_feedback_json.dig('usage', 'cache_read_input_tokens'),
-      output_tokens: research_feedback_json.dig('usage', 'output_tokens'),
-      minutes: research_feedback_duration / 60,
-      seconds: research_feedback_duration % 60
-    }
-  )
-)
+display_anthropic_meta(research_feedback_json, research_feedback_duration)
 puts research_feedback_content
 
 puts
@@ -226,18 +235,7 @@ revision_json = perplexity_completion(
 )
 revision_duration = Time.now - revision_duration
 revision_content = revision_json['choices'].map { |choice| choice['message']['content'] }.join("\n")
-Formatador.display_line(
-  format(
-    '[light_green](%<input_tokens>d -> %<output_tokens>d tokens in %<minutes>dm %<seconds>ds @ $%<cost>0.2f)[/]',
-    {
-      input_tokens: revision_json.dig('usage', 'prompt_tokens'),
-      output_tokens: revision_json.dig('usage', 'total_tokens') - revision_json.dig('usage', 'prompt_tokens'),
-      minutes: revision_duration / 60,
-      seconds: revision_duration % 60,
-      cost: revision_json.dig('usage', 'cost', 'total_cost')
-    }
-  )
-)
+display_perplexity_meta(revision_json, revision_duration)
 puts revision_content
 
 revision_output_template = ERB.new(<<~REVISION_OUTPUT, trim_mode: '-')
@@ -279,21 +277,7 @@ forecast_json = anthropic_completion({ 'role': 'user', 'content': forecast_promp
 forecast_duration = Time.now - forecast_duration
 forecast_text_array = forecast_json['content'].select { |content| content['type'] == 'text' }
 forecast_content = forecast_text_array.map { |content| content['text'] }.join("\n")
-# NOTE: Anthropic API doesn't appear to return cost data
-Formatador.display_line(
-  format(
-    '[light_green](%<input_tokens>d -> %<output_tokens>d tokens in %<minutes>dm %<seconds>ds)[/]',
-    {
-      input_tokens:
-        forecast_json.dig('usage', 'input_tokens') +
-        forecast_json.dig('usage', 'cache_creation_input_tokens') +
-        forecast_json.dig('usage', 'cache_read_input_tokens'),
-      output_tokens: forecast_json.dig('usage', 'output_tokens'),
-      minutes: forecast_duration / 60,
-      seconds: forecast_duration % 60
-    }
-  )
-)
+display_anthropic_meta(forecast_json, forecast_duration)
 puts forecast_content
 
 puts
