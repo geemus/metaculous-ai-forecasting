@@ -26,6 +26,7 @@ end
 
 # https://docs.anthropic.com/en/api/messages
 def anthropic_completion(*messages)
+  start_time = Time.now
   response = Excon.post(
     'https://api.anthropic.com/v1/messages',
     # expects: 200,
@@ -59,7 +60,10 @@ def anthropic_completion(*messages)
     }.to_json,
     read_timeout: 360
   )
-  JSON.parse(response.body)
+  duration = Time.now - start_time
+  json = JSON.parse(response.body)
+  display_anthropic_meta(json, duration)
+  json
 rescue Excon::Error => e
   puts e
   exit
@@ -85,6 +89,7 @@ end
 
 # https://docs.perplexity.ai/api-reference/chat-completions-post
 def perplexity_completion(*messages)
+  start_time = Time.now
   response = Excon.post(
     'https://api.perplexity.ai/chat/completions',
     expects: 200,
@@ -114,7 +119,10 @@ def perplexity_completion(*messages)
     }.to_json,
     read_timeout: 360
   )
-  JSON.parse(response.body)
+  duration = Time.now - start_time
+  json = JSON.parse(response.body)
+  display_perplexity_meta(json, duration)
+  json
 rescue Excon::Error => e
   puts e
   exit
@@ -145,6 +153,22 @@ def get_metaculus_post(post_id)
     }
   )
   JSON.parse(response.body)
+end
+
+def format_research(json)
+  content = json['choices'].map { |choice| choice['message']['content'] }.join("\n")
+  research_output_template = ERB.new(<<~RESEARCH_OUTPUT, trim_mode: '-')
+    <summary>
+    <%= extract_xml('summary', content) %>
+    </summary>
+
+    <sources>
+    <% json['search_results'].each do |result| -%>
+    - [<%= result['title'] %>](<%= result['url'] %>) <%= result['snippet'] %> (Published: <%= result['date'] %>, Updated: <%= result['last_updated'] %>)
+    <% end -%>
+    </sources>
+  RESEARCH_OUTPUT
+  research_output = research_output_template.result(binding)
 end
 
 # metaculous 578 for initial testing
@@ -187,24 +211,9 @@ puts research_prompt
 
 puts
 Formatador.display '[bold][green]# Researcher: Drafting Research…[/] '
-research_duration = Time.now
 research_json = perplexity_completion({ 'role': 'user', 'content': research_prompt })
-research_duration = Time.now - research_duration
 research_content = research_json['choices'].map { |choice| choice['message']['content'] }.join("\n")
-display_perplexity_meta(research_json, research_duration)
-
-research_output_template = ERB.new(<<~RESEARCH_OUTPUT, trim_mode: '-')
-  <summary>
-  <%= extract_xml('summary', research_content) %>
-  </summary>
-
-  <sources>
-  <% research_json['search_results'].each do |result| -%>
-  - [<%= result['title'] %>](<%= result['url'] %>) <%= result['snippet'] %> (Published: <%= result['date'] %>, Updated: <%= result['last_updated'] %>)
-  <% end -%>
-  </sources>
-RESEARCH_OUTPUT
-research_output = research_output_template.result(binding)
+research_output = format_research(research_json)
 puts research_output
 
 puts
@@ -223,38 +232,19 @@ puts research_feedback_prompt
 
 puts
 Formatador.display '[bold][green]## Superforecaster: Reviewing Research…[/] '
-research_feedback_duration = Time.now
 research_feedback_json = anthropic_completion({ 'role': 'user', 'content': research_feedback_prompt })
-research_feedback_duration = Time.now - research_feedback_duration
 research_feedback_text_array = research_feedback_json['content'].select { |content| content['type'] == 'text' }
 research_feedback_content = research_feedback_text_array.map { |content| content['text'] }.join("\n")
-display_anthropic_meta(research_feedback_json, research_feedback_duration)
 puts extract_xml('feedback', research_feedback_content)
 
 puts
 Formatador.display '[bold][green]# Researcher: Revising Research…[/] '
-revision_duration = Time.now
 revision_json = perplexity_completion(
   { 'role': 'user', 'content': research_prompt },
   { 'role': 'assistant', 'content': strip_xml('reasoning', research_content) },
   { 'role': 'user', 'content': extract_xml('feedback', research_feedback_content) }
 )
-revision_duration = Time.now - revision_duration
-revision_content = revision_json['choices'].map { |choice| choice['message']['content'] }.join("\n")
-display_perplexity_meta(revision_json, revision_duration)
-
-revision_output_template = ERB.new(<<~REVISION_OUTPUT, trim_mode: '-')
-  <summary>
-  <%= extract_xml('summary', revision_content) %>
-  </summary>
-
-  <sources>
-  <% revision_json['search_results'].each do |result| -%>
-  - [<%= result['title'] %>](<%= result['url'] %>) <%= result['snippet'] %> (Published: <%= result['date'] %>, Updated: <%= result['last_updated'] %>)
-  <% end -%>
-  </sources>
-REVISION_OUTPUT
-revision_output = revision_output_template.result(binding)
+revision_output = format_research(revision_json)
 puts revision_output
 
 Formatador.display_line '[bold][green]## Superforecaster: Forecast Prompt[/]'
@@ -278,12 +268,9 @@ puts forecast_prompt
 
 puts
 Formatador.display '[bold][green]## Superforecaster: Forecasting…[/] '
-forecast_duration = Time.now
 forecast_json = anthropic_completion({ 'role': 'user', 'content': forecast_prompt })
-forecast_duration = Time.now - forecast_duration
 forecast_text_array = forecast_json['content'].select { |content| content['type'] == 'text' }
 forecast_content = forecast_text_array.map { |content| content['text'] }.join("\n")
-display_anthropic_meta(forecast_json, forecast_duration)
 puts extract_xml('forecast', forecast_content)
 
 puts
