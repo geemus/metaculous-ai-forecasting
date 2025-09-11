@@ -44,7 +44,7 @@ class Perplexity
     )
     response = Response.new(
       duration: Time.now - start_time,
-      json: JSON.parse(excon_response.body)
+      data: JSON.parse(excon_response.body)
     )
     response.display_meta
     response
@@ -69,11 +69,11 @@ class Perplexity
   end
 
   class Response
-    attr_accessor :duration, :json
+    attr_accessor :data, :duration
 
-    def initialize(duration:, json:)
+    def initialize(data:, duration:)
+      @data = data
       @duration = duration
-      @json = json
     end
 
     def display_meta
@@ -92,11 +92,11 @@ class Perplexity
     end
 
     def content
-      @content ||= json['choices'].map { |choice| choice['message']['content'] }.join("\n")
+      @content ||= data['choices'].map { |choice| choice['message']['content'] }.join("\n")
     end
 
     def cost
-      @json.dig('usage', 'cost', 'total_cost')
+      @data.dig('usage', 'cost', 'total_cost')
     end
 
     def extracted_content(tag)
@@ -104,11 +104,11 @@ class Perplexity
     end
 
     def input_tokens
-      @input_tokens ||= @json.dig('usage', 'prompt_tokens')
+      @input_tokens ||= data.dig('usage', 'prompt_tokens')
     end
 
     def output_tokens
-      @output_tokens ||= @json.dig('usage', 'total_tokens') - json.dig('usage', 'prompt_tokens')
+      @output_tokens ||= data.dig('usage', 'total_tokens') - data.dig('usage', 'prompt_tokens')
     end
 
     def stripped_content(tag)

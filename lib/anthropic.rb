@@ -37,7 +37,7 @@ class Anthropic
     )
     response = Response.new(
       duration: Time.now - start_time,
-      json: JSON.parse(excon_response.body)
+      data: JSON.parse(excon_response.body)
     )
     response.display_meta
     response
@@ -63,11 +63,11 @@ class Anthropic
   end
 
   class Response
-    attr_accessor :duration, :json
+    attr_accessor :data, :duration
 
-    def initialize(duration:, json:)
+    def initialize(data:, duration:)
+      @data = data
       @duration = duration
-      @json = json
     end
 
     # NOTE: Anthropic API doesn't appear to return cost data
@@ -86,7 +86,7 @@ class Anthropic
 
     def content
       @content ||= begin
-        text_array = @json['content'].select { |content| content['type'] == 'text' }
+        text_array = data['content'].select { |content| content['type'] == 'text' }
         text_array.map { |content| content['text'] }.join("\n")
       end
     end
@@ -96,11 +96,11 @@ class Anthropic
     end
 
     def input_tokens
-      @input_tokens ||= @json['usage'].fetch_values('input_tokens', 'cache_creation_input_tokens', 'cache_read_input_tokens').sum
+      @input_tokens ||= data['usage'].fetch_values('input_tokens', 'cache_creation_input_tokens', 'cache_read_input_tokens').sum
     end
 
     def output_tokens
-      @output_tokens ||= @json.dig('usage', 'output_tokens')
+      @output_tokens ||= data.dig('usage', 'output_tokens')
     end
 
     def stripped_content(tag)
