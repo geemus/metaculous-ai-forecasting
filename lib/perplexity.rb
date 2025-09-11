@@ -71,7 +71,7 @@ class Perplexity
   class Response
     attr_accessor :data, :duration
 
-    def initialize(data:, duration: 0)
+    def initialize(data:, duration: nil)
       @data = data
       @duration = duration
     end
