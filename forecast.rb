@@ -11,80 +11,11 @@ require 'formatador'
 require 'json'
 
 require './lib/anthropic'
+require './lib/perplexity'
 require './lib/utility'
 
 Thread.current[:formatador] = Formatador.new
 Thread.current[:formatador].instance_variable_set(:@indent, 0)
-
-# https://docs.perplexity.ai/api-reference/chat-completions-post
-def perplexity_completion(*messages)
-  start_time = Time.now
-  response = Excon.post(
-    'https://api.perplexity.ai/chat/completions',
-    expects: 200,
-    headers: {
-      'accept': 'application/json',
-      'authorization': "Bearer #{ENV['PERPLEXITY_API_KEY']}",
-      'content-type': 'application/json'
-    },
-    body: {
-      model: 'sonar-pro',
-      messages: [
-        {
-          'role': 'system',
-          'content': <<~SYSTEM
-            You are an experienced research assistant for a superforecaster.
-            - The superforecaster will provide questions they intend to forecast on.
-            - Generate research summaries that are concise yet sufficiently detailed to support forecasting.
-            - Do not comment or speculate beyond what what is supported by the evidence.
-
-            - Check for base rate quantifications and meta-analytic summaries.
-            - Assess evidence quality, source credibility, and methodological limitations.
-            - Identify and state critical assumptions underlying the question, evidence, and scenarios.
-            - Flag uncertainties, and information gaps. Characterize the type of uncertainty and impact on the forecast.
-            - Flag insufficient, inconclusive, outdated, and contradictory evidence.
-            - Flag potential cognitive and source biases.
-
-            - Begin by identifying any relevant base rates, historical analogs or precedents, and reference classes.
-            - Then systematically list supporting and opposing evidence for each potential outcome, highlighting key facts and uncertainties.
-            - Indicate which outcome current information suggests or if it remains inconclusive, but do not produce forecasts or assign probabilities yourself.
-            - Finally, note where further research would improve confidence.
-            - Before your response, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
-            - Provide your response starting with <summary> on the line before and ending with </summary> on the line after.
-          SYSTEM
-        }
-      ].concat(messages),
-      temperature: 0.1
-    }.to_json,
-    read_timeout: 360
-  )
-  duration = Time.now - start_time
-  json = JSON.parse(response.body)
-  display_perplexity_meta(json, duration)
-  json
-rescue Excon::Error => e
-  puts e
-  exit
-end
-
-def display_perplexity_meta(json, duration)
-  Formatador.display_line(
-    format(
-      '[light_green](%<input_tokens>d -> %<output_tokens>d tokens in %<minutes>dm %<seconds>ds @ $%<cost>0.2f)[/]',
-      {
-        input_tokens: json.dig('usage', 'prompt_tokens'),
-        output_tokens: json.dig('usage', 'total_tokens') - json.dig('usage', 'prompt_tokens'),
-        minutes: duration / 60,
-        seconds: duration % 60,
-        cost: json.dig('usage', 'cost', 'total_cost')
-      }
-    )
-  )
-end
-
-def extract_perplexity_content(json)
-  json['choices'].map { |choice| choice['message']['content'] }.join("\n")
-end
 
 def get_metaculus_post(post_id)
   response = Excon.get(
@@ -98,15 +29,14 @@ def get_metaculus_post(post_id)
   JSON.parse(response.body)
 end
 
-def format_research(json)
-  content = extract_perplexity_content(json)
+def format_research(perplexity_response)
   research_output_template = ERB.new(<<~RESEARCH_OUTPUT, trim_mode: '-')
     <summary>
-    <%= extract_xml('summary', content) %>
+    <%= perplexity_response.extracted_content('summary') %>
     </summary>
 
     <sources>
-    <% json['search_results'].each do |result| -%>
+    <% perplexity_response.json['search_results'].each do |result| -%>
     - [<%= result['title'] %>](<%= result['url'] %>) <%= result['snippet'] %> (Published: <%= result['date'] %>, Updated: <%= result['last_updated'] %>)
     <% end -%>
     </sources>
@@ -154,9 +84,8 @@ puts research_prompt
 
 puts
 Formatador.display '[bold][green]# Researcher: Drafting Research…[/] '
-research_json = perplexity_completion({ 'role': 'user', 'content': research_prompt })
-research_content = extract_perplexity_content(research_json)
-research_output = format_research(research_json)
+research = Perplexity.eval({ 'role': 'user', 'content': research_prompt })
+research_output = format_research(research)
 puts research_output
 
 puts
@@ -176,18 +105,19 @@ puts research_feedback_prompt
 puts
 Formatador.display '[bold][green]## Superforecaster: Reviewing Research…[/] '
 research_feedback = Anthropic.eval({ 'role': 'user', 'content': research_feedback_prompt })
-puts research_feedback.content
+puts research_feedback.stripped_content('feedback')
 
 puts
 Formatador.display '[bold][green]# Researcher: Revising Research…[/] '
-revision_json = perplexity_completion(
+revision = Perplexity.eval(
   { 'role': 'user', 'content': research_prompt },
-  { 'role': 'assistant', 'content': strip_xml('reasoning', research_content) },
+  { 'role': 'assistant', 'content': research.stripped_content('reasoning') },
   { 'role': 'user', 'content': research_feedback.extracted_content('feedback') }
 )
-revision_output = format_research(revision_json)
+revision_output = format_research(revision)
 puts revision_output
 
+puts
 Formatador.display_line '[bold][green]## Superforecaster: Forecast Prompt[/]'
 forecast_prompt_template = ERB.new(<<~FORECAST_PROMPT, trim_mode: '-')
   Create a forecast based on the following information.

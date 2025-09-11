@@ -25,7 +25,7 @@ class Anthropic
   # https://docs.anthropic.com/en/api/messages
   def eval(*messages)
     start_time = Time.now
-    response = connection.post(
+    excon_response = connection.post(
       body: {
         # model: 'claude-opus-4-1-20250805',
         model: 'claude-sonnet-4-20250514',
@@ -35,12 +35,12 @@ class Anthropic
         temperature: 0.1
       }.to_json
     )
-    result = Response.new(
+    response = Response.new(
       duration: Time.now - start_time,
-      json: JSON.parse(response.body)
+      json: JSON.parse(excon_response.body)
     )
-    result.display_meta
-    result
+    response.display_meta
+    response
   rescue Excon::Error => e
     puts e
     exit
