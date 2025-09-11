@@ -77,19 +77,16 @@ forecast_prompt_template = ERB.new(<<~FORECAST_PROMPT_TEMPLATE, trim_mode: '-')
 FORECAST_PROMPT_TEMPLATE
 forecast_prompt = forecast_prompt_template.result(binding)
 
-puts
-Formatador.display_line '[bold][green]# Researcher: Research Prompt[/]'
+Formatador.display_line "\n[bold][green]# Researcher: Research Prompt[/]"
 research_prompt = forecast_prompt
 puts research_prompt
 
-puts
-Formatador.display '[bold][green]# Researcher: Drafting Research…[/] '
+Formatador.display "\n[bold][green]# Researcher: Drafting Research…[/] "
 research = Perplexity.eval({ 'role': 'user', 'content': research_prompt })
 research_output = format_research(research)
 puts research_output
 
-puts
-Formatador.display_line '[bold][green]## Superforecaster: Research Feedback Prompt[/]'
+Formatador.display_line "\n[bold][green]## Superforecaster: Research Feedback Prompt[/]"
 research_feedback_prompt_template = ERB.new(<<~RESEARCH_FEEDBACK_PROMPT, trim_mode: '-')
   Provide feedback to your assistant on this research for one of your forecasts:
   <research>
@@ -102,13 +99,11 @@ RESEARCH_FEEDBACK_PROMPT
 research_feedback_prompt = research_feedback_prompt_template.result(binding)
 puts research_feedback_prompt
 
-puts
-Formatador.display '[bold][green]## Superforecaster: Reviewing Research…[/] '
+Formatador.display "\n[bold][green]## Superforecaster: Reviewing Research…[/] "
 research_feedback = Anthropic.eval({ 'role': 'user', 'content': research_feedback_prompt })
 puts research_feedback.stripped_content('feedback')
 
-puts
-Formatador.display '[bold][green]# Researcher: Revising Research…[/] '
+Formatador.display "\n[bold][green]# Researcher: Revising Research…[/] "
 revision = Perplexity.eval(
   { 'role': 'user', 'content': research_prompt },
   { 'role': 'assistant', 'content': research.stripped_content('reasoning') },
@@ -117,8 +112,7 @@ revision = Perplexity.eval(
 revision_output = format_research(revision)
 puts revision_output
 
-puts
-Formatador.display_line '[bold][green]## Superforecaster: Forecast Prompt[/]'
+Formatador.display_line "\n[bold][green]## Superforecaster: Forecast Prompt[/]"
 forecast_prompt_template = ERB.new(<<~FORECAST_PROMPT, trim_mode: '-')
   Create a forecast based on the following information.
 
@@ -137,11 +131,9 @@ FORECAST_PROMPT
 forecast_prompt = forecast_prompt_template.result(binding)
 puts forecast_prompt
 
-puts
-Formatador.display '[bold][green]## Superforecaster: Forecasting…[/] '
+Formatador.display "\n[bold][green]## Superforecaster: Forecasting…[/] "
 forecast = Anthropic.eval({ 'role': 'user', 'content': forecast_prompt })
 puts forecast.extracted_content('forecast')
 
-puts
-Formatador.display_line '[bold][green]## Forecast[/]'
+Formatador.display_line "\n[bold][green]## Forecast[/]"
 puts "#{question['title']} #{forecast.extracted_content('probability')}"
