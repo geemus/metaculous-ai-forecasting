@@ -10,19 +10,10 @@ require 'excon'
 require 'formatador'
 require 'json'
 
+require './lib/utility'
+
 Thread.current[:formatador] = Formatador.new
 Thread.current[:formatador].instance_variable_set(:@indent, 0)
-
-# https://github.com/anthropics/anthropic-cookbook/blob/main/patterns/agents/util.py
-# https://ruby-doc.org/3.4.1/String.html#method-i-match
-def extract_xml(tag, text)
-  match = text.match(%r{<#{tag}>([\s\S]*?)</#{tag}>})
-  match[1].strip if match
-end
-
-def strip_xml(tag, text)
-  text.gsub(%r{<#{tag}>([\s\S]*?)</#{tag}>}, '')
-end
 
 # https://docs.anthropic.com/en/api/messages
 def anthropic_completion(*messages)
