@@ -11,23 +11,12 @@ require 'formatador'
 require 'json'
 
 require './lib/anthropic'
+require './lib/metaculus'
 require './lib/perplexity'
 require './lib/utility'
 
 Thread.current[:formatador] = Formatador.new
 Thread.current[:formatador].instance_variable_set(:@indent, 0)
-
-def get_metaculus_post(post_id)
-  response = Excon.get(
-    "https://www.metaculus.com/api/posts/#{post_id}/",
-    expects: 200,
-    headers: {
-      'accept': 'application/json',
-      # 'authorization': "Token #{ENV['METACULUS_API_TOKEN']}"
-    }
-  )
-  JSON.parse(response.body)
-end
 
 def format_research(perplexity_response)
   research_output_template = ERB.new(<<~RESEARCH_OUTPUT, trim_mode: '-')
@@ -44,35 +33,29 @@ def format_research(perplexity_response)
   research_output = research_output_template.result(binding)
 end
 
-# metaculous 578 for initial testing
-metaculus_json = get_metaculus_post(578)
-metaculus_latest_aggregations = metaculus_json.dig('question', 'aggregations', 'recency_weighted', 'latest')
-metaculus_latest_count = metaculus_latest_aggregations['forecaster_count']
-metaculus_latest_mean = (metaculus_latest_aggregations['means'].first * 100).round
-metaculus_latest_median = (metaculus_latest_aggregations['centers'].first * 100).round
-question = metaculus_json['question']
-
+# metaculus 578 for initial testing
+question = Metaculus.get_post(578)
 forecast_prompt_template = ERB.new(<<~FORECAST_PROMPT_TEMPLATE, trim_mode: '-')
   Forecast Question:
   <question>
-  <%= question['title'] %>
+  <%= question.title %>
   </question>
 
   Forecast Background:
   <background>
-  <%= question['description'] %>
+  <%= question.background %>
   </background>
 
   Criteria for determining forecast outcome, which have not yet been met:
   <criteria>
-  <%= [question['resolution_criteria'], question['fine_print']].compact.join("\n\n").strip %>
+  <%= question.criteria %>
   </criteria>
 
   Existing Metaculus Forecasts Aggregate:
   <aggregate>
-    <count><%= metaculus_latest_count %></count>
-    <mean><%= metaculus_latest_mean %>%</mean>
-    <median><%= metaculus_latest_median %>%</median>
+  <count><%= question.latest_count %></count>
+  <mean><%= question.latest_mean %>%</mean>
+  <median><%= question.latest_median %>%</median>
   </aggregate>
 FORECAST_PROMPT_TEMPLATE
 forecast_prompt = forecast_prompt_template.result(binding)
