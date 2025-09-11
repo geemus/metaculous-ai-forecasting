@@ -6,8 +6,17 @@ class Metaculus
   end
 
   def get_post(id)
+    start_time = Time.now
     excon_response = connection.get(path: "/api/posts/#{id}/")
-    Question.new(data: JSON.parse(excon_response.body))
+    duration = Time.now - start_time
+    question = Question.new(data: JSON.parse(excon_response.body))
+    Formatador.display_line(
+      format(
+        '[light_green](in %<minutes>dm %<seconds>ds)[/]',
+        minutes: duration / 60, seconds: duration % 60
+      )
+    )
+    question
   rescue Excon::Error => e
     puts e
     exit

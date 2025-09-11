@@ -38,7 +38,7 @@ end
 # metaculus 578 for initial testing
 question_id = 578
 question_json = cache("#{question_id}.question.json") do
-  Formatador.display_line "\n[bold][green]# Metaculus: Getting Question…[/]"
+  Formatador.display "\n[bold][green]# Metaculus: Getting Question…[/]"
   Metaculus.get_post(question_id).to_json
 end
 question = Metaculus::Question.new(data: JSON.parse(question_json))
