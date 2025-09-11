@@ -71,7 +71,7 @@ class Perplexity
   class Response
     attr_accessor :data, :duration
 
-    def initialize(data:, duration:)
+    def initialize(data:, duration: 0)
       @data = data
       @duration = duration
     end
@@ -113,6 +113,10 @@ class Perplexity
 
     def stripped_content(tag)
       strip_xml(tag, content)
+    end
+
+    def to_json(*args)
+      data.to_json(*args)
     end
   end
 end

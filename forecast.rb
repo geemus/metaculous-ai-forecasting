@@ -7,6 +7,7 @@ Bundler.setup
 
 require 'erb'
 require 'excon'
+require 'fileutils'
 require 'formatador'
 require 'json'
 
@@ -18,23 +19,30 @@ require './lib/utility'
 Thread.current[:formatador] = Formatador.new
 Thread.current[:formatador].instance_variable_set(:@indent, 0)
 
+FileUtils.mkdir_p('./tmp') # setup for cache if missing
+
 def format_research(perplexity_response)
-  research_output_template = ERB.new(<<~RESEARCH_OUTPUT, trim_mode: '-')
+  ERB.new(<<~RESEARCH_OUTPUT, trim_mode: '-').result(binding)
     <summary>
     <%= perplexity_response.extracted_content('summary') %>
     </summary>
 
     <sources>
-    <% perplexity_response.json['search_results'].each do |result| -%>
+    <% perplexity_response.data['search_results'].each do |result| -%>
     - [<%= result['title'] %>](<%= result['url'] %>) <%= result['snippet'] %> (Published: <%= result['date'] %>, Updated: <%= result['last_updated'] %>)
     <% end -%>
     </sources>
   RESEARCH_OUTPUT
-  research_output = research_output_template.result(binding)
 end
 
 # metaculus 578 for initial testing
-question = Metaculus.get_post(578)
+question_id = 578
+question_json = cache("#{question_id}.question.json") do
+  Formatador.display_line "\n[bold][green]# Metaculus: Getting Question…[/]"
+  Metaculus.get_post(question_id).to_json
+end
+question = Metaculus::Question.new(data: JSON.parse(question_json))
+
 forecast_prompt_template = ERB.new(<<~FORECAST_PROMPT_TEMPLATE, trim_mode: '-')
   Forecast Question:
   <question>
@@ -64,34 +72,42 @@ Formatador.display_line "\n[bold][green]# Researcher: Research Prompt[/]"
 research_prompt = forecast_prompt
 puts research_prompt
 
-Formatador.display "\n[bold][green]# Researcher: Drafting Research…[/] "
-research = Perplexity.eval({ 'role': 'user', 'content': research_prompt })
+research_json = cache("#{question_id}.research.0.json") do
+  Formatador.display "\n[bold][green]# Researcher: Drafting Research…[/] "
+  research = Perplexity.eval({ 'role': 'user', 'content': research_prompt })
+  research.to_json
+end
+research = Perplexity::Response.new(data: JSON.parse(research_json))
 research_output = format_research(research)
 puts research_output
 
-Formatador.display_line "\n[bold][green]## Superforecaster: Research Feedback Prompt[/]"
-research_feedback_prompt_template = ERB.new(<<~RESEARCH_FEEDBACK_PROMPT, trim_mode: '-')
-  Provide feedback to your assistant on this research for one of your forecasts:
-  <research>
-  <%= research_output %>
-  </research>
+revision_json = cache("#{question_id}.research.1.json") do
+  Formatador.display_line "\n[bold][green]# Superforecaster: Research Feedback Prompt[/]"
+  research_feedback_prompt_template = ERB.new(<<~RESEARCH_FEEDBACK_PROMPT, trim_mode: '-')
+    Provide feedback to your assistant on this research for one of your forecasts:
+    <research>
+    <%= research_output %>
+    </research>
 
-  - Before providing feedback, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
-  - Provide feedback on how to improve this research starting with <feedback> on the line before and ending with </feedback> on the line after.
-RESEARCH_FEEDBACK_PROMPT
-research_feedback_prompt = research_feedback_prompt_template.result(binding)
-puts research_feedback_prompt
+    - Before providing feedback, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
+    - Provide feedback on how to improve this research starting with <feedback> on the line before and ending with </feedback> on the line after.
+  RESEARCH_FEEDBACK_PROMPT
+  research_feedback_prompt = research_feedback_prompt_template.result(binding)
+  puts research_feedback_prompt
 
-Formatador.display "\n[bold][green]## Superforecaster: Reviewing Research…[/] "
-research_feedback = Anthropic.eval({ 'role': 'user', 'content': research_feedback_prompt })
-puts research_feedback.stripped_content('feedback')
+  Formatador.display "\n[bold][green]# Superforecaster: Reviewing Research…[/] "
+  research_feedback = Anthropic.eval({ 'role': 'user', 'content': research_feedback_prompt })
+  puts research_feedback.extracted_content('feedback')
 
-Formatador.display "\n[bold][green]# Researcher: Revising Research…[/] "
-revision = Perplexity.eval(
-  { 'role': 'user', 'content': research_prompt },
-  { 'role': 'assistant', 'content': research.stripped_content('reasoning') },
-  { 'role': 'user', 'content': research_feedback.extracted_content('feedback') }
-)
+  Formatador.display "\n[bold][green]# Researcher: Revising Research…[/] "
+  revision = Perplexity.eval(
+    { 'role': 'user', 'content': research_prompt },
+    { 'role': 'assistant', 'content': research.stripped_content('reasoning') },
+    { 'role': 'user', 'content': research_feedback.extracted_content('feedback') }
+  )
+  revision.to_json
+end
+revision = Perplexity::Response.new(data: JSON.parse(revision_json))
 revision_output = format_research(revision)
 puts revision_output
 
@@ -114,9 +130,13 @@ FORECAST_PROMPT
 forecast_prompt = forecast_prompt_template.result(binding)
 puts forecast_prompt
 
-Formatador.display "\n[bold][green]## Superforecaster: Forecasting…[/] "
-forecast = Anthropic.eval({ 'role': 'user', 'content': forecast_prompt })
-puts forecast.extracted_content('forecast')
+forecast_json = cache("#{question_id}.forecast.json") do
+  Formatador.display "\n[bold][green]# Superforecaster: Forecasting…[/] "
+  forecast = Anthropic.eval({ 'role': 'user', 'content': forecast_prompt })
+  forecast.to_json
+end
+forecast = Anthropic::Response.new(data: JSON.parse(forecast_json))
 
-Formatador.display_line "\n[bold][green]## Forecast[/]"
-puts "#{question['title']} #{forecast.extracted_content('probability')}"
+Formatador.display_line "\n[bold][green]# Forecast:[/] #{question.title}"
+puts "Probability: #{forecast.extracted_content('probability')}"
+puts forecast.extracted_content('forecast')

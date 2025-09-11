@@ -57,6 +57,10 @@ class Metaculus
       @title ||= data.dig('question', 'title')
     end
 
+    def to_json(*args)
+      data.to_json(*args)
+    end
+
     private
 
     def latest_aggregations
