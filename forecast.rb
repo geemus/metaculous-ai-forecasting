@@ -87,6 +87,11 @@ def display_anthropic_meta(json, duration)
   )
 end
 
+def extract_anthropic_content(json)
+  text_array = json['content'].select { |content| content['type'] == 'text' }
+  text_array.map { |content| content['text'] }.join("\n")
+end
+
 # https://docs.perplexity.ai/api-reference/chat-completions-post
 def perplexity_completion(*messages)
   start_time = Time.now
@@ -143,6 +148,10 @@ def display_perplexity_meta(json, duration)
   )
 end
 
+def extract_perplexity_content(json)
+  json['choices'].map { |choice| choice['message']['content'] }.join("\n")
+end
+
 def get_metaculus_post(post_id)
   response = Excon.get(
     "https://www.metaculus.com/api/posts/#{post_id}/",
@@ -156,7 +165,7 @@ def get_metaculus_post(post_id)
 end
 
 def format_research(json)
-  content = json['choices'].map { |choice| choice['message']['content'] }.join("\n")
+  content = extract_perplexity_content(json)
   research_output_template = ERB.new(<<~RESEARCH_OUTPUT, trim_mode: '-')
     <summary>
     <%= extract_xml('summary', content) %>
@@ -212,7 +221,7 @@ puts research_prompt
 puts
 Formatador.display '[bold][green]# Researcher: Drafting Research…[/] '
 research_json = perplexity_completion({ 'role': 'user', 'content': research_prompt })
-research_content = research_json['choices'].map { |choice| choice['message']['content'] }.join("\n")
+research_content = extract_perplexity_content(research_json)
 research_output = format_research(research_json)
 puts research_output
 
@@ -233,8 +242,7 @@ puts research_feedback_prompt
 puts
 Formatador.display '[bold][green]## Superforecaster: Reviewing Research…[/] '
 research_feedback_json = anthropic_completion({ 'role': 'user', 'content': research_feedback_prompt })
-research_feedback_text_array = research_feedback_json['content'].select { |content| content['type'] == 'text' }
-research_feedback_content = research_feedback_text_array.map { |content| content['text'] }.join("\n")
+research_feedback_content = extract_anthropic_content(research_feedback_json)
 puts extract_xml('feedback', research_feedback_content)
 
 puts
@@ -269,8 +277,7 @@ puts forecast_prompt
 puts
 Formatador.display '[bold][green]## Superforecaster: Forecasting…[/] '
 forecast_json = anthropic_completion({ 'role': 'user', 'content': forecast_prompt })
-forecast_text_array = forecast_json['content'].select { |content| content['type'] == 'text' }
-forecast_content = forecast_text_array.map { |content| content['text'] }.join("\n")
+forecast_content = extract_anthropic_content(forecast_json)
 puts extract_xml('forecast', forecast_content)
 
 puts
