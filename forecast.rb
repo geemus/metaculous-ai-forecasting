@@ -189,6 +189,22 @@ end
 forecast = Anthropic::Response.new(data: JSON.parse(forecast_json))
 
 Formatador.display_line "\n[bold][green]# Forecast:[/] #{question.title}"
-puts "Probability: #{forecast.extracted_content('probability')}"
+Formatador.display_line "\n[bold][green]## Summary:[/]"
 puts forecast.extracted_content('forecast')
-puts forecast.content
+Formatador.display_line "\n[bold][green]## Output:[/]"
+case question.type
+when 'binary'
+  probability = forecast.extracted_content('probability')
+  puts "Probability: #{probability}"
+when 'discrete', 'numeric'
+  puts 'TODO: Discrete/Numeric output and parsing'
+when 'multiple_choice'
+  probabilities_content = forecast.extracted_content('probabilities')
+  probabilities = {}
+  probabilities_content.split("\n").each do |line|
+    pair = line.split('Option ', 2).last
+    key, value = pair.split(': ', 2)
+    probabilities[key] = value
+  end
+  puts format('Probabilities: { %s }', probabilities.map { |k, v| format('%<k>s: %<v>s', k: k, v: v) }.join(', '))
+end
