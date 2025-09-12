@@ -149,7 +149,8 @@ numeric_forecast_prompt_template = ERB.new(<<~FORECAST_PROMPT, trim_mode: '-')
   - Before providing your forecast, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
   - Today is <%= Time.now.strftime('%B %d, %Y') %>. Consider the time remaining before the outcome of the question will become known.
   - Provide your response starting with <forecast> on the line before and ending with </forecast> on the line after.
-  - Provide your final probabilistic prediction as a cumulative distribution function as a comma separated list with <cdf> on the line before and ending with </cdf> on the line after, only include the continuous distribution function itself.
+  - Finally provide the likelihood that the answer will fall within each percentile of the range starting with <percentiles> on the line before and ending with </percentiles> on the line after.
+
 FORECAST_PROMPT
 numeric_forecast_prompt = numeric_forecast_prompt_template.result(binding)
 
@@ -172,3 +173,4 @@ forecast = Anthropic::Response.new(data: JSON.parse(forecast_json))
 Formatador.display_line "\n[bold][green]# Forecast:[/] #{question.title}"
 puts "Probability: #{forecast.extracted_content('probability')}"
 puts forecast.extracted_content('forecast')
+puts forecast.content

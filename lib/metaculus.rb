@@ -108,15 +108,27 @@ class Metaculus
     end
 
     def lower_bound
-      @lower_bound ||= scaling['range_min']
+      @lower_bound ||= scaling['nominal_min'] || scaling['range_min']
     end
 
     def metadata_content
       @metadata_content ||= begin
         content = []
-        content << "<lower_bound>#{lower_bound}</lower_bound>" unless lower_bound.nil? || scaling['open_lower_bound']
+        unless lower_bound.nil?
+          content << if scaling['open_lower_bound']
+                       "<nominal_lower_bound>#{lower_bound}</nominal_lower_bound>"
+                     else
+                       "<lower_bound>#{lower_bound}</lower_bound>"
+                     end
+        end
         content << "<units>#{units}</units>" unless units.empty?
-        content << "<upper_bound>#{upper_bound}</upper_bound>" unless upper_bound.nil? || scaling['open_upper_bound']
+        unless upper_bound.nil?
+          content << if scaling['open_upper_bound']
+                       "<nominal_upper_bound>#{upper_bound}</nominal_upper_bound>"
+                     else
+                       "<upper_bound>#{upper_bound}</upper_bound>"
+                     end
+        end
         content.join("\n")
       end
     end
@@ -134,7 +146,7 @@ class Metaculus
     end
 
     def upper_bound
-      @upper_bound ||= scaling['range_max']
+      @upper_bound ||= scaling['nominal_max'] || scaling['range_max']
     end
 
     def to_json(*args)
