@@ -53,20 +53,27 @@ forecast_prompt_template = ERB.new(<<~FORECAST_PROMPT_TEMPLATE, trim_mode: '-')
   <background>
   <%= question.background %>
   </background>
+  <%- unless question.metadata_content.empty? -%>
+
+  Question Metadata:
+  <metadata>
+  <%= question.metadata_content %>
+  </metadata>
+  <%- end -%>
 
   Criteria for determining forecast outcome, which have not yet been met:
   <criteria>
-  <%= question.criteria %>
+  <%= question.criteria_content %>
   </criteria>
 
   Existing Metaculus Forecasts Aggregate:
   <aggregate>
-  <count><%= question.latest_count %></count>
-  <mean><%= question.latest_mean %>%</mean>
-  <median><%= question.latest_median %>%</median>
+  <%= question.aggregate_content %>
   </aggregate>
 FORECAST_PROMPT_TEMPLATE
 forecast_prompt = forecast_prompt_template.result(binding)
+puts forecast_prompt
+exit
 
 Formatador.display_line "\n[bold][green]# Researcher: Research Prompt[/]"
 research_prompt = forecast_prompt
