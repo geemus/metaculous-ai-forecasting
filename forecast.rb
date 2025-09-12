@@ -73,7 +73,6 @@ forecast_prompt_template = ERB.new(<<~FORECAST_PROMPT_TEMPLATE, trim_mode: '-')
 FORECAST_PROMPT_TEMPLATE
 forecast_prompt = forecast_prompt_template.result(binding)
 puts forecast_prompt
-exit
 
 Formatador.display_line "\n[bold][green]# Researcher: Research Prompt[/]"
 research_prompt = forecast_prompt
@@ -120,7 +119,7 @@ revision_output = format_research(revision)
 puts revision_output
 
 Formatador.display_line "\n[bold][green]## Superforecaster: Forecast Prompt[/]"
-forecast_prompt_template = ERB.new(<<~FORECAST_PROMPT, trim_mode: '-')
+binary_forecast_prompt_template = ERB.new(<<~FORECAST_PROMPT, trim_mode: '-')
   Create a forecast based on the following information.
 
   <%= forecast_prompt -%>
@@ -135,8 +134,13 @@ forecast_prompt_template = ERB.new(<<~FORECAST_PROMPT, trim_mode: '-')
   - Provide your response starting with <forecast> on the line before and ending with </forecast> on the line after.
   - Provide your final probabilistic prediction with <probability> on the line before and ending with </probability> on the line after, only include the probability itself.
 FORECAST_PROMPT
-forecast_prompt = forecast_prompt_template.result(binding)
-puts forecast_prompt
+binary_forecast_prompt = binary_forecast_prompt_template.result(binding)
+
+forecast_prompt = case question.type
+                  when 'binary'
+                    puts binary_forecast_prompt
+                    binary_forecast_prompt
+                  end
 
 Formatador.display "\n[bold][green]# Superforecaster: Forecasting…[/] "
 forecast_json = cache("#{question_id}.forecast.json") do
