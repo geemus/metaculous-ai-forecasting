@@ -48,6 +48,11 @@ forecast_prompt_template = ERB.new(<<~FORECAST_PROMPT_TEMPLATE, trim_mode: '-')
   <question>
   <%= question.title %>
   </question>
+  <%- unless question.options.empty? -%>
+  <options>
+  <%= question.options %>
+  </options>
+  <%- end -%>
 
   Forecast Background:
   <background>
@@ -119,7 +124,7 @@ revision_output = format_research(revision)
 puts revision_output
 
 Formatador.display_line "\n[bold][green]## Superforecaster: Forecast Prompt[/]"
-binary_forecast_prompt_template = ERB.new(<<~FORECAST_PROMPT, trim_mode: '-')
+shared_forecast_prompt_template = ERB.new(<<~SHARED_FORECAST_PROMPT, trim_mode: '-')
   Create a forecast based on the following information.
 
   <%= forecast_prompt -%>
@@ -132,35 +137,48 @@ binary_forecast_prompt_template = ERB.new(<<~FORECAST_PROMPT, trim_mode: '-')
   - Before providing your forecast, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
   - Today is <%= Time.now.strftime('%B %d, %Y') %>. Consider the time remaining before the outcome of the question will become known.
   - Provide your response starting with <forecast> on the line before and ending with </forecast> on the line after.
+SHARED_FORECAST_PROMPT
+shared_forecast_prompt = shared_forecast_prompt_template.result(binding)
+
+binary_forecast_prompt_template = ERB.new(<<~BINARY_FORECAST_PROMPT, trim_mode: '-')
+  <%= shared_forecast_prompt -%>
+
   - Provide your final probabilistic prediction with <probability> on the line before and ending with </probability> on the line after, only include the probability itself.
-FORECAST_PROMPT
+BINARY_FORECAST_PROMPT
 binary_forecast_prompt = binary_forecast_prompt_template.result(binding)
 
-numeric_forecast_prompt_template = ERB.new(<<~FORECAST_PROMPT, trim_mode: '-')
-  Create a forecast based on the following information.
+numeric_forecast_prompt_template = ERB.new(<<~NUMERIC_FORECAST_PROMPT, trim_mode: '-')
+  <%= shared_forecast_prompt -%>
 
-  <%= forecast_prompt -%>
-
-  Here is a summary of relevant data from your research assistant:
-  <research>
-  <%= revision_output %>
-  </research>
-
-  - Before providing your forecast, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
-  - Today is <%= Time.now.strftime('%B %d, %Y') %>. Consider the time remaining before the outcome of the question will become known.
-  - Provide your response starting with <forecast> on the line before and ending with </forecast> on the line after.
   - Finally provide the likelihood that the answer will fall within each percentile of the range starting with <percentiles> on the line before and ending with </percentiles> on the line after.
-
-FORECAST_PROMPT
+NUMERIC_FORECAST_PROMPT
 numeric_forecast_prompt = numeric_forecast_prompt_template.result(binding)
+
+multiple_choice_prompt_template = ERB.new(<<~MULTIPLE_CHOICE_FORECAST_PROMPT, trim_mode: '-')
+  <%= shared_forecast_prompt -%>
+
+  - Provide your final probabilistic prediction with <probability> on the line before and ending with </probability> on the line after, only include the probability itself, format like:
+  <probabilities>
+  Option "A": Z%
+  Option "B": Y%
+  ...
+  Option "N": N%
+  </probabilities>
+MULTIPLE_CHOICE_FORECAST_PROMPT
+multiple_choice_prompt = multiple_choice_prompt_template.result(binding)
 
 forecast_prompt = case question.type
                   when 'binary'
                     puts binary_forecast_prompt
                     binary_forecast_prompt
-                  when 'numeric'
+                  when 'discrete', 'numeric'
                     puts numeric_forecast_prompt
                     numeric_forecast_prompt
+                  when 'multiple_choice'
+                    puts multiple_choice_prompt
+                    multiple_choice_prompt
+                  else
+                    raise "Missing template for type: #{question.type}"
                   end
 
 Formatador.display "\n[bold][green]# Superforecaster: Forecasting…[/] "

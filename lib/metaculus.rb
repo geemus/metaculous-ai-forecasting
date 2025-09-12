@@ -45,32 +45,47 @@ class Metaculus
     def aggregate_content
       @aggregate_content ||= begin
         content = []
-        content << "<forecaster-count>#{latest_forecaster_count}</forecaster-count>"
-        content << "<mean>#{latest_mean}</mean>" if latest_mean
-        if %w[discrete numeric].include?(type) && scaling['open_lower_bound']
-          below_lower_bound = (1 - latest_aggregations['forecast_values'].first) * 100
-          content << format(
-            '<below_%<lower_bound>d>%<below_lower_bound>0.2f%%</below_%<lower_bound>d>',
-            below_lower_bound: below_lower_bound,
-            lower_bound: lower_bound
-          )
-        end
-        if !type != 'binary' && latest_aggregations['interval_lower_bounds']
-          lower_25_percent = (latest_aggregations['interval_lower_bounds'].first * upper_bound).round(2)
-          content << "<lower_25_percent>#{lower_25_percent}</lower_25_percent>"
-        end
-        content << "<median>#{latest_median}</median>" if latest_median
-        if type != 'binary' && latest_aggregations['interval_upper_bounds']
-          upper_75_percent = (latest_aggregations['interval_upper_bounds'].first * upper_bound).round(2)
-          content << "<upper_75_percent>#{upper_75_percent}</upper_75_percent>"
-        end
-        if %w[discrete numeric].include?(type) && scaling['open_upper_bound']
-          above_upper_bound = (1 - latest_aggregations['forecast_values'].last) * 100
-          content << format(
-            '<above_%<upper_bound>d>%<above_upper_bound>0.2f%%</above_%<upper_bound>d>',
-            above_upper_bound: above_upper_bound,
-            upper_bound: upper_bound
-          )
+        content << "Forecaster Count: #{latest_forecaster_count}"
+        if type == 'multiple_choice'
+          options.each_with_index do |option, index|
+            content << format(
+              'Option "%<option>s": { mean: %0.2<mean>f%%, lowest: %0.2<lowest>f%%, median: %0.2<median>f%%, highest: %0.2<highest>f%% }',
+              {
+                option: option,
+                mean: latest_aggregations['means'][index] * 100,
+                lowest: latest_aggregations['interval_lower_bounds'][index] * 100,
+                median: latest_aggregations['centers'][index] * 100,
+                highest: latest_aggregations['interval_upper_bounds'][index] * 100
+              }
+            )
+          end
+        else
+          content << "Mean: #{latest_mean}" if latest_mean
+          if %w[discrete numeric].include?(type) && scaling['open_lower_bound']
+            below_lower_bound = (1 - latest_aggregations['forecast_values'].first) * 100
+            content << format(
+              'Below %<lower_bound>d: %<below_lower_bound>0.2f%%',
+              below_lower_bound: below_lower_bound,
+              lower_bound: lower_bound
+            )
+          end
+          if type != 'binary' && latest_aggregations['interval_lower_bounds']
+            lower_25_percent = (latest_aggregations['interval_lower_bounds'].first * upper_bound).round(2)
+            content << "Lower 25%: #{lower_25_percent}"
+          end
+          content << "Median: #{latest_median}" if latest_median
+          if type != 'binary' && latest_aggregations['interval_upper_bounds']
+            upper_75_percent = (latest_aggregations['interval_upper_bounds'].first * upper_bound).round(2)
+            content << "Upper 75%: #{upper_75_percent}"
+          end
+          if %w[discrete numeric].include?(type) && scaling['open_upper_bound']
+            above_upper_bound = (1 - latest_aggregations['forecast_values'].last) * 100
+            content << format(
+              'Above %<upper_bound>d: %<above_upper_bound>0.2f%%',
+              above_upper_bound: above_upper_bound,
+              upper_bound: upper_bound
+            )
+          end
         end
         content.join("\n")
       end
@@ -112,21 +127,25 @@ class Metaculus
         content = []
         unless lower_bound.nil?
           content << if scaling['open_lower_bound']
-                       "<nominal_lower_bound>#{lower_bound}</nominal_lower_bound>"
+                       "Nominal Lower Bound: #{lower_bound}"
                      else
-                       "<lower_bound>#{lower_bound}</lower_bound>"
+                       "Lower Bound: #{lower_bound}"
                      end
         end
-        content << "<units>#{units}</units>" unless units.empty?
+        content << "Units: #{units}" unless units.empty?
         unless upper_bound.nil?
           content << if scaling['open_upper_bound']
-                       "<nominal_upper_bound>#{upper_bound}</nominal_upper_bound>"
+                       "Nominal Upper Bound: #{upper_bound}"
                      else
-                       "<upper_bound>#{upper_bound}</upper_bound>"
+                       "Upper Bound: #{upper_bound}"
                      end
         end
         content.join("\n")
       end
+    end
+
+    def options
+      @options ||= question['options']
     end
 
     def title
