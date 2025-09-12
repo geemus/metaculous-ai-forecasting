@@ -47,14 +47,18 @@ class Metaculus
         content = []
         content << "<forecaster-count>#{latest_forecaster_count}</forecaster-count>"
         content << "<mean>#{latest_mean}</mean>" if latest_mean
-        content << "<median>#{latest_median}</median>"
-        if type == 'numeric' && latest_aggregations['interval_lower_bounds']
-          lower_25_percent = (latest_aggregations['interval_lower_bounds'].first * upper_bound).round(2)
-          content << "<lower_25_percent>#{lower_25_percent}</lower_25_percent>"
-        end
-        if type == 'numeric' && latest_aggregations['interval_upper_bounds']
-          upper_75_percent = (latest_aggregations['interval_upper_bounds'].first * upper_bound).round(2)
-          content << "<upper_75_percent>#{upper_75_percent}</upper_75_percent>"
+        content << "<median>#{latest_median}</median>" if latest_median
+        if type == 'multiple_choice'
+          content << 'TODO: multiple_choice'
+        else
+          if !type != 'binary' && latest_aggregations['interval_lower_bounds']
+            lower_25_percent = (latest_aggregations['interval_lower_bounds'].first * upper_bound).round(2)
+            content << "<lower_25_percent>#{lower_25_percent}</lower_25_percent>"
+          end
+          if type != 'binary' && latest_aggregations['interval_upper_bounds']
+            upper_75_percent = (latest_aggregations['interval_upper_bounds'].first * upper_bound).round(2)
+            content << "<upper_75_percent>#{upper_75_percent}</upper_75_percent>"
+          end
         end
         content.join("\n")
       end
@@ -80,7 +84,9 @@ class Metaculus
       @latest_median ||= case type
                          when 'binary'
                            format('%0.2f%%', latest_aggregations['centers'].first * 100)
-                         when 'numeric'
+                         when 'multiple_choice'
+                           # TODO: implement
+                         else
                            (latest_aggregations['centers'].first * upper_bound).round(2)
                          end
     end
