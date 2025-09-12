@@ -3,12 +3,12 @@
 def cache(path, &block)
   tmp_path = "./tmp/#{path}"
   if File.exist?(tmp_path)
-    Formatador.display_line "[light_green](Cache @ `#{tmp_path}[/]`)"
+    Formatador.display_line "[light_green](Cache @ `#{tmp_path})[/]`"
     File.read(tmp_path)
   else
     data = block.call
     File.write(tmp_path, data)
-    Formatador.display_line "[light_green](Cached @ `#{tmp_path}[/]`"
+    Formatador.display_line "[light_green](Cached @ `#{tmp_path})[/]`"
     data
   end
 end

@@ -136,10 +136,30 @@ binary_forecast_prompt_template = ERB.new(<<~FORECAST_PROMPT, trim_mode: '-')
 FORECAST_PROMPT
 binary_forecast_prompt = binary_forecast_prompt_template.result(binding)
 
+numeric_forecast_prompt_template = ERB.new(<<~FORECAST_PROMPT, trim_mode: '-')
+  Create a forecast based on the following information.
+
+  <%= forecast_prompt -%>
+
+  Here is a summary of relevant data from your research assistant:
+  <research>
+  <%= revision_output %>
+  </research>
+
+  - Before providing your forecast, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
+  - Today is <%= Time.now.strftime('%B %d, %Y') %>. Consider the time remaining before the outcome of the question will become known.
+  - Provide your response starting with <forecast> on the line before and ending with </forecast> on the line after.
+  - Provide your final probabilistic prediction as a cumulative distribution function as a comma separated list with <cdf> on the line before and ending with </cdf> on the line after, only include the continuous distribution function itself.
+FORECAST_PROMPT
+numeric_forecast_prompt = numeric_forecast_prompt_template.result(binding)
+
 forecast_prompt = case question.type
                   when 'binary'
                     puts binary_forecast_prompt
                     binary_forecast_prompt
+                  when 'numeric'
+                    puts numeric_forecast_prompt
+                    numeric_forecast_prompt
                   end
 
 Formatador.display "\n[bold][green]# Superforecaster: Forecasting…[/] "

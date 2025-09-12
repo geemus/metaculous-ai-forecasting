@@ -51,6 +51,14 @@ class Metaculus
         if type == 'multiple_choice'
           content << 'TODO: multiple_choice'
         else
+          if type == 'numeric' && scaling['open_lower_bound']
+            below_lower_bound = (1 - latest_aggregations['forecast_values'].first) * 100
+            content << format(
+              '<below_%<lower_bound>d>%<below_lower_bound>0.2f%%</below_%<lower_bound>d>',
+              below_lower_bound: below_lower_bound,
+              lower_bound: lower_bound
+            )
+          end
           if !type != 'binary' && latest_aggregations['interval_lower_bounds']
             lower_25_percent = (latest_aggregations['interval_lower_bounds'].first * upper_bound).round(2)
             content << "<lower_25_percent>#{lower_25_percent}</lower_25_percent>"
@@ -58,6 +66,14 @@ class Metaculus
           if type != 'binary' && latest_aggregations['interval_upper_bounds']
             upper_75_percent = (latest_aggregations['interval_upper_bounds'].first * upper_bound).round(2)
             content << "<upper_75_percent>#{upper_75_percent}</upper_75_percent>"
+          end
+          if type == 'numeric' && scaling['open_upper_bound']
+            above_upper_bound = (1 - latest_aggregations['forecast_values'].last) * 100
+            content << format(
+              '<above_%<upper_bound>d>%<above_upper_bound>0.2f%%</above_%<upper_bound>d>',
+              above_upper_bound: above_upper_bound,
+              upper_bound: upper_bound
+            )
           end
         end
         content.join("\n")
