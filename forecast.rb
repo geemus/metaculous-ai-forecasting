@@ -109,7 +109,7 @@ revision_json = cache(question_id, 'research.1.json') do
   revision.to_json
 end
 revision = Perplexity::Response.new(data: JSON.parse(revision_json))
-revision_output = reasch.formatted_research
+revision_output = research.formatted_research
 puts revision_output
 
 Formatador.display_line "\n[bold][green]## Superforecaster: Forecast Prompt[/]"
