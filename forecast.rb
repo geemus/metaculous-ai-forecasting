@@ -19,8 +19,6 @@ require './lib/utility'
 Thread.current[:formatador] = Formatador.new
 Thread.current[:formatador].instance_variable_set(:@indent, 0)
 
-FileUtils.mkdir_p('./tmp') # setup for cache if missing
-
 def format_research(perplexity_response)
   ERB.new(<<~RESEARCH_OUTPUT, trim_mode: '-').result(binding)
     <summary>
@@ -35,10 +33,15 @@ def format_research(perplexity_response)
   RESEARCH_OUTPUT
 end
 
-# metaculus 578 for initial testing
-question_id = 578
-Formatador.display "\n[bold][green]# Metaculus: Getting Question…[/] "
-question_json = cache("#{question_id}.question.json") do
+# metaculus test questions: (binary: 578, numeric: 14333, multiple-choice: 22427, discrete: 38880)
+question_id = ENV['QUESTION_ID']
+
+# setup directories for cache, if missing
+FileUtils.mkdir_p('./tmp')
+FileUtils.mkdir_p("./tmp/#{question_id}")
+
+Formatador.display "\n[bold][green]# Metaculus: Getting Question(#{question_id})…[/] "
+question_json = cache(question_id, 'question.json') do
   Metaculus.get_post(question_id).to_json
 end
 question = Metaculus::Question.new(data: JSON.parse(question_json))
@@ -84,7 +87,7 @@ research_prompt = forecast_prompt
 puts research_prompt
 
 Formatador.display "\n[bold][green]# Researcher: Drafting Research…[/] "
-research_json = cache("#{question_id}.research.0.json") do
+research_json = cache(question_id, 'research.0.json') do
   research = Perplexity.eval({ 'role': 'user', 'content': research_prompt })
   research.to_json
 end
@@ -93,7 +96,7 @@ research_output = format_research(research)
 puts research_output
 
 Formatador.display "\n[bold][green]# Meta: Optimizing Research[/] "
-revision_json = cache("#{question_id}.research.1.json") do
+revision_json = cache(question_id, 'research.1.json') do
   Formatador.display_line "\n[bold][green]## Superforecaster: Research Feedback Prompt[/]"
   research_feedback_prompt_template = ERB.new(<<~RESEARCH_FEEDBACK_PROMPT, trim_mode: '-')
     Provide feedback to your assistant on this research for one of your forecasts:
@@ -188,7 +191,7 @@ forecast_prompt = case question.type
                   end
 
 Formatador.display "\n[bold][green]# Superforecaster: Forecasting…[/] "
-forecast_json = cache("#{question_id}.forecast.json") do
+forecast_json = cache(question_id, 'forecast.json') do
   forecast = Anthropic.eval({ 'role': 'user', 'content': forecast_prompt })
   forecast.to_json
 end
@@ -203,7 +206,8 @@ when 'binary'
   probability = forecast.extracted_content('probability')
   puts "Probability: #{probability}"
 when 'discrete', 'numeric'
-  puts 'TODO: Discrete/Numeric output and parsing'
+  puts forecast.extracted_content('probabilities')
+  puts 'FIXME: Discrete/Numeric output and parsing'
 when 'multiple_choice'
   probabilities_content = forecast.extracted_content('probabilities')
   probabilities = {}

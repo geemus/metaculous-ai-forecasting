@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-def cache(path, &block)
-  tmp_path = "./tmp/#{path}"
+def cache(question_id, path, &block)
+  tmp_path = "./tmp/#{question_id}/#{path}"
   if File.exist?(tmp_path)
     Formatador.display_line "[light_green](Cache @ `#{tmp_path})[/]`"
     File.read(tmp_path)
