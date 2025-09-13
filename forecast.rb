@@ -19,20 +19,6 @@ require './lib/utility'
 Thread.current[:formatador] = Formatador.new
 Thread.current[:formatador].instance_variable_set(:@indent, 0)
 
-def format_research(perplexity_response)
-  ERB.new(<<~RESEARCH_OUTPUT, trim_mode: '-').result(binding)
-    <summary>
-    <%= perplexity_response.extracted_content('summary') %>
-    </summary>
-
-    <sources>
-    <% perplexity_response.data['search_results'].each do |result| -%>
-    - [<%= result['title'] %>](<%= result['url'] %>) <%= result['snippet'] %> (Published: <%= result['date'] %>, Updated: <%= result['last_updated'] %>)
-    <% end -%>
-    </sources>
-  RESEARCH_OUTPUT
-end
-
 # metaculus test questions: (binary: 578, numeric: 14333, multiple-choice: 22427, discrete: 38880)
 question_id = ARGV[0] || raise("ENV['QUESTION_ID'] is required")
 
@@ -92,7 +78,7 @@ research_json = cache(question_id, 'research.0.json') do
   research.to_json
 end
 research = Perplexity::Response.new(data: JSON.parse(research_json))
-research_output = format_research(research)
+research_output = research.formatted_research
 puts research_output
 
 Formatador.display_line "\n[bold][green]# Meta: Optimizing Research[/] "
@@ -123,7 +109,7 @@ revision_json = cache(question_id, 'research.1.json') do
   revision.to_json
 end
 revision = Perplexity::Response.new(data: JSON.parse(revision_json))
-revision_output = format_research(revision)
+revision_output = reasch.formatted_research
 puts revision_output
 
 Formatador.display_line "\n[bold][green]## Superforecaster: Forecast Prompt[/]"
