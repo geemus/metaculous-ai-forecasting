@@ -19,6 +19,8 @@ require './lib/utility'
 Thread.current[:formatador] = Formatador.new
 Thread.current[:formatador].instance_variable_set(:@indent, 0)
 
+FORECASTERS = 2
+
 # metaculus test questions: (binary: 578, numeric: 14333, multiple-choice: 22427, discrete: 38880)
 question_id = ARGV[0] || raise("ENV['QUESTION_ID'] is required")
 
@@ -125,7 +127,7 @@ shared_forecast_prompt_template = ERB.new(<<~SHARED_FORECAST_PROMPT, trim_mode: 
 
   - Before providing your forecast, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
   - Today is <%= Time.now.strftime('%B %d, %Y') %>. Consider the time remaining before the outcome of the question will become known.
-  - Provide your response starting with <forecast> on the line before and ending with </forecast> on the line after.
+  - Provide your forecast starting with <forecast> on the line before and ending with </forecast> on the line after.
 SHARED_FORECAST_PROMPT
 shared_forecast_prompt = shared_forecast_prompt_template.result(binding)
 
@@ -176,31 +178,71 @@ forecast_prompt = case question.type
                     raise "Missing template for type: #{question.type}"
                   end
 
-Formatador.display "\n[bold][green]# Superforecaster: Forecasting…[/] "
-forecast_json = cache(question_id, 'forecast.json') do
-  forecast = Anthropic.eval({ 'role': 'user', 'content': forecast_prompt })
-  forecast.to_json
-end
-forecast = Anthropic::Response.new(data: JSON.parse(forecast_json))
-
-Formatador.display_line "\n[bold][green]# Forecast:[/] #{question.title}"
-Formatador.display_line "\n[bold][green]## Summary:[/]"
-puts forecast.extracted_content('forecast')
-Formatador.display_line "\n[bold][green]## Output:[/]"
-case question.type
-when 'binary'
-  probability = forecast.extracted_content('probability')
-  puts "Probability: #{probability}"
-when 'discrete', 'numeric'
-  puts forecast.extracted_content('probabilities')
-  puts 'FIXME: Discrete/Numeric output and parsing'
-when 'multiple_choice'
-  probabilities_content = forecast.extracted_content('probabilities')
-  probabilities = {}
-  probabilities_content.split("\n").each do |line|
-    pair = line.split('Option ', 2).last
-    key, value = pair.split(': ', 2)
-    probabilities[key] = value
+forecasts = []
+FORECASTERS.times do |index|
+  Formatador.display "\n[bold][green]# Superforecaster[#{index}]: Forecasting…[/] "
+  forecast_json = cache(question_id, "#{index}.forecast.json") do
+    forecast = Anthropic.eval({ 'role': 'user', 'content': forecast_prompt })
+    forecast.to_json
   end
-  puts format('Probabilities: { %s }', probabilities.map { |k, v| format('%<k>s: %<v>s', k: k, v: v) }.join(', '))
+  forecasts << Anthropic::Response.new(data: JSON.parse(forecast_json))
+end
+
+forecast_delphi_prompt_template = ERB.new(<<~FORECAST_DELPHI_PROMPT, trim_mode: '-')
+  Review these forecasts for the same question from other superforecasters.
+  <forecasts>
+  <%- forecasts.each do |f| -%>
+  <%- next if f == forecast -%>
+  <forecast>
+  <%= f.extracted_content('forecast') %>
+  </forecast>
+  <%- end -%>
+  </forecasts>
+
+  - Compare these forecasts to your own, paying particular attention to how and why they differ.
+  - Before providing your revised forecast, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
+  - Provide your revised forecast starting with <forecast> on the line before and ending with </forecast> on the line after.
+FORECAST_DELPHI_PROMPT
+
+forecast_revisions = []
+Formatador.display_line "\n[bold][green]# Meta: Optimizing Forecasts[/] "
+forecasts.each_with_index do |forecast, index|
+  Formatador.display_line "\n[bold][green]## Superforecaster[#{index}]: Forecast Optimization Prompt[/]"
+  forecast_delphi_prompt = forecast_delphi_prompt_template.result(binding)
+
+  forecast_revision_json = cache(question_id, "#{index}.forecast.1.json") do
+    Formatador.display "\n[bold][green]## Superforecaster[#{index}]: Revising Forecast…[/] "
+    revision = Anthropic.eval(
+      { 'role': 'user', 'content': forecast_prompt },
+      { 'role': 'assistant', 'content': forecast.stripped_content('reasoning') },
+      { 'role': 'user', 'content': forecast_delphi_prompt }
+    )
+    puts revision.content
+    revision.to_json
+  end
+  forecast_revisions << Anthropic::Response.new(data: JSON.parse(forecast_revision_json))
+end
+
+forecast_revisions.each_with_index do |forecast, index|
+  Formatador.display_line "\n[bold][green]# Forecast[#{index}]:[/] #{question.title}"
+  Formatador.display_line "\n[bold][green]## Summary:[/]"
+  puts forecast.extracted_content('forecast')
+  Formatador.display_line "\n[bold][green]## Output:[/]"
+  case question.type
+  when 'binary'
+    probability = forecast.extracted_content('probability')
+    puts "Probability: #{probability}"
+  when 'discrete', 'numeric'
+    puts forecast.extracted_content('probabilities')
+    puts 'FIXME: Discrete/Numeric output and parsing'
+  when 'multiple_choice'
+    probabilities_content = forecast.extracted_content('probabilities')
+    probabilities = {}
+    probabilities_content.split("\n").each do |line|
+      pair = line.split('Option ', 2).last
+      key, value = pair.split(': ', 2)
+      probabilities[key] = value
+    end
+    puts format('Probabilities: { %s }', probabilities.map { |k, v| format('%<k>s: %<v>s', k: k, v: v) }.join(', '))
+  end
 end
