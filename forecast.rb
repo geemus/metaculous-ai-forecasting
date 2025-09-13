@@ -150,7 +150,13 @@ binary_forecast_prompt = binary_forecast_prompt_template.result(binding)
 numeric_forecast_prompt_template = ERB.new(<<~NUMERIC_FORECAST_PROMPT, trim_mode: '-')
   <%= shared_forecast_prompt -%>
 
-  - Finally provide the likelihood that the answer will fall within each percentile of the range starting with <percentiles> on the line before and ending with </percentiles> on the line after.
+  - Finally provide the likelihood that the answer will fall at individual values starting with <probabilities> on the line before and ending with </probabilities> on the line after, only include the probabilities themselves and do not use ranges of values, format like:
+  <probabilities>
+  Value A: A%
+  Value B: B%
+  ...
+  Value N: N%
+  </probabilities>
 NUMERIC_FORECAST_PROMPT
 numeric_forecast_prompt = numeric_forecast_prompt_template.result(binding)
 
@@ -159,8 +165,8 @@ multiple_choice_prompt_template = ERB.new(<<~MULTIPLE_CHOICE_FORECAST_PROMPT, tr
 
   - Provide your final probabilistic prediction with <probability> on the line before and ending with </probability> on the line after, only include the probability itself, format like:
   <probabilities>
-  Option "A": Z%
-  Option "B": Y%
+  Option "A": A%
+  Option "B": B%
   ...
   Option "N": N%
   </probabilities>
