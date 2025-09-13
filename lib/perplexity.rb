@@ -6,6 +6,7 @@ class Perplexity
 
     - The superforecaster will provide questions they intend to forecast on.
     - Generate research summaries that are concise yet sufficiently detailed to support forecasting.
+    - Seek primary sources rather than news articles (e.g., the actual expert surveys, not just media coverage)
     - Do not comment or speculate beyond what what is supported by the evidence.
 
     - Check for base rate quantifications and meta-analytic summaries.
