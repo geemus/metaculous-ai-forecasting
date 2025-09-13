@@ -34,7 +34,7 @@ def format_research(perplexity_response)
 end
 
 # metaculus test questions: (binary: 578, numeric: 14333, multiple-choice: 22427, discrete: 38880)
-question_id = ENV['QUESTION_ID']
+question_id = ENV['QUESTION_ID'] || raise("ENV['QUESTION_ID'] is required")
 
 # setup directories for cache, if missing
 FileUtils.mkdir_p('./tmp')
