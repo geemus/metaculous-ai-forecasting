@@ -95,7 +95,7 @@ research = Perplexity::Response.new(data: JSON.parse(research_json))
 research_output = format_research(research)
 puts research_output
 
-Formatador.display "\n[bold][green]# Meta: Optimizing Research[/] "
+Formatador.display_line "\n[bold][green]# Meta: Optimizing Research[/] "
 revision_json = cache(question_id, 'research.1.json') do
   Formatador.display_line "\n[bold][green]## Superforecaster: Research Feedback Prompt[/]"
   research_feedback_prompt_template = ERB.new(<<~RESEARCH_FEEDBACK_PROMPT, trim_mode: '-')
