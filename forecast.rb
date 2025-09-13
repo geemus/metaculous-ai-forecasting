@@ -34,7 +34,7 @@ question_json = cache(question_id, 'question.json') do
 end
 question = Metaculus::Question.new(data: JSON.parse(question_json))
 
-forecast_prompt_template = ERB.new(<<~FORECAST_PROMPT_TEMPLATE, trim_mode: '-')
+forecast_prompt = ERB.new(<<~FORECAST_PROMPT_TEMPLATE, trim_mode: '-').result(binding)
   Forecast Question:
   <question>
   <%= question.title %>
@@ -67,7 +67,6 @@ forecast_prompt_template = ERB.new(<<~FORECAST_PROMPT_TEMPLATE, trim_mode: '-')
   <%= question.aggregate_content %>
   </aggregate>
 FORECAST_PROMPT_TEMPLATE
-forecast_prompt = forecast_prompt_template.result(binding)
 puts forecast_prompt
 
 Formatador.display_line "\n[bold][green]# Researcher: Research Prompt[/]"
@@ -86,7 +85,7 @@ puts research_output
 Formatador.display_line "\n[bold][green]# Meta: Optimizing Research[/] "
 revision_json = cache(question_id, 'research.1.json') do
   Formatador.display_line "\n[bold][green]## Superforecaster: Research Feedback Prompt[/]"
-  research_feedback_prompt_template = ERB.new(<<~RESEARCH_FEEDBACK_PROMPT, trim_mode: '-')
+  research_feedback_prompt = ERB.new(<<~RESEARCH_FEEDBACK_PROMPT, trim_mode: '-').result(binding)
     Provide feedback to your assistant on this research for one of your forecasts:
     <research>
     <%= research_output %>
@@ -95,7 +94,6 @@ revision_json = cache(question_id, 'research.1.json') do
     - Before providing feedback, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
     - Provide feedback on how to improve this research starting with <feedback> on the line before and ending with </feedback> on the line after.
   RESEARCH_FEEDBACK_PROMPT
-  research_feedback_prompt = research_feedback_prompt_template.result(binding)
   puts research_feedback_prompt
 
   Formatador.display "\n[bold][green]## Superforecaster: Reviewing Research…[/] "
@@ -115,7 +113,7 @@ revision_output = research.formatted_research
 puts revision_output
 
 Formatador.display_line "\n[bold][green]## Superforecaster: Forecast Prompt[/]"
-shared_forecast_prompt_template = ERB.new(<<~SHARED_FORECAST_PROMPT, trim_mode: '-')
+shared_forecast_prompt = ERB.new(<<~SHARED_FORECAST_PROMPT, trim_mode: '-').result(binding)
   Create a forecast based on the following information.
 
   <%= forecast_prompt -%>
@@ -129,16 +127,14 @@ shared_forecast_prompt_template = ERB.new(<<~SHARED_FORECAST_PROMPT, trim_mode: 
   - Today is <%= Time.now.strftime('%B %d, %Y') %>. Consider the time remaining before the outcome of the question will become known.
   - Provide your forecast starting with <forecast> on the line before and ending with </forecast> on the line after.
 SHARED_FORECAST_PROMPT
-shared_forecast_prompt = shared_forecast_prompt_template.result(binding)
 
-binary_forecast_prompt_template = ERB.new(<<~BINARY_FORECAST_PROMPT, trim_mode: '-')
+binary_forecast_prompt = ERB.new(<<~BINARY_FORECAST_PROMPT, trim_mode: '-').result(binding)
   <%= shared_forecast_prompt -%>
 
   - Provide your final probabilistic prediction with <probability> on the line before and ending with </probability> on the line after, only include the probability itself.
 BINARY_FORECAST_PROMPT
-binary_forecast_prompt = binary_forecast_prompt_template.result(binding)
 
-numeric_forecast_prompt_template = ERB.new(<<~NUMERIC_FORECAST_PROMPT, trim_mode: '-')
+numeric_forecast_prompt = ERB.new(<<~NUMERIC_FORECAST_PROMPT, trim_mode: '-').result(binding)
   <%= shared_forecast_prompt -%>
 
   - Finally provide the likelihood that the answer will fall at individual values starting with <probabilities> on the line before and ending with </probabilities> on the line after, only include the probabilities themselves and do not use ranges of values, format like:
@@ -149,9 +145,8 @@ numeric_forecast_prompt_template = ERB.new(<<~NUMERIC_FORECAST_PROMPT, trim_mode
   Value N: N%
   </probabilities>
 NUMERIC_FORECAST_PROMPT
-numeric_forecast_prompt = numeric_forecast_prompt_template.result(binding)
 
-multiple_choice_prompt_template = ERB.new(<<~MULTIPLE_CHOICE_FORECAST_PROMPT, trim_mode: '-')
+multiple_choice_prompt = ERB.new(<<~MULTIPLE_CHOICE_FORECAST_PROMPT, trim_mode: '-').result(binding)
   <%= shared_forecast_prompt -%>
 
   - Provide your final probabilistic prediction with <probability> on the line before and ending with </probability> on the line after, only include the probability itself, format like:
@@ -162,7 +157,6 @@ multiple_choice_prompt_template = ERB.new(<<~MULTIPLE_CHOICE_FORECAST_PROMPT, tr
   Option "N": N%
   </probabilities>
 MULTIPLE_CHOICE_FORECAST_PROMPT
-multiple_choice_prompt = multiple_choice_prompt_template.result(binding)
 
 forecast_prompt = case question.type
                   when 'binary'
