@@ -19,7 +19,7 @@ require './lib/utility'
 Thread.current[:formatador] = Formatador.new
 Thread.current[:formatador].instance_variable_set(:@indent, 0)
 
-FORECASTERS = 2
+FORECASTERS = 3
 
 # metaculus test questions: (binary: 578, numeric: 14333, multiple-choice: 22427, discrete: 38880)
 question_id = ARGV[0] || raise("ENV['QUESTION_ID'] is required")
@@ -209,6 +209,7 @@ Formatador.display_line "\n[bold][green]# Meta: Optimizing Forecasts[/] "
 forecasts.each_with_index do |forecast, index|
   Formatador.display_line "\n[bold][green]## Superforecaster[#{index}]: Forecast Optimization Prompt[/]"
   forecast_delphi_prompt = forecast_delphi_prompt_template.result(binding)
+  puts forecast_delphi_prompt
 
   forecast_revision_json = cache(question_id, "#{index}.forecast.1.json") do
     Formatador.display "\n[bold][green]## Superforecaster[#{index}]: Revising Forecast…[/] "
