@@ -14,6 +14,7 @@ require 'json'
 require './lib/anthropic'
 require './lib/metaculus'
 require './lib/perplexity'
+require './lib/prompts'
 require './lib/utility'
 
 Thread.current[:formatador] = Formatador.new
