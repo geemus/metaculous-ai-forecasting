@@ -241,30 +241,6 @@ consensus_forecast_prompt = ERB.new(<<~CONSENSUS_FORECAST_PROMPT, trim_mode: '-'
   - Provide your summary starting with <forecast> on the line before and ending with </forecast> on the line after.
 CONSENSUS_FORECAST_PROMPT
 
-forecast_revisions.each_with_index do |forecast, index|
-  Formatador.display_line "\n[bold][green]# Forecast[#{index}]:[/] #{question.title}"
-  Formatador.display_line "\n[bold][green]## Summary:[/]"
-  puts forecast.extracted_content('forecast')
-  Formatador.display_line "\n[bold][green]## Output:[/]"
-  case question.type
-  when 'binary'
-    probability = forecast.extracted_content('probability')
-    puts "Probability: #{probability}"
-  when 'discrete', 'numeric'
-    puts forecast.extracted_content('probabilities')
-    puts 'FIXME: Discrete/Numeric output and parsing'
-  when 'multiple_choice'
-    probabilities_content = forecast.extracted_content('probabilities')
-    probabilities = {}
-    probabilities_content.split("\n").each do |line|
-      pair = line.split('Option ', 2).last
-      key, value = pair.split(': ', 2)
-      probabilities[key] = value
-    end
-    puts format('Probabilities: { %s }', probabilities.map { |k, v| format('%<k>s: %<v>s', k: k, v: v) }.join(', '))
-  end
-end
-
 consensus_prompt = prompt_with_type(question, consensus_forecast_prompt)
 Formatador.display "\n[bold][green]# Superforecaster: Summarizing Consensus…[/] "
 consensus_json = cache(question_id, 'consensus.json') do
@@ -272,4 +248,22 @@ consensus_json = cache(question_id, 'consensus.json') do
   consensus.to_json
 end
 revision = Anthropic::Response.new(data: JSON.parse(consensus_json))
-puts revision.content
+Formatador.display_line "\n[bold][green]## Forecast:[/]"
+puts revision.extracted_content('forecast')
+Formatador.display_line "\n[bold][green]## Output:[/]"
+case question.type
+when 'binary'
+  probability = revision.extracted_content('probability')
+  puts "Probability: #{probability}"
+when 'discrete', 'numeric'
+  puts revision.extracted_content('probabilities')
+when 'multiple_choice'
+  probabilities_content = revision.extracted_content('probabilities')
+  probabilities = {}
+  probabilities_content.split("\n").each do |line|
+    pair = line.split('Option ', 2).last
+    key, value = pair.split(': ', 2)
+    probabilities[key] = value
+  end
+  puts format('Probabilities: { %s }', probabilities.map { |k, v| format('%<k>s: %<v>s', k: k, v: v) }.join(', '))
+end
