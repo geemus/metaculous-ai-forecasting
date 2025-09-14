@@ -5,6 +5,16 @@ class Perplexity
     new.eval(*messages)
   end
 
+  attr_accessor :system, :temperature
+
+  def initialize(
+    system: RESEARCHER_SYSTEM_PROMPT,
+    temperature: 0.1
+  )
+    @system = system
+    @temperature = temperature
+  end
+
   # https://docs.perplexity.ai/api-reference/chat-completions-post
   def eval(*messages)
     start_time = Time.now
@@ -15,10 +25,10 @@ class Perplexity
         messages: [
           {
             'role': 'system',
-            'content': RESEARCHER_SYSTEM_PROMPT
+            'content': system
           }
         ].concat(messages),
-        temperature: 0.1,
+        temperature: temperature,
         web_search_options: {
           search_context_size: 'high'
         }

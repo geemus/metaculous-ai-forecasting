@@ -5,9 +5,13 @@ class Anthropic
     new.eval(*messages)
   end
 
-  attr_accessor :temperature
+  attr_accessor :system, :temperature
 
-  def initialize(temperature: 0.1)
+  def initialize(
+    system: SUPERFORECASTER_SYSTEM_PROMPT,
+    temperature: 0.1
+  )
+    @system = system
     @temperature = temperature
   end
 
@@ -20,7 +24,7 @@ class Anthropic
         model: 'claude-sonnet-4-20250514',
         max_tokens: 2048,
         messages: messages,
-        system: SUPERFORECASTER_SYSTEM_PROMPT,
+        system: system,
         temperature: temperature
       }.to_json
     )
