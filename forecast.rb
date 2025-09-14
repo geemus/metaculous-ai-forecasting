@@ -24,9 +24,7 @@ FORECASTERS = 3
 # metaculus test questions: (binary: 578, numeric: 14333, multiple-choice: 22427, discrete: 38880)
 question_id = ARGV[0] || raise("ENV['QUESTION_ID'] is required")
 
-# setup directories for cache, if missing
-FileUtils.mkdir_p('./tmp')
-FileUtils.mkdir_p("./tmp/#{question_id}")
+FileUtils.mkdir_p("./tmp/#{question_id}") # create cache directory if needed
 
 Formatador.display "\n[bold][green]# Metaculus: Getting Question(#{question_id})…[/] "
 question_json = cache(question_id, 'question.json') do
