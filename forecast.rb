@@ -255,7 +255,10 @@ Formatador.display_line "\n[bold][green]## Output:[/]"
 case question.type
 when 'binary'
   probability = revision.extracted_content('probability')
-  puts "Probability: #{probability}"
+  puts({
+    question: question_id,
+    probability_yes: probability.to_f / 100.0
+  }.to_json)
 when 'discrete', 'numeric'
   puts revision.extracted_content('probabilities')
 when 'multiple_choice'
@@ -264,7 +267,10 @@ when 'multiple_choice'
   probabilities_content.split("\n").each do |line|
     pair = line.split('Option ', 2).last
     key, value = pair.split(': ', 2)
-    probabilities[key] = value
+    probabilities[key] = value.to_f / 100.0
   end
-  puts format('Probabilities: { %s }', probabilities.map { |k, v| format('%<k>s: %<v>s', k: k, v: v) }.join(', '))
+  puts({
+    question: question_id,
+    probability_yes_per_category: probabilities
+  }.to_json)
 end
