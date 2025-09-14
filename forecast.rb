@@ -126,16 +126,12 @@ shared_forecast_prompt = ERB.new(<<~SHARED_FORECAST_PROMPT, trim_mode: '-').resu
   - Provide your forecast starting with <forecast> on the line before and ending with </forecast> on the line after.
 SHARED_FORECAST_PROMPT
 
-binary_forecast_prompt = ERB.new(<<~BINARY_FORECAST_PROMPT, trim_mode: '-').result(binding)
-  <%= shared_forecast_prompt -%>
-
-  - Provide your final probabilistic prediction with <probability> on the line before and ending with </probability> on the line after, only include the probability itself.
+BINARY_FORECAST_PROMPT = <<~BINARY_FORECAST_PROMPT
+  - Provide your final probabilistic prediction at the end of your forecast with <probability> on the line before and ending with </probability> on the line after, only include the probability itself.
 BINARY_FORECAST_PROMPT
 
-numeric_forecast_prompt = ERB.new(<<~NUMERIC_FORECAST_PROMPT, trim_mode: '-').result(binding)
-  <%= shared_forecast_prompt -%>
-
-  - Finally provide the likelihood that the answer will fall at individual values starting with <probabilities> on the line before and ending with </probabilities> on the line after, only include the probabilities themselves and do not use ranges of values, format like:
+NUMERIC_FORECAST_PROMPT = <<~NUMERIC_FORECAST_PROMPT
+  - Finally provide the likelihood that the answer will fall at individual values at the end of your forecast starting with <probabilities> on the line before and ending with </probabilities> on the line after, only include the probabilities themselves and do not use ranges of values, format like:
   <probabilities>
   Value A: A%
   Value B: B%
@@ -144,10 +140,10 @@ numeric_forecast_prompt = ERB.new(<<~NUMERIC_FORECAST_PROMPT, trim_mode: '-').re
   </probabilities>
 NUMERIC_FORECAST_PROMPT
 
-multiple_choice_prompt = ERB.new(<<~MULTIPLE_CHOICE_FORECAST_PROMPT, trim_mode: '-').result(binding)
+MULTIPLE_CHOICE_FORECAST_PROMPT = <<~MULTIPLE_CHOICE_FORECAST_PROMPT
   <%= shared_forecast_prompt -%>
 
-  - Provide your final probabilistic prediction with <probability> on the line before and ending with </probability> on the line after, only include the probability itself, format like:
+  - Provide your final probabilistic prediction at the end of your forecast with <probability> on the line before and ending with </probability> on the line after, only include the probability itself, format like:
   <probabilities>
   Option "A": A%
   Option "B": B%
@@ -156,19 +152,23 @@ multiple_choice_prompt = ERB.new(<<~MULTIPLE_CHOICE_FORECAST_PROMPT, trim_mode: 
   </probabilities>
 MULTIPLE_CHOICE_FORECAST_PROMPT
 
-forecast_prompt = case question.type
-                  when 'binary'
-                    puts binary_forecast_prompt
-                    binary_forecast_prompt
-                  when 'discrete', 'numeric'
-                    puts numeric_forecast_prompt
-                    numeric_forecast_prompt
-                  when 'multiple_choice'
-                    puts multiple_choice_prompt
-                    multiple_choice_prompt
-                  else
-                    raise "Missing template for type: #{question.type}"
-                  end
+def prompt_with_type(question, prompt)
+  prompt_with_type = prompt
+  prompt_with_type += case question.type
+                      when 'binary'
+                        BINARY_FORECAST_PROMPT
+                      when 'discrete', 'numeric'
+                        NUMERIC_FORECAST_PROMPT
+                      when 'multiple_choice'
+                        MULTIPLE_CHOICE_FORECAST_PROMPT
+                      else
+                        raise "Missing template for type: #{question.type}"
+                      end
+  puts prompt_with_type
+  prompt_with_type
+end
+
+forecast_prompt = prompt_with_type(question, shared_forecast_prompt)
 
 forecasts = []
 FORECASTERS.times do |index|
@@ -203,7 +203,7 @@ Formatador.display_line "\n[bold][green]# Meta: Optimizing Forecasts[/] "
 forecasts.each_with_index do |forecast, index|
   Formatador.display_line "\n[bold][green]## Superforecaster[#{index}]: Forecast Optimization Prompt[/]"
   forecast_delphi_prompt = forecast_delphi_prompt_template.result(binding)
-  puts forecast_delphi_prompt
+  forecast_delphi_prompt = prompt_with_type(question, forecast_delphi_prompt)
 
   forecast_revision_json = cache(question_id, "#{index}.forecast.1.json") do
     Formatador.display "\n[bold][green]## Superforecaster[#{index}]: Revising Forecast…[/] "
@@ -217,6 +217,21 @@ forecasts.each_with_index do |forecast, index|
   end
   forecast_revisions << Anthropic::Response.new(data: JSON.parse(forecast_revision_json))
 end
+
+consensus_forecast_prompt = ERB.new(<<~CONSENSUS_FORECAST_PROMPT, trim_mode: '-').result(binding)
+  Review these forecasts from other superforecasters.
+  <forecasts>
+  <%- forecasts.each do |forecast| -%>
+  <forecast>
+  <%= forecast.extracted_content('forecast') %>
+  </forecast>
+  <%- end -%>
+  </forecasts>
+
+  - Summarize the consensus as a final forecast.
+  - Before summarizing the consensus, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
+  - Provide your summary starting with <forecast> on the line before and ending with </forecast> on the line after.
+CONSENSUS_FORECAST_PROMPT
 
 forecast_revisions.each_with_index do |forecast, index|
   Formatador.display_line "\n[bold][green]# Forecast[#{index}]:[/] #{question.title}"
@@ -241,3 +256,12 @@ forecast_revisions.each_with_index do |forecast, index|
     puts format('Probabilities: { %s }', probabilities.map { |k, v| format('%<k>s: %<v>s', k: k, v: v) }.join(', '))
   end
 end
+
+consensus_prompt = prompt_with_type(question, consensus_forecast_prompt)
+Formatador.display "\n[bold][green]# Superforecaster: Summarizing Consensus…[/] "
+consensus_json = cache(question_id, 'consensus.json') do
+  consensus = Anthropic.eval({ 'role': 'user', 'content': consensus_prompt })
+  consensus.to_json
+end
+revision = Anthropic::Response.new(data: JSON.parse(consensus_json))
+puts revision.content
