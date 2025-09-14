@@ -22,6 +22,12 @@ class Anthropic
     new.eval(*messages)
   end
 
+  attr_accessor :temperature
+
+  def initialize(temperature: 0.1)
+    @temperature = temperature
+  end
+
   # https://docs.anthropic.com/en/api/messages
   def eval(*messages)
     start_time = Time.now
@@ -32,7 +38,7 @@ class Anthropic
         max_tokens: 2048,
         messages: messages,
         system: SYSTEM_PROMPT,
-        temperature: 0.1
+        temperature: temperature
       }.to_json
     )
     response = Response.new(

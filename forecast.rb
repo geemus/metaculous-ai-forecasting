@@ -174,7 +174,8 @@ forecasts = []
 FORECASTERS.times do |index|
   Formatador.display "\n[bold][green]# Superforecaster[#{index}]: Forecasting…[/] "
   forecast_json = cache(question_id, "#{index}.forecast.json") do
-    forecast = Anthropic.eval({ 'role': 'user', 'content': forecast_prompt })
+    anthropic = Anthropic.new(temperature: 0.9)
+    forecast = anthropic.eval({ 'role': 'user', 'content': forecast_prompt })
     forecast.to_json
   end
   forecasts << Anthropic::Response.new(data: JSON.parse(forecast_json))
