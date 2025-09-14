@@ -124,33 +124,41 @@ shared_forecast_prompt = ERB.new(<<~SHARED_FORECAST_PROMPT, trim_mode: '-').resu
 
   - Before providing your forecast, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
   - Today is <%= Time.now.strftime('%B %d, %Y') %>. Consider the time remaining before the outcome of the question will become known.
-  - Provide your forecast starting with <forecast> on the line before and ending with </forecast> on the line after.
 SHARED_FORECAST_PROMPT
 
 BINARY_FORECAST_PROMPT = <<~BINARY_FORECAST_PROMPT
-  - Provide your final probabilistic prediction at the end of your forecast with <probability> on the line before and ending with </probability> on the line after, only include the probability itself.
+  - Before your forecast put <forecast> on a new line.
+  - At the end of your forecast provide your final probabilistic prediction starting with <probability> on a new line before and ending with </probability> on a new line after, only include the probability itself, format like:
+  <probability>
+  X%
+  </probability>
+  - After your forecast put </forecast> on a new line.
 BINARY_FORECAST_PROMPT
 
 NUMERIC_FORECAST_PROMPT = <<~NUMERIC_FORECAST_PROMPT
-  - Finally provide the likelihood that the answer will fall at individual values at the end of your forecast starting with <probabilities> on the line before and ending with </probabilities> on the line after, only include the probabilities themselves and do not use ranges of values, format like:
+  - Before your forecast put <forecast> on a new line.
+  - At the end of your forecast provide the likelihood that the answer will fall at individual values starting with <probabilities> on a new line before and ending with </probabilities> on a new line after, only include the probabilities themselves and do not use ranges of values, format like:
   <probabilities>
   Value A: A%
   Value B: B%
   ...
   Value N: N%
   </probabilities>
+  - After your forecast put </forecast> on a new line.
 NUMERIC_FORECAST_PROMPT
 
 MULTIPLE_CHOICE_FORECAST_PROMPT = <<~MULTIPLE_CHOICE_FORECAST_PROMPT
   <%= shared_forecast_prompt -%>
 
-  - Provide your final probabilistic prediction at the end of your forecast with <probability> on the line before and ending with </probability> on the line after, only include the probability itself, format like:
+  - Before your forecast put <forecast> on a new line.
+    - At the end of your forecast provide your final probabilistic prediction starting with <probabilities> on a new line before and ending with </probabilities> on a new line after, only include the probability itself, format like:
   <probabilities>
   Option "A": A%
   Option "B": B%
   ...
   Option "N": N%
   </probabilities>
+  - After your forecast put </forecast> on a new line.
 MULTIPLE_CHOICE_FORECAST_PROMPT
 
 def prompt_with_type(question, prompt)
@@ -195,7 +203,6 @@ forecast_delphi_prompt_template = ERB.new(<<~FORECAST_DELPHI_PROMPT, trim_mode: 
 
   - Review these forecasts and compare each to your initial forecast. Focus on differences in probabilities, key assumptions, reasoning, and supporting evidence.
   - Before revising your forecast, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
-  - Provide your revised forecast starting with <forecast> on the line before and ending with </forecast> on the line after.
   - Include your confidence level and note any uncertainties impacting your revision.
 FORECAST_DELPHI_PROMPT
 
