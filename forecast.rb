@@ -192,9 +192,10 @@ forecast_delphi_prompt_template = ERB.new(<<~FORECAST_DELPHI_PROMPT, trim_mode: 
   <%- end -%>
   </forecasts>
 
-  - Compare these forecasts to your own, paying particular attention to how and why they differ.
-  - Before providing your revised forecast, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
+  - Review these forecasts and compare each to your initial forecast. Focus on differences in probabilities, key assumptions, reasoning, and supporting evidence.
+  - Before revising your forecast, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
   - Provide your revised forecast starting with <forecast> on the line before and ending with </forecast> on the line after.
+  - Include your confidence level and note any uncertainties impacting your revision.
 FORECAST_DELPHI_PROMPT
 
 forecast_revisions = []
