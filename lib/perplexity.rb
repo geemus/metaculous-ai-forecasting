@@ -33,6 +33,7 @@ class Perplexity
     start_time = Time.now
     excon_response = connection.post(
       body: {
+        max_tokens: 2048,
         model: 'sonar-pro',
         messages: [
           {
@@ -40,7 +41,10 @@ class Perplexity
             'content': SYSTEM_PROMPT
           }
         ].concat(messages),
-        temperature: 0.1
+        temperature: 0.1,
+        web_search_options: {
+          search_context_size: 'high'
+        }
       }.to_json
     )
     response = Response.new(
