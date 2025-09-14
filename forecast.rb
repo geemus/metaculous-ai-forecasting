@@ -19,7 +19,7 @@ require './lib/utility'
 Thread.current[:formatador] = Formatador.new
 Thread.current[:formatador].instance_variable_set(:@indent, 0)
 
-FORECASTERS = 3
+FORECASTERS = 4
 
 # metaculus test questions: (binary: 578, numeric: 14333, multiple-choice: 22427, discrete: 38880)
 question_id = ARGV[0] || raise("ENV['QUESTION_ID'] is required")
