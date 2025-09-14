@@ -101,13 +101,14 @@ revision_json = cache(question_id, 'research.1.json') do
   Formatador.display "\n[bold][green]## Researcher: Revising Research…[/] "
   revision = Perplexity.eval(
     { 'role': 'user', 'content': research_prompt },
-    { 'role': 'assistant', 'content': research.stripped_content('reasoning') },
+    { 'role': 'assistant', 'content': research.formatted_research },
     { 'role': 'user', 'content': research_feedback.extracted_content('feedback') }
   )
+
   revision.to_json
 end
 revision = Perplexity::Response.new(data: JSON.parse(revision_json))
-revision_output = research.formatted_research
+revision_output = revision.formatted_research
 puts revision_output
 
 Formatador.display_line "\n[bold][green]## Superforecaster: Forecast Prompt[/]"
