@@ -80,10 +80,11 @@ class Anthropic
     def display_meta
       Formatador.display_line(
         format(
-          '[light_green](%<input_tokens>d -> %<output_tokens>d tokens in %<minutes>dm %<seconds>ds)[/]',
+          '[light_green](%<total>d: %<input>d -> %<output>d tokens in %<minutes>dm %<seconds>ds)[/]',
           {
-            input_tokens: input_tokens,
-            output_tokens: output_tokens,
+            total: total_tokens,
+            input: input_tokens,
+            output: output_tokens,
             minutes: duration / 60, seconds: duration % 60
           }
         )
@@ -115,6 +116,10 @@ class Anthropic
 
     def to_json(*args)
       data.to_json(*args)
+    end
+
+    def total_tokens
+      @total_tokens ||= input_tokens + output_tokens
     end
   end
 end
