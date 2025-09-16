@@ -100,9 +100,7 @@ class Perplexity
 
     def formatted_research
       ERB.new(<<~RESEARCH_OUTPUT, trim_mode: '-').result(binding)
-        <research>
         <%= stripped_content('think') %>
-        </research>
 
         <sources>
         <% data['search_results'].each do |result| -%>

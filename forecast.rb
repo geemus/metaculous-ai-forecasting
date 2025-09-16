@@ -75,7 +75,6 @@ puts forecast_prompt
 
 Formatador.display_line "\n[bold][green]# Researcher: Research Prompt[/]"
 research_prompt = forecast_prompt
-puts research_prompt
 
 Formatador.display "\n[bold][green]# Researcher: Drafting Research…[/] "
 research_json = cache(post_id, 'research.0.json') do
@@ -95,7 +94,7 @@ shared_forecast_prompt = ERB.new(<<~SHARED_FORECAST_PROMPT, trim_mode: '-').resu
 
   Here is a summary of relevant data from your research assistant:
   <research>
-  <%= research_output %>
+  <%= research_output -%>
   </research>
 
   1. Today is <%= Time.now.strftime('%B %d, %Y') %>. Consider the time remaining before the outcome of the question will become known.
@@ -160,12 +159,10 @@ def prompt_with_type(question, prompt)
                       else
                         raise "Missing template for type: #{question.type}"
                       end
-  puts prompt_with_type
   prompt_with_type
 end
 
 forecast_prompt = prompt_with_type(question, shared_forecast_prompt)
-
 forecasts = []
 FORECASTERS.each_with_index do |provider, index|
   Formatador.display "\n[bold][green]# Superforecaster[#{index}: #{provider}]: Forecasting…[/] "
@@ -180,6 +177,7 @@ FORECASTERS.each_with_index do |provider, index|
             ) # 0-2
           end
     forecast = llm.eval({ 'role': 'user', 'content': forecast_prompt })
+    put forecast.content
     forecast.to_json
   end
   forecasts << case provider
