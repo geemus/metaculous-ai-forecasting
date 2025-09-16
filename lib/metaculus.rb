@@ -321,7 +321,8 @@ class Metaculus
     def submit(response)
       forecast_data = case type
                       when 'binary'
-                        probability = response.extracted_content('probability').to_f / 100.0
+                        probability = response.extracted_content('probability')
+                        probability = probability.include?('%') ? probability.to_f / 100.0 : probability.to_f
                         [{
                           question: id,
                           probability_yes: probability
@@ -340,9 +341,10 @@ class Metaculus
                       when 'multiple_choice'
                         probabilities = {}
                         response.extracted_content('probabilities').split("\n").each do |line|
-                          pair = line.split('Option ', 2).last
-                          key, value = pair.split(': ', 2)
-                          probabilities[key] = value.to_f / 100.0
+                          pair = line.split('Option "', 2).last
+                          key, value = pair.split('": ', 2)
+                          value = value.include?('%') ? value.to_f / 100.0 : value.to_f
+                          probabilities[key] = value.to_f
                         end
                         [{
                           question: id,
