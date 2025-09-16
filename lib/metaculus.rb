@@ -100,6 +100,10 @@ class Metaculus
       @criteria_content ||= [question['resolution_criteria'], question['fine_print']].compact.join("\n\n").strip
     end
 
+    def existing_forecast?
+      @existing_forecast ||= !question.dig('my_forecasts', 'latest').nil?
+    end
+
     def latest_forecaster_count
       @latest_forecaster_count ||= latest_aggregations['forecaster_count']
     end
