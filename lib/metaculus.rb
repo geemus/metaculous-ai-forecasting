@@ -9,16 +9,47 @@ class Metaculus
     start_time = Time.now
     excon_response = connection.get(path: "/api/posts/#{id}/")
     duration = Time.now - start_time
-    question = Question.new(data: JSON.parse(excon_response.body))
     Formatador.display_line(
       format(
         '[light_green](in %<minutes>dm %<seconds>ds)[/]',
         minutes: duration / 60, seconds: duration % 60
       )
     )
-    question
+    Question.new(data: JSON.parse(excon_response.body))
   rescue Excon::Error => e
-    puts e
+    puts e.response.inspect
+    exit
+  end
+
+  def self.list_tournament_questions(tournament_id)
+    new.list_tournament_questions(tournament_id)
+  end
+
+  def list_tournament_questions(tournament_id)
+    start_time = Time.now
+    excon_response = connection.get(
+      path: '/api/posts/',
+      query: {
+        forecast_type: %w[binary discrete multiple_choice numeric].join(','),
+        include_description: true,
+        offset: 0,
+        statuses: 'open',
+        tournaments: [tournament_id]
+      }
+    )
+    duration = Time.now - start_time
+    Formatador.display_line(
+      format(
+        '[light_green](in %<minutes>dm %<seconds>ds)[/]',
+        minutes: duration / 60, seconds: duration % 60
+      )
+    )
+    data = JSON.parse(excon_response.body)
+    questions = data['results'].map { |datum| Question.new(data: datum) }
+    questions.reject! { |question| question.data['status'] == 'closed' }
+    questions
+  rescue Excon::Error => e
+    puts e.response.inspect
     exit
   end
 
@@ -29,8 +60,8 @@ class Metaculus
       'https://www.metaculus.com',
       expects: 200,
       headers: {
-        'accept': 'application/json'
-        # 'authorization': "Token #{ENV['METACULUS_API_TOKEN']}"
+        'accept': 'application/json',
+        'authorization': "Token #{ENV['METACULUS_BOT_API_TOKEN']}"
       }
     )
   end
