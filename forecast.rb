@@ -138,13 +138,13 @@ BINARY_FORECAST_PROMPT
 
 NUMERIC_FORECAST_PROMPT = <<~NUMERIC_FORECAST_PROMPT
   - Before your forecast put <forecast> on a new line.
-  - At the end of your forecast provide the likelihood that the answer will fall at individual values starting with <probabilities> on a new line before and ending with </probabilities> on a new line after, only include the probabilities themselves and do not use ranges of values, format like:
-  <probabilities>
-  Value A: A%
-  Value B: B%
+  - At the end of your forecast provide percentile predictions of values in the given units and range starting with <percentiles> on a new line before and ending with </percentiles> on a new line after, only include the probabilities themselves and do not use ranges of values, format like:
+  <percentiles>
+  Percentile A: A {unit}
+  Percentile B: B {unit}
   ...
-  Value N: N%
-  </probabilities>
+  Percentile N: N {unit}
+  </percentiles>
   - After your forecast put </forecast> on a new line.
 NUMERIC_FORECAST_PROMPT
 
