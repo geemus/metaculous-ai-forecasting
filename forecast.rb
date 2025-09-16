@@ -20,14 +20,19 @@ require './lib/utility'
 Thread.current[:formatador] = Formatador.new
 Thread.current[:formatador].instance_variable_set(:@indent, 0)
 
-FORECASTERS = 4
+FORECASTERS = %i[
+  anthropic
+  anthropic
+  perplexity
+  perplexity
+].freeze
 
 # metaculus test questions: (binary: 578, numeric: 14333, multiple-choice: 22427, discrete: 38880)
 post_id = ARGV[0] || raise('post id argument is required')
 
 FileUtils.mkdir_p("./tmp/#{post_id}") # create cache directory if needed
 
-Formatador.display "\n[bold][green]# Metaculus: Getting Question(#{post_id})…[/] "
+Formatador.display "\n[bold][green]# Metaculus: Getting Post(#{post_id})…[/] "
 post_json = cache(post_id, 'post.json') do
   Metaculus.get_post(post_id).to_json
 end
@@ -90,8 +95,10 @@ revision_json = cache(post_id, 'research.1.json') do
     <%= research_output %>
     </research>
 
-    - Before providing feedback, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
-    - Provide feedback on how to improve this research starting with <feedback> on the line before and ending with </feedback> on the line after.
+    - Emphasize source diversity and quality.
+
+    1. Before providing feedback, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
+    2. Provide feedback on how to improve this research starting with <feedback> on the line before and ending with </feedback> on the line after.
   RESEARCH_FEEDBACK_PROMPT
   puts research_feedback_prompt
 
@@ -123,43 +130,59 @@ shared_forecast_prompt = ERB.new(<<~SHARED_FORECAST_PROMPT, trim_mode: '-').resu
   <%= revision_output %>
   </research>
 
-  - Before providing your forecast, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
-  - Today is <%= Time.now.strftime('%B %d, %Y') %>. Consider the time remaining before the outcome of the question will become known.
+  1. Today is <%= Time.now.strftime('%B %d, %Y') %>. Consider the time remaining before the outcome of the question will become known.
+  2. Before providing your forecast, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
 SHARED_FORECAST_PROMPT
 
 BINARY_FORECAST_PROMPT = <<~BINARY_FORECAST_PROMPT
-  - Before your forecast put <forecast> on a new line.
-  - At the end of your forecast provide your final probabilistic prediction starting with <probability> on a new line before and ending with </probability> on a new line after, only include the probability itself, format like:
+  3. Before your forecast put <forecast> on a new line.
+  4. At the end of your forecast provide a probabilistic prediction starting with <probability> on a new line before and ending with </probability> on a new line after, only include the probability itself.
+  5. After your forecast put </forecast> on a new line.
+
+  After reasoning, your response should be in this format:
+  <forecast>
+  {forecast}
+
   <probability>
   X%
   </probability>
-  - After your forecast put </forecast> on a new line.
+  </forecast>
 BINARY_FORECAST_PROMPT
 
 NUMERIC_FORECAST_PROMPT = <<~NUMERIC_FORECAST_PROMPT
-  - Before your forecast put <forecast> on a new line.
-  - At the end of your forecast provide percentile predictions of values in the given units and range starting with <percentiles> on a new line before and ending with </percentiles> on a new line after, only include the probabilities themselves and do not use ranges of values, format like:
+  3. Before your forecast put <forecast> on a new line.
+  4. At the end of your forecast provide percentile predictions of values in the given units and range starting with <percentiles> on a new line before and ending with </percentiles> on a new line after, only include the values and units, do not use ranges of values.
+  5. After your forecast put </forecast> on a new line.
+
+  After reasoning, your response should be in this format:
+  <forecast>
+  {forecast}
+
   <percentiles>
   Percentile A: A {unit}
   Percentile B: B {unit}
   ...
   Percentile N: N {unit}
   </percentiles>
-  - After your forecast put </forecast> on a new line.
+  </forecast>
 NUMERIC_FORECAST_PROMPT
 
 MULTIPLE_CHOICE_FORECAST_PROMPT = <<~MULTIPLE_CHOICE_FORECAST_PROMPT
-  <%= shared_forecast_prompt -%>
+  3. Before your forecast put <forecast> on a new line.
+  4. At the end of your forecast provide your final probabilistic prediction starting with <probabilities> on a new line before and ending with </probabilities> on a new line after, only include the probability itself.
+  5. After your forecast put </forecast> on a new line.
 
-  - Before your forecast put <forecast> on a new line.
-    - At the end of your forecast provide your final probabilistic prediction starting with <probabilities> on a new line before and ending with </probabilities> on a new line after, only include the probability itself, format like:
+  After reasoning, your response should be in this format:
+  <forecast>
+  {forecost}
+
   <probabilities>
   Option "A": A%
   Option "B": B%
   ...
   Option "N": N%
   </probabilities>
-  - After your forecast put </forecast> on a new line.
+  </forecast>
 MULTIPLE_CHOICE_FORECAST_PROMPT
 
 def prompt_with_type(question, prompt)
@@ -181,14 +204,24 @@ end
 forecast_prompt = prompt_with_type(question, shared_forecast_prompt)
 
 forecasts = []
-FORECASTERS.times do |index|
-  Formatador.display "\n[bold][green]# Superforecaster[#{index}]: Forecasting…[/] "
+FORECASTERS.each_with_index do |provider, index|
+  Formatador.display "\n[bold][green]# Superforecaster[#{index}: #{provider}]: Forecasting…[/] "
   forecast_json = cache(post_id, "#{index}.forecast.json") do
-    anthropic = Anthropic.new(temperature: 0.9)
-    forecast = anthropic.eval({ 'role': 'user', 'content': forecast_prompt })
+    llm = case provider
+          when :anthropic
+            Anthropic.new(temperature: 0.9) # 0-1
+          when :perplexity
+            Perplexity.new(system: SUPERFORECASTER_SYSTEM_PROMPT, temperature: 1.9) # 0-2
+          end
+    forecast = llm.eval({ 'role': 'user', 'content': forecast_prompt })
     forecast.to_json
   end
-  forecasts << Anthropic::Response.new(data: JSON.parse(forecast_json))
+  forecasts << case provider
+               when :anthropic
+                 Anthropic::Response.new(data: JSON.parse(forecast_json))
+               when :perplexity
+                 Perplexity::Response.new(data: JSON.parse(forecast_json))
+               end
 end
 
 forecast_delphi_prompt_template = ERB.new(<<~FORECAST_DELPHI_PROMPT, trim_mode: '-')
@@ -197,26 +230,34 @@ forecast_delphi_prompt_template = ERB.new(<<~FORECAST_DELPHI_PROMPT, trim_mode: 
   <%- forecasts.each do |f| -%>
   <%- next if f == forecast -%>
   <forecast>
-  <%= f.extracted_content('forecast') %>
+  <%= f.stripped_content('reasoning') %>
   </forecast>
   <%- end -%>
   </forecasts>
 
-  - Review these forecasts and compare each to your initial forecast. Focus on differences in probabilities, key assumptions, reasoning, and supporting evidence.
-  - Before revising your forecast, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
-  - Include your confidence level and note any uncertainties impacting your revision.
+  1. Review these forecasts and compare each to your initial forecast. Focus on differences in probabilities, key assumptions, reasoning, and supporting evidence.
+  2. Before revising your forecast, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
+  3. Include your confidence level and note any uncertainties impacting your revision.
 FORECAST_DELPHI_PROMPT
 
 forecast_revisions = []
 Formatador.display_line "\n[bold][green]# Meta: Optimizing Forecasts[/] "
-forecasts.each_with_index do |forecast, index|
-  Formatador.display_line "\n[bold][green]## Superforecaster[#{index}]: Forecast Optimization Prompt[/]"
+FORECASTERS.each_with_index do |provider, index|
+  forecast = forecasts[index]
+
+  Formatador.display_line "\n[bold][green]## Superforecaster[#{index}: #{provider}]: Forecast Optimization Prompt[/]"
   forecast_delphi_prompt = forecast_delphi_prompt_template.result(binding)
   forecast_delphi_prompt = prompt_with_type(question, forecast_delphi_prompt)
 
   forecast_revision_json = cache(post_id, "#{index}.forecast.1.json") do
-    Formatador.display "\n[bold][green]## Superforecaster[#{index}]: Revising Forecast…[/] "
-    revision = Anthropic.eval(
+    Formatador.display "\n[bold][green]## Superforecaster[#{index}: #{provider}]: Revising Forecast…[/] "
+    llm = case provider
+          when :anthropic
+            Anthropic.new
+          when :perplexity
+            Perplexity.new(system: SUPERFORECASTER_SYSTEM_PROMPT)
+          end
+    revision = llm.eval(
       { 'role': 'user', 'content': forecast_prompt },
       { 'role': 'assistant', 'content': forecast.stripped_content('reasoning') },
       { 'role': 'user', 'content': forecast_delphi_prompt }
@@ -224,7 +265,12 @@ forecasts.each_with_index do |forecast, index|
     puts revision.content
     revision.to_json
   end
-  forecast_revisions << Anthropic::Response.new(data: JSON.parse(forecast_revision_json))
+  forecast_revisions << case provider
+                        when :anthropic
+                          Anthropic::Response.new(data: JSON.parse(forecast_revision_json))
+                        when :perplexity
+                          Perplexity::Response.new(data: JSON.parse(forecast_revision_json))
+                        end
 end
 
 consensus_forecast_prompt = ERB.new(<<~CONSENSUS_FORECAST_PROMPT, trim_mode: '-').result(binding)
