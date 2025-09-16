@@ -136,6 +136,10 @@ class Metaculus
       @existing_forecast ||= !question.dig('my_forecasts', 'latest').nil?
     end
 
+    def id
+      @id ||= question['id']
+    end
+
     def latest_forecaster_count
       @latest_forecaster_count ||= latest_aggregations['forecaster_count']
     end
@@ -279,6 +283,10 @@ class Metaculus
 
     def options
       @options ||= question['options']
+    end
+
+    def post_id
+      @post_id ||= data['id']
     end
 
     def title

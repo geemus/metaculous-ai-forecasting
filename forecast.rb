@@ -285,3 +285,14 @@ when 'multiple_choice'
     probability_yes_per_category: probabilities
   }.to_json)
 end
+comment_text = revision.extracted_content('forecast')
+%w[percentiles probability probabilities].each do |tag|
+  comment_text = strip_xml(tag, comment_text)
+end
+puts({
+  text: comment_text,
+  parent: nil,
+  included_forecast: true,
+  is_private: true,
+  on_post: question.post_id
+}.to_json)
