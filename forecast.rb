@@ -249,50 +249,5 @@ consensus_json = cache(question_id, 'consensus.json') do
   consensus.to_json
 end
 revision = Anthropic::Response.new(data: JSON.parse(consensus_json))
-Formatador.display_line "\n[bold][green]## Forecast:[/]"
-puts revision.extracted_content('forecast')
-Formatador.display_line "\n[bold][green]## Output:[/]"
-case question.type
-when 'binary'
-  probability = revision.extracted_content('probability')
-  puts({
-    question: question_id,
-    probability_yes: probability.to_f / 100.0
-  }.to_json)
-when 'discrete', 'numeric'
-  percentiles_content = revision.extracted_content('percentiles')
-  percentiles = {}
-  percentiles_content.split("\n").each do |line|
-    key, value = line.split(': ', 2)
-    value = value.split(' ', 2).first
-    percentiles[key.to_i] = question.data.dig('question', 'scaling', 'continuous_range').first.is_a?(Float) ? value.to_f : value.to_i
-  end
-  cdf = question.continuous_cdf(percentiles).inspect
-  puts({
-    question: question_id,
-    continuous_cdf: cdf
-  }.to_json)
-when 'multiple_choice'
-  probabilities_content = revision.extracted_content('probabilities')
-  probabilities = {}
-  probabilities_content.split("\n").each do |line|
-    pair = line.split('Option ', 2).last
-    key, value = pair.split(': ', 2)
-    probabilities[key] = value.to_f / 100.0
-  end
-  puts({
-    question: question_id,
-    probability_yes_per_category: probabilities
-  }.to_json)
-end
-comment_text = revision.extracted_content('forecast')
-%w[percentiles probability probabilities].each do |tag|
-  comment_text = strip_xml(tag, comment_text)
-end
-puts({
-  text: comment_text,
-  parent: nil,
-  included_forecast: true,
-  is_private: true,
-  on_post: question.post_id
-}.to_json)
+Formatador.display_line "\n[bold][green]## Post Prep:[/]"
+puts question.submit(revision)

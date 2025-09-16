@@ -21,5 +21,5 @@ def extract_xml(tag, text)
 end
 
 def strip_xml(tag, text)
-  text.gsub(%r{<#{tag}>([\s\S]*?)</#{tag}>}, '')
+  text.gsub(%r{<#{tag}>([\s\S]*?)</#{tag}>}, '').strip
 end
