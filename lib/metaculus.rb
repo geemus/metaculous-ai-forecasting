@@ -292,15 +292,14 @@ class Metaculus
     def submit(response)
       case type
       when 'binary'
-        probability = response.extracted_content('probability')
+        probability = response.extracted_content('probability').to_f / 100.0
         puts({
           question: id,
-          probability_yes: probability.to_f / 100.0
+          probability_yes: probability
         }.to_json)
       when 'discrete', 'numeric'
-        percentiles_content = response.extracted_content('percentiles')
         percentiles = {}
-        percentiles_content.split("\n").each do |line|
+        response.extracted_content('percentiles').split("\n").each do |line|
           key, value = line.split(': ', 2)
           value = value.split(' ', 2).first
           percentiles[key.to_i] = data.dig('question', 'scaling', 'continuous_range').first.is_a?(Float) ? value.to_f : value.to_i
@@ -310,9 +309,8 @@ class Metaculus
           continuous_cdf: continuous_cdf(percentiles)
         }.to_json)
       when 'multiple_choice'
-        probabilities_content = response.extracted_content('probabilities')
         probabilities = {}
-        probabilities_content.split("\n").each do |line|
+        response.extracted_content('probabilities').split("\n").each do |line|
           pair = line.split('Option ', 2).last
           key, value = pair.split(': ', 2)
           probabilities[key] = value.to_f / 100.0
