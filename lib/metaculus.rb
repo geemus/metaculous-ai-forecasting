@@ -60,7 +60,8 @@ class Metaculus
             )
           end
         else
-          content << "Mean: #{latest_mean}" if latest_mean
+          units_string = units.empty? ? '' : " #{units}"
+          content << "Mean: #{latest_mean}#{units_string}" if latest_mean
           if %w[discrete numeric].include?(type) && scaling['open_lower_bound']
             below_lower_bound = (1 - latest_aggregations['forecast_values'].first) * 100
             content << format(
@@ -71,12 +72,12 @@ class Metaculus
           end
           if type != 'binary' && latest_aggregations['interval_lower_bounds']
             lower_25_percent = (latest_aggregations['interval_lower_bounds'].first * upper_bound).round(2)
-            content << "Lower 25%: #{lower_25_percent}"
+            content << "Lower 25%: #{lower_25_percent}#{units_string}"
           end
-          content << "Median: #{latest_median}" if latest_median
+          content << "Median: #{latest_median}#{units_string}" if latest_median
           if type != 'binary' && latest_aggregations['interval_upper_bounds']
             upper_75_percent = (latest_aggregations['interval_upper_bounds'].first * upper_bound).round(2)
-            content << "Upper 75%: #{upper_75_percent}"
+            content << "Upper 75%: #{upper_75_percent}#{units_string}"
           end
           if %w[discrete numeric].include?(type) && scaling['open_upper_bound']
             above_upper_bound = (1 - latest_aggregations['forecast_values'].last) * 100

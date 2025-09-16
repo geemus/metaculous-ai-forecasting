@@ -260,7 +260,18 @@ when 'binary'
     probability_yes: probability.to_f / 100.0
   }.to_json)
 when 'discrete', 'numeric'
-  puts revision.extracted_content('probabilities')
+  percentiles_content = revision.extracted_content('percentiles')
+  percentiles = {}
+  percentiles_content.split("\n").each do |line|
+    key, value = line.split(': ', 2)
+    value = value.split(' ', 2).first
+    percentiles[key.to_i] = question.data.dig('question', 'scaling', 'continuous_range').first.is_a?(Float) ? value.to_f : value.to_i
+  end
+  cdf = question.continuous_cdf(percentiles).inspect
+  puts({
+    question: question_id,
+    continuous_cdf: cdf
+  }.to_json)
 when 'multiple_choice'
   probabilities_content = revision.extracted_content('probabilities')
   probabilities = {}
