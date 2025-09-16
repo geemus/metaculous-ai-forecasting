@@ -31,6 +31,7 @@ class Metaculus
       path: '/api/posts/',
       query: {
         forecast_type: %w[binary discrete multiple_choice numeric].join(','),
+        not_forecaster_id: ENV['METACULUS_BOT_ID'],
         include_description: true,
         offset: 0,
         statuses: 'open',
