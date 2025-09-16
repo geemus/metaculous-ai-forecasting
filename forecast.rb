@@ -79,46 +79,13 @@ puts research_prompt
 
 Formatador.display "\n[bold][green]# Researcher: Drafting Research…[/] "
 research_json = cache(post_id, 'research.0.json') do
-  research = Perplexity.eval({ 'role': 'user', 'content': research_prompt })
+  perplexity = Perplexity.new(model: 'sonar-deep-research')
+  research = perplexity.eval({ 'role': 'user', 'content': research_prompt })
   research.to_json
 end
 research = Perplexity::Response.new(data: JSON.parse(research_json))
 research_output = research.formatted_research
 puts research_output
-
-Formatador.display_line "\n[bold][green]# Meta: Optimizing Research[/] "
-revision_json = cache(post_id, 'research.1.json') do
-  Formatador.display_line "\n[bold][green]## Superforecaster: Research Feedback Prompt[/]"
-  research_feedback_prompt = ERB.new(<<~RESEARCH_FEEDBACK_PROMPT, trim_mode: '-').result(binding)
-    Provide feedback to your assistant on this research for one of your forecasts:
-    <research>
-    <%= research_output %>
-    </research>
-
-    - Emphasize source diversity and quality.
-
-    1. Before providing feedback, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
-    2. Provide feedback on how to improve this research starting with <feedback> on the line before and ending with </feedback> on the line after.
-  RESEARCH_FEEDBACK_PROMPT
-  puts research_feedback_prompt
-
-  Formatador.display "\n[bold][green]## Superforecaster: Reviewing Research…[/] "
-  perplexity = Perplexity.new(system: SUPERFORECASTER_SYSTEM_PROMPT)
-  research_feedback = perplexity.eval({ 'role': 'user', 'content': research_feedback_prompt })
-  puts research_feedback.extracted_content('feedback')
-
-  Formatador.display "\n[bold][green]## Researcher: Revising Research…[/] "
-  revision = Perplexity.eval(
-    { 'role': 'user', 'content': research_prompt },
-    { 'role': 'assistant', 'content': research.formatted_research },
-    { 'role': 'user', 'content': research_feedback.extracted_content('feedback') }
-  )
-
-  revision.to_json
-end
-revision = Perplexity::Response.new(data: JSON.parse(revision_json))
-revision_output = revision.formatted_research
-puts revision_output
 
 Formatador.display_line "\n[bold][green]## Superforecaster: Forecast Prompt[/]"
 shared_forecast_prompt = ERB.new(<<~SHARED_FORECAST_PROMPT, trim_mode: '-').result(binding)
@@ -128,7 +95,7 @@ shared_forecast_prompt = ERB.new(<<~SHARED_FORECAST_PROMPT, trim_mode: '-').resu
 
   Here is a summary of relevant data from your research assistant:
   <research>
-  <%= revision_output %>
+  <%= research_output %>
   </research>
 
   1. Today is <%= Time.now.strftime('%B %d, %Y') %>. Consider the time remaining before the outcome of the question will become known.

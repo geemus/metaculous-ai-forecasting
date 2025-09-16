@@ -22,7 +22,7 @@ class Perplexity
     start_time = Time.now
     excon_response = connection.post(
       body: {
-        max_tokens: 2048,
+        # max_tokens: 2048,
         model: model,
         messages: [
           {
@@ -100,9 +100,9 @@ class Perplexity
 
     def formatted_research
       ERB.new(<<~RESEARCH_OUTPUT, trim_mode: '-').result(binding)
-        <summary>
-        <%= extracted_content('summary') %>
-        </summary>
+        <research>
+        <%= stripped_content('think') %>
+        </research>
 
         <sources>
         <% data['search_results'].each do |result| -%>

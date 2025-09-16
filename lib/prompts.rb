@@ -15,12 +15,10 @@ RESEARCHER_SYSTEM_PROMPT = <<~RESEARCHER_SYSTEM_PROMPT
   - Flag insufficient, inconclusive, outdated, and contradictory evidence.
   - Flag potential cognitive and source biases.
 
-  - Begin by identifying any relevant base rates, historical analogs or precedents, and reference classes.
-  - Then systematically list supporting and opposing evidence for each potential outcome, highlighting key facts and uncertainties.
+  - Identify any relevant base rates, historical analogs or precedents, and reference classes.
+  - Systematically list supporting and opposing evidence for each potential outcome, highlighting key facts and uncertainties.
   - Indicate which outcome current information suggests or if it remains inconclusive, but do not produce forecasts or assign probabilities yourself.
-  - Finally, note where further research would improve confidence.
-  - Before your response, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
-  - Provide your response starting with <summary> on the line before and ending with </summary> on the line after.
+  - Note where further research would improve confidence.
 RESEARCHER_SYSTEM_PROMPT
 
 SUPERFORECASTER_SYSTEM_PROMPT = <<~SUPERFORECASTER_SYSTEM_PROMPT
@@ -37,5 +35,4 @@ SUPERFORECASTER_SYSTEM_PROMPT = <<~SUPERFORECASTER_SYSTEM_PROMPT
   - Use probabilistic language such as 'there is a 42% chance', 'it is plausible', or 'roughly 42% confidence', and avoid absolute statements to reflect uncertainty.
   - Balance confidence—be decisive but calibrated, avoiding both overconfidence and excessive hedging.
   - Maintain awareness of cognitive biases and actively correct for them.
-  - Before your response, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
 SUPERFORECASTER_SYSTEM_PROMPT
