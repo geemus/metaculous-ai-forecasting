@@ -103,7 +103,8 @@ revision_json = cache(post_id, 'research.1.json') do
   puts research_feedback_prompt
 
   Formatador.display "\n[bold][green]## Superforecaster: Reviewing Research…[/] "
-  research_feedback = Anthropic.eval({ 'role': 'user', 'content': research_feedback_prompt })
+  perplexity = Perplexity.new(system: SUPERFORECASTER_SYSTEM_PROMPT)
+  research_feedback = perplexity.eval({ 'role': 'user', 'content': research_feedback_prompt })
   puts research_feedback.extracted_content('feedback')
 
   Formatador.display "\n[bold][green]## Researcher: Revising Research…[/] "
@@ -132,12 +133,11 @@ shared_forecast_prompt = ERB.new(<<~SHARED_FORECAST_PROMPT, trim_mode: '-').resu
 
   1. Today is <%= Time.now.strftime('%B %d, %Y') %>. Consider the time remaining before the outcome of the question will become known.
   2. Before providing your forecast, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
+
 SHARED_FORECAST_PROMPT
 
 BINARY_FORECAST_PROMPT = <<~BINARY_FORECAST_PROMPT
-  3. Before your forecast put <forecast> on a new line.
-  4. At the end of your forecast provide a probabilistic prediction starting with <probability> on a new line before and ending with </probability> on a new line after, only include the probability itself.
-  5. After your forecast put </forecast> on a new line.
+  - At the end of your forecast provide a probabilistic prediction.
 
   After reasoning, your response should be in this format:
   <forecast>
@@ -150,9 +150,7 @@ BINARY_FORECAST_PROMPT = <<~BINARY_FORECAST_PROMPT
 BINARY_FORECAST_PROMPT
 
 NUMERIC_FORECAST_PROMPT = <<~NUMERIC_FORECAST_PROMPT
-  3. Before your forecast put <forecast> on a new line.
-  4. At the end of your forecast provide percentile predictions of values in the given units and range starting with <percentiles> on a new line before and ending with </percentiles> on a new line after, only include the values and units, do not use ranges of values.
-  5. After your forecast put </forecast> on a new line.
+  - At the end of your forecast provide percentile predictions of values in the given units and range, only include the values and units, do not use ranges of values.
 
   After reasoning, your response should be in this format:
   <forecast>
@@ -168,9 +166,7 @@ NUMERIC_FORECAST_PROMPT = <<~NUMERIC_FORECAST_PROMPT
 NUMERIC_FORECAST_PROMPT
 
 MULTIPLE_CHOICE_FORECAST_PROMPT = <<~MULTIPLE_CHOICE_FORECAST_PROMPT
-  3. Before your forecast put <forecast> on a new line.
-  4. At the end of your forecast provide your final probabilistic prediction starting with <probabilities> on a new line before and ending with </probabilities> on a new line after, only include the probability itself.
-  5. After your forecast put </forecast> on a new line.
+  - At the end of your forecast provide your probabilistic predictions for each option, only include the probability itself.
 
   After reasoning, your response should be in this format:
   <forecast>
@@ -211,7 +207,10 @@ FORECASTERS.each_with_index do |provider, index|
           when :anthropic
             Anthropic.new(temperature: 0.9) # 0-1
           when :perplexity
-            Perplexity.new(system: SUPERFORECASTER_SYSTEM_PROMPT, temperature: 1.9) # 0-2
+            Perplexity.new(
+              system: SUPERFORECASTER_SYSTEM_PROMPT,
+              temperature: 0.9
+            ) # 0-2
           end
     forecast = llm.eval({ 'role': 'user', 'content': forecast_prompt })
     forecast.to_json
@@ -230,14 +229,15 @@ forecast_delphi_prompt_template = ERB.new(<<~FORECAST_DELPHI_PROMPT, trim_mode: 
   <%- forecasts.each do |f| -%>
   <%- next if f == forecast -%>
   <forecast>
-  <%= f.stripped_content('reasoning') %>
+  <%= f.extract_content('forecast') %>
   </forecast>
   <%- end -%>
   </forecasts>
 
   1. Review these forecasts and compare each to your initial forecast. Focus on differences in probabilities, key assumptions, reasoning, and supporting evidence.
   2. Before revising your forecast, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
-  3. Include your confidence level and note any uncertainties impacting your revision.
+  3. Provide a revised forecast, include your confidence level and note any uncertainties impacting your revision.
+
 FORECAST_DELPHI_PROMPT
 
 forecast_revisions = []
@@ -259,7 +259,7 @@ FORECASTERS.each_with_index do |provider, index|
           end
     revision = llm.eval(
       { 'role': 'user', 'content': forecast_prompt },
-      { 'role': 'assistant', 'content': forecast.stripped_content('reasoning') },
+      { 'role': 'assistant', 'content': forecast.strip_content('forecast') },
       { 'role': 'user', 'content': forecast_delphi_prompt }
     )
     puts revision.content
@@ -278,14 +278,14 @@ consensus_forecast_prompt = ERB.new(<<~CONSENSUS_FORECAST_PROMPT, trim_mode: '-'
   <forecasts>
   <%- forecasts.each do |forecast| -%>
   <forecast>
-  <%= forecast.extracted_content('forecast') %>
+  <%= forecast.extract_content('forecast') %>
   </forecast>
   <%- end -%>
   </forecasts>
 
   - Summarize the consensus as a final forecast.
   - Before summarizing the consensus, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
-  - Provide your summary starting with <forecast> on the line before and ending with </forecast> on the line after.
+
 CONSENSUS_FORECAST_PROMPT
 
 consensus_prompt = prompt_with_type(question, consensus_forecast_prompt)

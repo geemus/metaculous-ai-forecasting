@@ -5,12 +5,14 @@ class Perplexity
     new.eval(*messages)
   end
 
-  attr_accessor :system, :temperature
+  attr_accessor :model, :system, :temperature
 
   def initialize(
+    model: 'sonar-reasoning',
     system: RESEARCHER_SYSTEM_PROMPT,
     temperature: 0.1
   )
+    @model = model
     @system = system
     @temperature = temperature
   end
@@ -21,7 +23,7 @@ class Perplexity
     excon_response = connection.post(
       body: {
         max_tokens: 2048,
-        model: 'sonar-pro',
+        model: model,
         messages: [
           {
             'role': 'system',
