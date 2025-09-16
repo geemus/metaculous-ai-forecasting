@@ -54,6 +54,34 @@ class Metaculus
     exit
   end
 
+  def post_comment(data)
+    Formatador.display_line "\n[bold][green]# Metaculus: Submitting Comment…[/] "
+    body = data.to_json
+    puts body
+    connection.post(
+      path: '/api/comments/create/',
+      body: data.to_json,
+      expects: 201
+    )
+  rescue Excon::Error => e
+    puts e.response.inspect
+    exit
+  end
+
+  def post_forecasts(data)
+    Formatador.display_line "\n[bold][green]# Metaculus: Submitting Forecast…[/] "
+    body = data.to_json
+    puts body
+    connection.post(
+      path: '/api/questions/forecast/',
+      body: body,
+      expects: 201
+    )
+  rescue Excon::Error => e
+    puts e.response.inspect
+    exit
+  end
+
   private
 
   def connection
@@ -62,7 +90,8 @@ class Metaculus
       expects: 200,
       headers: {
         'accept': 'application/json',
-        'authorization': "Token #{ENV['METACULUS_BOT_API_TOKEN']}"
+        'authorization': "Token #{ENV['METACULUS_BOT_API_TOKEN']}",
+        'content-type': 'application/json'
       }
     )
   end
@@ -290,49 +319,53 @@ class Metaculus
     end
 
     def submit(response)
-      case type
-      when 'binary'
-        probability = response.extracted_content('probability').to_f / 100.0
-        puts({
-          question: id,
-          probability_yes: probability
-        }.to_json)
-      when 'discrete', 'numeric'
-        percentiles = {}
-        response.extracted_content('percentiles').split("\n").each do |line|
-          key, value = line.split(': ', 2)
-          value = value.split(' ', 2).first
-          percentiles[key.to_i] = data.dig('question', 'scaling', 'continuous_range').first.is_a?(Float) ? value.to_f : value.to_i
-        end
-        puts({
-          question: id,
-          continuous_cdf: continuous_cdf(percentiles)
-        }.to_json)
-      when 'multiple_choice'
-        probabilities = {}
-        response.extracted_content('probabilities').split("\n").each do |line|
-          pair = line.split('Option ', 2).last
-          key, value = pair.split(': ', 2)
-          probabilities[key] = value.to_f / 100.0
-        end
-        puts({
-          question: id,
-          probability_yes_per_category: probabilities
-        }.to_json)
-      else
-        raise("NOT IMPLEMENTED: question#submit for #{type} questions")
-      end
+      forecast_data = case type
+                      when 'binary'
+                        probability = response.extracted_content('probability').to_f / 100.0
+                        [{
+                          question: id,
+                          probability_yes: probability
+                        }]
+                      when 'discrete', 'numeric'
+                        percentiles = {}
+                        response.extracted_content('percentiles').split("\n").each do |line|
+                          key, value = line.split(': ', 2)
+                          value = value.split(' ', 2).first
+                          percentiles[key.to_i] = data.dig('question', 'scaling', 'continuous_range').first.is_a?(Float) ? value.to_f : value.to_i
+                        end
+                        [{
+                          question: id,
+                          continuous_cdf: continuous_cdf(percentiles)
+                        }]
+                      when 'multiple_choice'
+                        probabilities = {}
+                        response.extracted_content('probabilities').split("\n").each do |line|
+                          pair = line.split('Option ', 2).last
+                          key, value = pair.split(': ', 2)
+                          probabilities[key] = value.to_f / 100.0
+                        end
+                        [{
+                          question: id,
+                          probability_yes_per_category: probabilities
+                        }]
+                      else
+                        raise("NOT IMPLEMENTED: question#submit for #{type} questions")
+                      end
+      metaculus = Metaculus.new
+      metaculus.post_forecasts(forecast_data)
       comment_text = response.extracted_content('forecast')
       %w[percentiles probability probabilities].each do |tag|
         comment_text = strip_xml(tag, comment_text)
       end
-      puts({
-        text: comment_text,
-        parent: nil,
-        included_forecast: true,
-        is_private: true,
-        on_post: post_id
-      }.to_json)
+      metaculus.post_comment(
+        {
+          text: comment_text,
+          parent: nil,
+          included_forecast: true,
+          is_private: true,
+          on_post: post_id
+        }
+      )
     end
 
     def title

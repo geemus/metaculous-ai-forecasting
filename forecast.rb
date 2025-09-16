@@ -264,4 +264,4 @@ end
 revision = Anthropic::Response.new(data: JSON.parse(consensus_json))
 
 Formatador.display_line "\n[bold][green]## Post Prep:[/]"
-puts question.submit(revision)
+question.submit(revision)
