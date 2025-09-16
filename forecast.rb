@@ -38,7 +38,7 @@ forecast_prompt = ERB.new(<<~FORECAST_PROMPT_TEMPLATE, trim_mode: '-').result(bi
   <question>
   <%= question.title %>
   </question>
-  <%- unless question.options.empty? -%>
+  <%- if question.options && !question.options.empty? -%>
   <options>
   <%= question.options %>
   </options>
