@@ -229,7 +229,7 @@ forecast_delphi_prompt_template = ERB.new(<<~FORECAST_DELPHI_PROMPT, trim_mode: 
   <%- forecasts.each do |f| -%>
   <%- next if f == forecast -%>
   <forecast>
-  <%= f.extract_content('forecast') %>
+  <%= f.extracted_content('forecast') %>
   </forecast>
   <%- end -%>
   </forecasts>
@@ -278,7 +278,7 @@ consensus_forecast_prompt = ERB.new(<<~CONSENSUS_FORECAST_PROMPT, trim_mode: '-'
   <forecasts>
   <%- forecasts.each do |forecast| -%>
   <forecast>
-  <%= forecast.extract_content('forecast') %>
+  <%= forecast.extracted_content('forecast') %>
   </forecast>
   <%- end -%>
   </forecasts>
