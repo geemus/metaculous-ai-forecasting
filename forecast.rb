@@ -259,7 +259,7 @@ FORECASTERS.each_with_index do |provider, index|
           end
     revision = llm.eval(
       { 'role': 'user', 'content': forecast_prompt },
-      { 'role': 'assistant', 'content': forecast.strip_content('forecast') },
+      { 'role': 'assistant', 'content': forecast.extracted_content('forecast') },
       { 'role': 'user', 'content': forecast_delphi_prompt }
     )
     puts revision.content
