@@ -119,6 +119,102 @@ class Metaculus
                          end
     end
 
+    def continuous_cdf(percentiles)
+      x_values = cdf_xaxis
+      y_values = []
+
+      data = percentiles.dup
+
+      # adjust any values exactly at bounds
+      range_size = (scaling['range_max'] - scaling['range_min']).abs
+      buffer = range_size > 100 ? 1 : 0.01 * range_size
+      data.each do |key, value|
+        if !scaling['open_lower_bound'] && value <= scaling['range_min'] + buffer
+          data[key] = scaling['range_min'] + buffer
+        end
+        if !scaling['open_upper_bound'] && value >= scaling['range_max'] - buffer
+          data[key] = scaling['range_max'] - buffer
+        end
+      end
+
+      # set cdf values outside of range
+      if scaling['open_lower_bound']
+        if scaling['range_min'] < data[data.keys.min]
+          data[(0.5 * data.keys.min).to_i] = scaling['range_min']
+        end
+      else
+        data[0.0] = scaling['range_min']
+      end
+      if scaling['open_upper_bound']
+        if scaling['range_max'] > data[data.keys.max]
+          data[(100 - (0.5 * (100 - data.keys.max))).to_i] = scaling['range_max']
+        end
+      else
+        data[100.0] = scaling['range_max']
+      end
+
+      # normalize percentiles
+      normalized_percentiles = {}
+      data.each do |key, value|
+        normalized_percentiles[key.to_f / 100] = value
+      end
+
+      # swap to map specific values to probabilities
+      data = normalized_percentiles.invert
+      known_x = data.keys.sort
+
+      x_values.each do |x|
+        if known_x.include?(x)
+          y_values.append(data[x])
+        elsif x < known_x.first
+          y_values.append(data[known_x.first])
+        elsif x > known_x.last
+          y_values.append(data[known_x.last])
+        else
+          previous_x = known_x.first
+          next_x = known_x.last
+          known_x.each do |kx|
+            next_x = kx
+            break if next_x > x
+
+            previous_x = kx
+          end
+          previous_y = data[previous_x]
+          next_y = data[next_x]
+
+          y = previous_y + (x - previous_x) * (next_y - previous_y) / (next_x - previous_x)
+          y_values.append(y)
+        end
+      end
+
+      # standardize - see: https://www.metaculus.com/api/
+      # - no mass outside closed bounds (scaling accordingly)
+      # - at least minimum amount of mass outside open bounds
+      # - increasing by at least minimum amount (0.01 / 200 = 0.0005)
+      # - TODO: add smoothing for spiky CDFs (exceed change of 0.59)
+      scale_lower_to = scaling['open_lower_bound'] ? 0.0 : y_values.first
+      scale_upper_to = scaling['open_upper_bound'] ? 1.0 : y_values.last
+      rescaled_inbound_mass = scale_upper_to - scale_lower_to
+
+      y_values.each_with_index do |y, i|
+        location = i / (y_values.length - 1)
+        rescaled = (y - scale_lower_to) / rescaled_inbound_mass
+        y_values[i] = if scaling['open_lower_bound'] && scaling['open_upper_bound']
+                        0.988 * rescaled + 0.01 * location + 0.001
+                      elsif scaling['open_lower_bound']
+                        0.989 * rescaled + 0.01 * location + 0.001
+                      elsif scaling['open_upper_bound']
+                        0.989 * rescaled + 0.01 * location
+                      else
+                        0.99 * rescaled + 0.01 * location
+                      end
+      end
+      # round to avoid floating point errors
+      y_values.map! { |y| y.round(10) }
+
+      y_values
+    end
+
     def lower_bound
       @lower_bound ||= scaling['nominal_min'] || scaling['range_min']
     end
@@ -170,6 +266,10 @@ class Metaculus
     end
 
     private
+
+    def cdf_xaxis
+      @cdf_xaxis ||= scaling['continuous_range']
+    end
 
     def latest_aggregations
       @latest_aggregations ||= data.dig('question', 'aggregations', 'recency_weighted', 'latest')
