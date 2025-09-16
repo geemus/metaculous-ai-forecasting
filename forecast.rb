@@ -23,15 +23,15 @@ Thread.current[:formatador].instance_variable_set(:@indent, 0)
 FORECASTERS = 4
 
 # metaculus test questions: (binary: 578, numeric: 14333, multiple-choice: 22427, discrete: 38880)
-question_id = ARGV[0] || raise("ENV['QUESTION_ID'] is required")
+post_id = ARGV[0] || raise('post id argument is required')
 
-FileUtils.mkdir_p("./tmp/#{question_id}") # create cache directory if needed
+FileUtils.mkdir_p("./tmp/#{post_id}") # create cache directory if needed
 
-Formatador.display "\n[bold][green]# Metaculus: Getting Question(#{question_id})…[/] "
-question_json = cache(question_id, 'question.json') do
-  Metaculus.get_post(question_id).to_json
+Formatador.display "\n[bold][green]# Metaculus: Getting Question(#{post_id})…[/] "
+post_json = cache(post_id, 'post.json') do
+  Metaculus.get_post(post_id).to_json
 end
-question = Metaculus::Question.new(data: JSON.parse(question_json))
+question = Metaculus::Question.new(data: JSON.parse(post_json))
 
 forecast_prompt = ERB.new(<<~FORECAST_PROMPT_TEMPLATE, trim_mode: '-').result(binding)
   Forecast Question:
@@ -73,7 +73,7 @@ research_prompt = forecast_prompt
 puts research_prompt
 
 Formatador.display "\n[bold][green]# Researcher: Drafting Research…[/] "
-research_json = cache(question_id, 'research.0.json') do
+research_json = cache(post_id, 'research.0.json') do
   research = Perplexity.eval({ 'role': 'user', 'content': research_prompt })
   research.to_json
 end
@@ -82,7 +82,7 @@ research_output = research.formatted_research
 puts research_output
 
 Formatador.display_line "\n[bold][green]# Meta: Optimizing Research[/] "
-revision_json = cache(question_id, 'research.1.json') do
+revision_json = cache(post_id, 'research.1.json') do
   Formatador.display_line "\n[bold][green]## Superforecaster: Research Feedback Prompt[/]"
   research_feedback_prompt = ERB.new(<<~RESEARCH_FEEDBACK_PROMPT, trim_mode: '-').result(binding)
     Provide feedback to your assistant on this research for one of your forecasts:
@@ -183,7 +183,7 @@ forecast_prompt = prompt_with_type(question, shared_forecast_prompt)
 forecasts = []
 FORECASTERS.times do |index|
   Formatador.display "\n[bold][green]# Superforecaster[#{index}]: Forecasting…[/] "
-  forecast_json = cache(question_id, "#{index}.forecast.json") do
+  forecast_json = cache(post_id, "#{index}.forecast.json") do
     anthropic = Anthropic.new(temperature: 0.9)
     forecast = anthropic.eval({ 'role': 'user', 'content': forecast_prompt })
     forecast.to_json
@@ -214,7 +214,7 @@ forecasts.each_with_index do |forecast, index|
   forecast_delphi_prompt = forecast_delphi_prompt_template.result(binding)
   forecast_delphi_prompt = prompt_with_type(question, forecast_delphi_prompt)
 
-  forecast_revision_json = cache(question_id, "#{index}.forecast.1.json") do
+  forecast_revision_json = cache(post_id, "#{index}.forecast.1.json") do
     Formatador.display "\n[bold][green]## Superforecaster[#{index}]: Revising Forecast…[/] "
     revision = Anthropic.eval(
       { 'role': 'user', 'content': forecast_prompt },
@@ -244,10 +244,11 @@ CONSENSUS_FORECAST_PROMPT
 
 consensus_prompt = prompt_with_type(question, consensus_forecast_prompt)
 Formatador.display "\n[bold][green]# Superforecaster: Summarizing Consensus…[/] "
-consensus_json = cache(question_id, 'consensus.json') do
+consensus_json = cache(post_id, 'consensus.json') do
   consensus = Anthropic.eval({ 'role': 'user', 'content': consensus_prompt })
   consensus.to_json
 end
 revision = Anthropic::Response.new(data: JSON.parse(consensus_json))
+
 Formatador.display_line "\n[bold][green]## Post Prep:[/]"
 puts question.submit(revision)
