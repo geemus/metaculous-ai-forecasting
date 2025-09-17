@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       post_id:
-        description: 'Metaculus post id to generate forecast for.'
+        description: 'Metaculus post id to forecast:'
         default: '578'
         type: string
 
