@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 
 class Anthropic
-  attr_accessor :system, :temperature
+  attr_accessor :model, :system, :temperature
 
   def initialize(
+    model: 'claude-sonnet-4-20250514',
     system: SUPERFORECASTER_SYSTEM_PROMPT,
     temperature: 0.1
   )
+    @model = model
     @system = system
     @temperature = temperature
   end
@@ -17,7 +19,7 @@ class Anthropic
     excon_response = connection.post(
       body: {
         # model: 'claude-opus-4-1-20250805',
-        model: 'claude-sonnet-4-20250514',
+        model: model,
         max_tokens: 2048,
         messages: messages,
         system: system,
