@@ -1,4 +1,4 @@
-name: Forecast Test
+name: Minibench Forecast
 
 on:
   workflow_dispatch:
