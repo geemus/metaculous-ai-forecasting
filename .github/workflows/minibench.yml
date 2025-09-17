@@ -26,14 +26,14 @@ jobs:
         env:
           METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
       - if: steps.ids.outputs.POST_IDS != ''
-        run: ./research.rb ${{ steps.ids.POST_IDS }}
+        run: ./research.rb ${{ steps.ids.outputs.POST_IDS }}
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
           METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
       - if: steps.ids.outputs.POST_IDS != ''
-        run: ./forecast.rb ${{ steps.ids.POST_IDS }}
+        run: ./forecast.rb ${{ steps.ids.outputs.POST_IDS }}
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
