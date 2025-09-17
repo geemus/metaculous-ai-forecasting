@@ -138,11 +138,11 @@ FORECASTERS.each_with_index do |provider, index|
     forecast.to_json
   end
   @forecasts << case provider
-               when :anthropic
-                 Anthropic::Response.new(data: JSON.parse(forecast_json))
-               when :perplexity
-                 Perplexity::Response.new(data: JSON.parse(forecast_json))
-               end
+                when :anthropic
+                  Anthropic::Response.new(data: JSON.parse(forecast_json))
+                when :perplexity
+                  Perplexity::Response.new(data: JSON.parse(forecast_json))
+                end
 end
 
 forecast_delphi_prompt_template = ERB.new(<<~FORECAST_DELPHI_PROMPT, trim_mode: '-')
