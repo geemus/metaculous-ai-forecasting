@@ -1,10 +1,6 @@
 # frozen_string_literal: true
 
 class Perplexity
-  def self.eval(*messages)
-    new.eval(*messages)
-  end
-
   attr_accessor :model, :system, :temperature
 
   def initialize(

@@ -1,10 +1,6 @@
 # frozen_string_literal: true
 
 class Anthropic
-  def self.eval(*messages)
-    new.eval(*messages)
-  end
-
   attr_accessor :system, :temperature
 
   def initialize(
