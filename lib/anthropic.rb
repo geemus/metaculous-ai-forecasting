@@ -34,7 +34,7 @@ class Anthropic
     response
   rescue Excon::Error => e
     puts e
-    exit
+    exit(1)
   end
 
   private

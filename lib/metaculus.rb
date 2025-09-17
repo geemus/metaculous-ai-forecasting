@@ -25,7 +25,7 @@ class Metaculus
     Question.new(data: JSON.parse(excon_response.body))
   rescue Excon::Error => e
     puts e.response.inspect
-    exit
+    exit(1)
   end
 
   def self.list_tournament_questions(tournament_id)
@@ -58,7 +58,7 @@ class Metaculus
     questions
   rescue Excon::Error => e
     puts e.response.inspect
-    exit
+    exit(1)
   end
 
   def post_comment(data)
@@ -72,7 +72,7 @@ class Metaculus
     )
   rescue Excon::Error => e
     puts e.response.inspect
-    exit
+    exit(1)
   end
 
   def post_forecasts(data)
@@ -86,7 +86,7 @@ class Metaculus
     )
   rescue Excon::Error => e
     puts e.response.inspect
-    exit
+    exit(1)
   end
 
   private
