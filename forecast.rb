@@ -155,7 +155,7 @@ end
 @forecasts = []
 FORECASTERS.each_with_index do |provider, index|
   Formatador.display "\n[bold][green]# Superforecaster[#{index}: #{provider}]: Forecasting…[/] "
-  forecast_json = cache(post_id, "/forecasts/forecast.#{index}.json") do
+  forecast_json = cache(post_id, "forecasts/forecast.#{index}.json") do
     llm = case provider
           when :anthropic
             Anthropic.new(temperature: 0.9) # 0-1
@@ -182,7 +182,7 @@ forecast_delphi_prompt_template = ERB.new(<<~FORECAST_DELPHI_PROMPT, trim_mode: 
   Review these predictions for the same question from other superforecasters.
   <forecasts>
   <%- @forecasts.each do |f| -%>
-  <%- next if f == forecast -%>
+  <%- next if f == @forecast -%>
   <forecast>
   <%= f.content %>
   </forecast>
@@ -200,7 +200,7 @@ FORECAST_DELPHI_PROMPT
 forecast_revisions = []
 Formatador.display_line "\n[bold][green]# Meta: Optimizing Forecasts[/] "
 FORECASTERS.each_with_index do |provider, index|
-  forecast = @forecasts[index]
+  @forecast = @forecasts[index]
 
   forecast_revision_json = cache(post_id, "forecasts/revision.#{index}.json") do
     Formatador.display "\n[bold][green]## Superforecaster[#{index}: #{provider}]: Revising Forecast…[/] "
@@ -210,10 +210,11 @@ FORECASTERS.each_with_index do |provider, index|
           when :perplexity
             Perplexity.new(system: SUPERFORECASTER_SYSTEM_PROMPT)
           end
+    forecast_prompt = prompt_with_type(llm, question, shared_forecast_prompt_template)
     forecast_delphi_prompt = prompt_with_type(llm, question, forecast_delphi_prompt_template)
     revision = llm.eval(
       { 'role': 'user', 'content': forecast_prompt },
-      { 'role': 'assistant', 'content': forecast.content },
+      { 'role': 'assistant', 'content': @forecast.content },
       { 'role': 'user', 'content': forecast_delphi_prompt }
     )
     puts revision.content
@@ -230,7 +231,7 @@ end
 consensus_forecast_prompt_template = ERB.new(<<~CONSENSUS_FORECAST_PROMPT_TEMPLATE, trim_mode: '-')
   Review these predictions from other superforecasters.
   <forecasts>
-  <%- forecasts.each do |forecast| -%>
+  <%- @forecasts.each do |forecast| -%>
   <forecast>
   <%= forecast.content %>
   </forecast>
