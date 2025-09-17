@@ -31,6 +31,7 @@ FORECASTERS = %i[
 post_id = ARGV[0] || raise('post id argument is required')
 
 FileUtils.mkdir_p("./tmp/#{post_id}") # create cache directory if needed
+FileUtils.mkdir_p("./tmp/#{post_id}/forecasts") # create cache directory if needed
 
 Formatador.display "\n[bold][green]# Metaculus: Getting Post(#{post_id})…[/] "
 post_json = cache(post_id, 'post.json') do
@@ -104,23 +105,16 @@ SHARED_FORECAST_PROMPT_TEMPLATE
 BINARY_FORECAST_PROMPT = <<~BINARY_FORECAST_PROMPT
   - At the end of your forecast provide a probabilistic prediction.
 
-  Your response should be in this format:
-  <forecast>
-  {forecast}
-
+  Your prediction should be in this format:
   <probability>
   X%
   </probability>
-  </forecast>
 BINARY_FORECAST_PROMPT
 
 NUMERIC_FORECAST_PROMPT = <<~NUMERIC_FORECAST_PROMPT
   - At the end of your forecast provide percentile predictions of values in the given units and range, only include the values and units, do not use ranges of values.
 
-  Your response should be in this format:
-  <forecast>
-  {forecast}
-
+  Your predictions should be in this format:
   <percentiles>
   Percentile 10: A {unit}
   Percentile 20: B {unit}
@@ -129,23 +123,18 @@ NUMERIC_FORECAST_PROMPT = <<~NUMERIC_FORECAST_PROMPT
   Percentile 80: E {unit}
   Percentile 90: F {unit}
   </percentiles>
-  </forecast>
 NUMERIC_FORECAST_PROMPT
 
 MULTIPLE_CHOICE_FORECAST_PROMPT = <<~MULTIPLE_CHOICE_FORECAST_PROMPT
   - At the end of your forecast provide your probabilistic predictions for each option, only include the probability itself.
 
-  Your response should be in this format:
-  <forecast>
-  {forecost}
-
+  Your predictions should be in this format:
   <probabilities>
   Option "A": A%
   Option "B": B%
   ...
   Option "N": N%
   </probabilities>
-  </forecast>
 MULTIPLE_CHOICE_FORECAST_PROMPT
 
 def prompt_with_type(llm, question, prompt_template)
@@ -191,14 +180,14 @@ end
 
 forecast_delphi_prompt_template = ERB.new(<<~FORECAST_DELPHI_PROMPT, trim_mode: '-')
   Review these predictions for the same question from other superforecasters.
-  <predictions>
+  <forecasts>
   <%- @forecasts.each do |f| -%>
   <%- next if f == forecast -%>
-  <prediction>
+  <forecast>
   <%= f.content %>
-  </prediction>
+  </forecast>
   <%- end -%>
-  </predictions>
+  </forecasts>
 
   1. Review these forecasts and compare each to your initial forecast. Focus on differences in probabilities, key assumptions, reasoning, and supporting evidence.
   2. Before revising your forecast, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
@@ -238,13 +227,13 @@ end
 
 consensus_forecast_prompt_template = ERB.new(<<~CONSENSUS_FORECAST_PROMPT_TEMPLATE, trim_mode: '-')
   Review these predictions from other superforecasters.
-  <predictions>
+  <forecasts>
   <%- forecasts.each do |forecast| -%>
-  <prediction>
+  <forecast>
   <%= forecast.content %>
-  </prediction>
+  </forecast>
   <%- end -%>
-  </predictions>
+  </forecasts>
 
   - Summarize the consensus as a final forecast.
   - Before summarizing the consensus, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
