@@ -166,7 +166,7 @@ end
 @forecasts = []
 FORECASTERS.each_with_index do |provider, index|
   Formatador.display "\n[bold][green]# Superforecaster[#{index}: #{provider}]: Forecasting…[/] "
-  forecast_json = cache(post_id, "#{index}.forecast.json") do
+  forecast_json = cache(post_id, "/forecasts/forecast.#{index}.json") do
     llm = case provider
           when :anthropic
             Anthropic.new(temperature: 0.9) # 0-1
@@ -211,10 +211,7 @@ Formatador.display_line "\n[bold][green]# Meta: Optimizing Forecasts[/] "
 FORECASTERS.each_with_index do |provider, index|
   forecast = forecasts[index]
 
-  forecast_delphi_prompt = forecast_delphi_prompt_template.result(binding)
-  forecast_delphi_prompt = prompt_with_type(question, forecast_delphi_prompt)
-
-  forecast_revision_json = cache(post_id, "#{index}.forecast.1.json") do
+  forecast_revision_json = cache(post_id, "forecasts/revision.#{index}.json") do
     Formatador.display "\n[bold][green]## Superforecaster[#{index}: #{provider}]: Revising Forecast…[/] "
     llm = case provider
           when :anthropic
