@@ -18,7 +18,7 @@ jobs:
           ruby-version: '3.4'
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
       - run: |
-        ./forecast.rb 578
+          ./forecast.rb 578
         env:
           ANTHROPIC_API_KEY: $${{ secrets.ANTHROPIC_API_KEY }}
           METACULUS_BOT_API_TOKEN: $${ secrets.METACULUS_BOT_API_TOKEN }}
