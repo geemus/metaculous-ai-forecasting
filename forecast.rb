@@ -38,6 +38,11 @@ post_json = cache(post_id, 'post.json') do
 end
 question = Metaculus::Question.new(data: JSON.parse(post_json))
 
+if question.existing_forecast? && ![578, 14_333, 22_427, 38_880].include?(post_id)
+  Formatador.display "\n[bold][green]# Skipping: Already Submitted Forecast for #{post_id}[/] "
+  exit
+end
+
 @forecast_prompt = FORECAST_PROMPT_TEMPLATE.result(binding)
 puts @forecast_prompt
 
