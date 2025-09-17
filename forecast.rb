@@ -190,15 +190,17 @@ forecast_delphi_prompt_template = ERB.new(<<~FORECAST_DELPHI_PROMPT, trim_mode: 
   </forecasts>
 
   1. Review these forecasts and compare each to your initial forecast. Focus on differences in probabilities, key assumptions, reasoning, and supporting evidence.
-  2. Before revising your forecast, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
-  3. Provide a revised forecast, include your confidence level and note any uncertainties impacting your revision.
+  2. Provide a revised forecast, include your confidence level and note any uncertainties impacting your revision.
+  <%- unless %w[sonar-reasoning sonar-reasoning-pro sonar-deep-research].include?(llm.model) -%>
+  3. Before revising your forecast, show step-by-step reasoning in clear, logical order starting with <think> on the line before and ending with </think> on the line after.
+  <%- end %>
 
 FORECAST_DELPHI_PROMPT
 
 forecast_revisions = []
 Formatador.display_line "\n[bold][green]# Meta: Optimizing Forecasts[/] "
 FORECASTERS.each_with_index do |provider, index|
-  forecast = forecasts[index]
+  forecast = @forecasts[index]
 
   forecast_revision_json = cache(post_id, "forecasts/revision.#{index}.json") do
     Formatador.display "\n[bold][green]## Superforecaster[#{index}: #{provider}]: Revising Forecast…[/] "
