@@ -36,3 +36,39 @@ SUPERFORECASTER_SYSTEM_PROMPT = <<~SUPERFORECASTER_SYSTEM_PROMPT
   - Balance confidence—be decisive but calibrated, avoiding both overconfidence and excessive hedging.
   - Maintain awareness of cognitive biases and actively correct for them.
 SUPERFORECASTER_SYSTEM_PROMPT
+
+FORECAST_PROMPT_TEMPLATE = ERB.new(<<~FORECAST_PROMPT_TEMPLATE, trim_mode: '-')
+  Forecast Question:
+  <question>
+  <%= question.title %>
+  </question>
+  <%- if question.options && !question.options.empty? -%>
+  <options>
+  <%= question.options %>
+  </options>
+  <%- end -%>
+
+  Forecast Background:
+  <background>
+  <%= question.background %>
+  </background>
+  <%- unless question.metadata_content.empty? -%>
+
+  Question Metadata:
+  <metadata>
+  <%= question.metadata_content %>
+  </metadata>
+  <%- end -%>
+
+  Criteria for determining forecast outcome, which have not yet been met:
+  <criteria>
+  <%= question.criteria_content %>
+  </criteria>
+  <%- unless question.aggregate_content.empty? -%>
+
+  Existing Metaculus Forecasts Aggregate:
+  <aggregate>
+  <%= question.aggregate_content %>
+  </aggregate>
+  <%- end -%>
+FORECAST_PROMPT_TEMPLATE

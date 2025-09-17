@@ -39,48 +39,13 @@ post_json = cache(post_id, 'post.json') do
 end
 question = Metaculus::Question.new(data: JSON.parse(post_json))
 
-@forecast_prompt = ERB.new(<<~FORECAST_PROMPT_TEMPLATE, trim_mode: '-').result(binding)
-  Forecast Question:
-  <question>
-  <%= question.title %>
-  </question>
-  <%- if question.options && !question.options.empty? -%>
-  <options>
-  <%= question.options %>
-  </options>
-  <%- end -%>
-
-  Forecast Background:
-  <background>
-  <%= question.background %>
-  </background>
-  <%- unless question.metadata_content.empty? -%>
-
-  Question Metadata:
-  <metadata>
-  <%= question.metadata_content %>
-  </metadata>
-  <%- end -%>
-
-  Criteria for determining forecast outcome, which have not yet been met:
-  <criteria>
-  <%= question.criteria_content %>
-  </criteria>
-  <%- unless question.aggregate_content.empty? -%>
-
-  Existing Metaculus Forecasts Aggregate:
-  <aggregate>
-  <%= question.aggregate_content %>
-  </aggregate>
-  <%- end -%>
-FORECAST_PROMPT_TEMPLATE
+@forecast_prompt = FORECAST_PROMPT_TEMPLATE.result(binding)
 puts @forecast_prompt
 
-@research_prompt = @forecast_prompt
 Formatador.display "\n[bold][green]# Researcher: Drafting Research…[/] "
-research_json = cache(post_id, 'research.0.json') do
+research_json = cache(post_id, 'research.json') do
   perplexity = Perplexity.new(model: 'sonar-deep-research')
-  research = perplexity.eval({ 'role': 'user', 'content': @research_prompt })
+  research = perplexity.eval({ 'role': 'user', 'content': @forecast_prompt })
   research.to_json
 end
 research = Perplexity::Response.new(data: JSON.parse(research_json))
