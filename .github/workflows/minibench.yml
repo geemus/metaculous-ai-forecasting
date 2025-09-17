@@ -2,6 +2,8 @@ name: Minibench Forecast
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "*/15 * * * *" # run every 15 minutes
 
 # prevent parallel runs
 concurrency:
