@@ -116,12 +116,17 @@ NUMERIC_FORECAST_PROMPT = <<~NUMERIC_FORECAST_PROMPT
 
   Your predictions should be in this format:
   <percentiles>
-  Percentile 10: A {unit}
-  Percentile 20: B {unit}
-  Percentile 40: C {unit}
-  Percentile 60: D {unit}
-  Percentile 80: E {unit}
-  Percentile 90: F {unit}
+  Percentile  5: A {unit}
+  Percentile 10: B {unit}
+  Percentile 20: C {unit}
+  Percentile 30: D {unit}
+  Percentile 40: E {unit}
+  Percentile 50: F {unit}
+  Percentile 60: G {unit}
+  Percentile 70: H {unit}
+  Percentile 80: I {unit}
+  Percentile 90: J {unit}
+  Percentile 95: K {unit}
   </percentiles>
 NUMERIC_FORECAST_PROMPT
 
@@ -244,13 +249,14 @@ consensus_forecast_prompt_template = ERB.new(<<~CONSENSUS_FORECAST_PROMPT_TEMPLA
 CONSENSUS_FORECAST_PROMPT_TEMPLATE
 
 Formatador.display "\n[bold][green]# Superforecaster: Summarizing Consensus…[/] "
-consensus_json = cache(post_id, 'consensus.json') do
+consensus_json = cache(post_id, 'forecasts/consensus.json') do
   llm = Anthropic.new
   consensus_prompt = prompt_with_type(llm, question, consensus_forecast_prompt_template)
   consensus = llm.eval({ 'role': 'user', 'content': consensus_prompt })
   consensus.to_json
 end
-revision = Anthropic::Response.new(data: JSON.parse(consensus_json))
+consensus = Anthropic::Response.new(data: JSON.parse(consensus_json))
+puts consensus.content
 
 Formatador.display_line "\n[bold][green]## Post Prep:[/]"
-question.submit(revision)
+question.submit(consensus)

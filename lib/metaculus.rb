@@ -209,14 +209,14 @@ class Metaculus
       # set cdf values outside of range
       if scaling['open_lower_bound']
         if scaling['range_min'] < data[data.keys.min]
-          data[(0.5 * data.keys.min).to_i] = scaling['range_min']
+          data[0.01 * data.keys.min] = scaling['range_min']
         end
       else
         data[0.0] = scaling['range_min']
       end
       if scaling['open_upper_bound']
         if scaling['range_max'] > data[data.keys.max]
-          data[(100 - (0.5 * (100 - data.keys.max))).to_i] = scaling['range_max']
+          data[100 - (0.01 * (100 - data.keys.max))] = scaling['range_max']
         end
       else
         data[100.0] = scaling['range_max']
@@ -331,6 +331,7 @@ class Metaculus
                         percentiles = {}
                         response.extracted_content('percentiles').split("\n").each do |line|
                           key, value = line.split(': ', 2)
+                          key = key.split('Percentile ', 2).last
                           value = value.split(' ', 2).first
                           percentiles[key.to_i] = data.dig('question', 'scaling', 'continuous_range').first.is_a?(Float) ? value.to_f : value.to_i
                         end
@@ -355,7 +356,7 @@ class Metaculus
                       end
       metaculus = Metaculus.new
       metaculus.post_forecasts(forecast_data)
-      comment_text = response.extracted_content('forecast')
+      comment_text = response.stripped_content('think')
       %w[percentiles probability probabilities].each do |tag|
         comment_text = strip_xml(tag, comment_text)
       end
