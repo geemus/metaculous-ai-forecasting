@@ -13,6 +13,14 @@ def cache(question_id, path, &block)
   end
 end
 
+def cache_read!(question_id, path)
+  tmp_path = "./tmp/#{question_id}/#{path}"
+  raise "Cache Not Found: `#{tmp_path}`" unless File.exist?(tmp_path)
+
+  Formatador.display_line "[light_green](Cache @ `#{tmp_path})[/]`"
+  File.read(tmp_path)
+end
+
 # https://github.com/anthropics/anthropic-cookbook/blob/main/patterns/agents/util.py
 # https://ruby-doc.org/3.4.1/String.html#method-i-match
 def extract_xml(tag, text)

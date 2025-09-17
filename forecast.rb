@@ -42,12 +42,8 @@ question = Metaculus::Question.new(data: JSON.parse(post_json))
 @forecast_prompt = FORECAST_PROMPT_TEMPLATE.result(binding)
 puts @forecast_prompt
 
-Formatador.display "\n[bold][green]# Researcher: Drafting Research…[/] "
-research_json = cache(post_id, 'research.json') do
-  perplexity = Perplexity.new(model: 'sonar-deep-research')
-  research = perplexity.eval({ 'role': 'user', 'content': @forecast_prompt })
-  research.to_json
-end
+Formatador.display "\n[bold][green]# Researcher: Loading Cached Research[/] "
+research_json = cache_read!(post_id, 'research.json')
 research = Perplexity::Response.new(data: JSON.parse(research_json))
 @research_output = research.formatted_research
 puts @research_output
