@@ -105,6 +105,8 @@ class Metaculus
 
     def aggregate_content
       @aggregate_content ||= begin
+        return '' unless latest_aggregations
+
         content = []
         content << "Forecaster Count: #{latest_forecaster_count}"
         if type == 'multiple_choice'
