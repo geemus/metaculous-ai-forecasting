@@ -97,7 +97,7 @@ shared_forecast_prompt_template = ERB.new(<<~SHARED_FORECAST_PROMPT_TEMPLATE, tr
 
   1. Today is <%= Time.now.strftime('%B %d, %Y') %>. Consider the time remaining before the outcome of the question will become known.
   <%- unless %w[sonar-reasoning sonar-reasoning-pro sonar-deep-research].include?(llm.model) -%>
-  2. Before providing your forecast, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
+  2. Before providing your forecast, show step-by-step reasoning in clear, logical order starting with <think> on the line before and ending with </think> on the line after.
   <%- end -%>
 
 SHARED_FORECAST_PROMPT_TEMPLATE
@@ -238,7 +238,7 @@ consensus_forecast_prompt_template = ERB.new(<<~CONSENSUS_FORECAST_PROMPT_TEMPLA
   </forecasts>
 
   - Summarize the consensus as a final forecast.
-  - Before summarizing the consensus, show step-by-step reasoning in clear, logical order starting with <reasoning> on the line before and ending with </reasoning> on the line after.
+  - Before summarizing the consensus, show step-by-step reasoning in clear, logical order starting with <think> on the line before and ending with </think> on the line after.
 
 CONSENSUS_FORECAST_PROMPT_TEMPLATE
 
