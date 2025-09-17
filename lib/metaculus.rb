@@ -33,7 +33,6 @@ class Metaculus
   end
 
   def list_tournament_questions(tournament_id)
-    start_time = Time.now
     excon_response = connection.get(
       path: '/api/posts/',
       query: {
@@ -44,13 +43,6 @@ class Metaculus
         statuses: 'open',
         tournaments: [tournament_id]
       }
-    )
-    duration = Time.now - start_time
-    Formatador.display_line(
-      format(
-        '[light_green](in %<minutes>dm %<seconds>ds)[/]',
-        minutes: duration / 60, seconds: duration % 60
-      )
     )
     data = JSON.parse(excon_response.body)
     questions = data['results'].map { |datum| Question.new(data: datum) }
