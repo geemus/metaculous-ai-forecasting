@@ -117,15 +117,17 @@ BINARY_FORECAST_PROMPT
 NUMERIC_FORECAST_PROMPT = <<~NUMERIC_FORECAST_PROMPT
   - At the end of your forecast provide percentile predictions of values in the given units and range, only include the values and units, do not use ranges of values.
 
-  After reasoning, your response should be in this format:
+  Your response should be in this format:
   <forecast>
   {forecast}
 
   <percentiles>
-  Percentile A: A {unit}
-  Percentile B: B {unit}
-  ...
-  Percentile N: N {unit}
+  Percentile 10: A {unit}
+  Percentile 20: B {unit}
+  Percentile 40: C {unit}
+  Percentile 60: D {unit}
+  Percentile 80: E {unit}
+  Percentile 90: F {unit}
   </percentiles>
   </forecast>
 NUMERIC_FORECAST_PROMPT
@@ -133,7 +135,7 @@ NUMERIC_FORECAST_PROMPT
 MULTIPLE_CHOICE_FORECAST_PROMPT = <<~MULTIPLE_CHOICE_FORECAST_PROMPT
   - At the end of your forecast provide your probabilistic predictions for each option, only include the probability itself.
 
-  After reasoning, your response should be in this format:
+  Your response should be in this format:
   <forecast>
   {forecost}
 
