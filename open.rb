@@ -1,5 +1,4 @@
 #!/usr/bin/env ruby
-
 # frozen_string_literal: true
 
 # metaculus test questions: (binary: 578, numeric: 14333, multiple-choice: 22427, discrete: 38880)
