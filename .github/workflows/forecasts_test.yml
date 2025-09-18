@@ -91,3 +91,9 @@ jobs:
         with:
           ruby-version: '3.4'
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+      - run: |
+          echo "# Results"
+          echo "```json" >> $GITHUB_STEP_SUMMARY
+          echo "# $(cat tmp/${{ inputs.post_id }}/consensus/forecast.json | jq -r '.')" >> $GITHUB_STEP_SUMMARY
+          echo "```" >> $GITHUB_STEP_SUMMARY
+          echo "$(cat tmp/${{ inputs.post_id }}/consensus/comment.json | jq -r '.text')" >> $GITHUB_STEP_SUMMARY

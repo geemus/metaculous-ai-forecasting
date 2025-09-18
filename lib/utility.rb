@@ -18,6 +18,11 @@ def cache_read!(question_id, path)
   File.read(tmp_path)
 end
 
+def cache_write(question_id, path, data)
+  tmp_path = "./tmp/#{question_id}/#{path}"
+  File.write(tmp_path, data)
+end
+
 # https://github.com/anthropics/anthropic-cookbook/blob/main/patterns/agents/util.py
 # https://ruby-doc.org/3.4.1/String.html#method-i-match
 def extract_xml(tag, text)
