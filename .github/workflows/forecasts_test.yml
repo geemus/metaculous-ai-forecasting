@@ -30,10 +30,10 @@ jobs:
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
       - uses: actions/upload-artifact@v4
         with:
-          path: tmp/${{ inputs.post_id }}/research.json
+          path: tmp
       - run: |
-          echo "# $(cat tmp/${{ inputs.post_id }}/post.json | jq '.title')" >> $GITHUB_STEP_SUMMARY
-          echo "$(cat tmp/${{ inputs.post_id }}/post.json | jq '.question.description')" >> $GITHUB_STEP_SUMMARY
+          echo "# $(cat tmp/${{ inputs.post_id }}/post.json | jq -r '.title')" >> $GITHUB_STEP_SUMMARY
+          echo "$(cat tmp/${{ inputs.post_id }}/post.json | jq -r '.question.description')" >> $GITHUB_STEP_SUMMARY
 
   forecast:
     needs: research
