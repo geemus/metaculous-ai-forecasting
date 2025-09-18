@@ -65,10 +65,11 @@ FORECAST_PROMPT_TEMPLATE = ERB.new(<<~FORECAST_PROMPT_TEMPLATE, trim_mode: '-')
   <%= question.criteria_content %>
   </criteria>
   <%- unless question.aggregate_content.empty? -%>
-
+  <%- if false -%>
   Existing Metaculus Forecasts Aggregate:
   <aggregate>
   <%= question.aggregate_content %>
   </aggregate>
+  <%- end -%>
   <%- end -%>
 FORECAST_PROMPT_TEMPLATE
