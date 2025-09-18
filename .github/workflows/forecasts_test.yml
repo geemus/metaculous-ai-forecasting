@@ -1,4 +1,4 @@
-name: Forecast Test
+name: Forecasts Test
 
 on:
   workflow_dispatch:
@@ -28,7 +28,7 @@ jobs:
           METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
           METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
-      - run: ./forecast.rb ${{ inputs.post_id }}
+      - run: ./forecasts.rb ${{ inputs.post_id }}
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
