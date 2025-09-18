@@ -31,6 +31,7 @@ post_id = ARGV[0] || raise('post id argument is required')
 
 FileUtils.mkdir_p("./tmp/#{post_id}") # create cache directory if needed
 FileUtils.mkdir_p("./tmp/#{post_id}/forecasts") # create cache directory if needed
+FileUtils.mkdir_p("./tmp/#{post_id}/consensus") # create cache directory if needed
 
 Formatador.display "\n[bold][green]# Metaculus: Getting Post(#{post_id})…[/] "
 post_json = cache(post_id, 'post.json') do
