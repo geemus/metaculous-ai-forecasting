@@ -20,9 +20,13 @@ end
 
 system "./research.rb #{post_id}"
 0.upto(3).each do |forecaster_index|
-  system "./forecast.rb #{post_id} #{forecaster_index}"
+  threads = []
+  threads << Thread.new { system("./forecast.rb #{post_id} #{forecaster_index}") }
+  threads.each(&:join)
 end
 0.upto(3).each do |forecaster_index|
-  system "./revise_forecast.rb #{post_id} #{forecaster_index}"
+  threads = []
+  threads << Thread.new { system("./revise_forecast.rb #{post_id} #{forecaster_index}") }
+  threads.each(&:join)
 end
 system "./finalize.rb #{post_id}"
