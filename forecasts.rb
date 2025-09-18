@@ -78,7 +78,7 @@ FORECASTERS.each_with_index do |provider, index|
                 end
 end
 
-forecast_revisions = []
+@revised_forecasts = []
 Formatador.display_line "\n[bold][green]# Meta: Optimizing Forecasts[/] "
 FORECASTERS.each_with_index do |provider, index|
   @forecast = @forecasts[index]
@@ -101,7 +101,7 @@ FORECASTERS.each_with_index do |provider, index|
     puts revision.content
     revision.to_json
   end
-  forecast_revisions << case provider
+  @revised_forecasts << case provider
                         when :anthropic
                           Anthropic::Response.new(data: JSON.parse(forecast_revision_json))
                         when :perplexity
