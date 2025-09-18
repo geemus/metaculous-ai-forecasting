@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/download-artifact@v4
         with:
-          merge-multiple: true
+          name: research
           path: tmp
       - uses: ruby/setup-ruby@v1
         with:
@@ -50,7 +50,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/download-artifact@v4
         with:
-          merge-multiple: true
+          name: research
           path: tmp
       - uses: ruby/setup-ruby@v1
         with:
@@ -77,8 +77,13 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/download-artifact@v4
         with:
-          merge-multiple: true
+          name: research
           path: tmp
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+          pattern: forecast.*
+          path: tmp/${{ inputs.post_id }}/forecasts
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4'
@@ -101,8 +106,13 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/download-artifact@v4
         with:
-          merge-multiple: true
+          name: research
           path: tmp
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+          pattern: revision.*
+          path: tmp/${{ inputs.post_id }}/forecasts
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4'
