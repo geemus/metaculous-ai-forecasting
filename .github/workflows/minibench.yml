@@ -25,6 +25,7 @@ jobs:
           echo "POST_IDS=$(./tournament_questions.rb minibench)" >> "$GITHUB_OUTPUT"
         env:
           METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
+          METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
       - if: steps.ids.outputs.POST_IDS != ''
         run: ./research.rb ${{ steps.ids.outputs.POST_IDS }}
         env:
