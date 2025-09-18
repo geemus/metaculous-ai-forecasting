@@ -34,16 +34,10 @@ if question.existing_forecast? && !%w[578 14333 22427 38880].include?(post_id)
   exit
 end
 
-@forecast_prompt = FORECAST_PROMPT_TEMPLATE.result(binding)
-puts @forecast_prompt
-
-@research_prompt = @forecast_prompt
-Formatador.display "\n[bold][green]# Researcher: Drafting Research…[/] "
-research_json = cache(post_id, 'research.json') do
+@research_prompt = FORECAST_PROMPT_TEMPLATE.result(binding)
+Formatador.display "\n[bold][green]# Researcher: Drafting Research(#{post_id})…[/] "
+cache(post_id, 'research.json') do
   perplexity = Perplexity.new(model: 'sonar-deep-research')
   research = perplexity.eval({ 'role': 'user', 'content': @research_prompt })
   research.to_json
 end
-research = Perplexity::Response.new(data: JSON.parse(research_json))
-@research_output = research.formatted_research
-puts @research_output

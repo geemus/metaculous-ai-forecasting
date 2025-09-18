@@ -33,7 +33,6 @@ forecaster_index = ARGV[1]&.to_i || raise('forecaster index argv[1] is required'
 FileUtils.mkdir_p("./tmp/#{post_id}") # create cache directory if needed
 FileUtils.mkdir_p("./tmp/#{post_id}/forecasts") # create cache directory if needed
 
-Formatador.display "\n[bold][green]# Metaculus: Loading Cached Post(#{post_id})[/] "
 post_json = cache_read!(post_id, 'post.json')
 question = Metaculus::Question.new(data: JSON.parse(post_json))
 if question.existing_forecast? && !%w[578 14333 22427 38880].include?(post_id)
@@ -41,14 +40,9 @@ if question.existing_forecast? && !%w[578 14333 22427 38880].include?(post_id)
   exit
 end
 
-@forecast_prompt = FORECAST_PROMPT_TEMPLATE.result(binding)
-puts @forecast_prompt
-
-Formatador.display "\n[bold][green]# Researcher: Loading Cached Research(#{post_id})[/] "
 research_json = cache_read!(post_id, 'research.json')
 research = Perplexity::Response.new(data: JSON.parse(research_json))
 @research_output = research.formatted_research
-puts @research_output
 
 provider = FORECASTERS[forecaster_index]
 Formatador.display "\n[bold][green]# Superforecaster[#{forecaster_index}: #{provider}]: Forecasting(#{post_id})…[/] "

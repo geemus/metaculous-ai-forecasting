@@ -3,12 +3,10 @@
 def cache(question_id, path, &block)
   tmp_path = "./tmp/#{question_id}/#{path}"
   if File.exist?(tmp_path)
-    Formatador.display_line "[light_green](Cache @ `#{tmp_path}`)[/]"
     File.read(tmp_path)
   else
     data = block.call
     File.write(tmp_path, data)
-    Formatador.display_line "[light_green](Cached @ `#{tmp_path}`)[/]"
     data
   end
 end
@@ -17,7 +15,6 @@ def cache_read!(question_id, path)
   tmp_path = "./tmp/#{question_id}/#{path}"
   raise "Cache Not Found: `#{tmp_path}`" unless File.exist?(tmp_path)
 
-  Formatador.display_line "[light_green](Cache @ `#{tmp_path})[/]`"
   File.read(tmp_path)
 end
 

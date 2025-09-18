@@ -18,7 +18,6 @@ if post_id.nil? || post_id.empty?
   exit
 end
 
-puts "ETE: #{post_id}"
 system "./research.rb #{post_id}"
 0.upto(3).each do |forecaster_index|
   system "./forecast.rb #{post_id} #{forecaster_index}"

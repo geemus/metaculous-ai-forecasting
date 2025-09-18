@@ -32,7 +32,6 @@ post_id = ARGV[0] || raise('post id argument is required')
 FileUtils.mkdir_p("./tmp/#{post_id}") # create cache directory if needed
 FileUtils.mkdir_p("./tmp/#{post_id}/forecasts") # create cache directory if needed
 
-Formatador.display "\n[bold][green]# Metaculus: Loading Cached Post(#{post_id})[/] "
 post_json = cache_read!(post_id, 'post.json')
 question = Metaculus::Question.new(data: JSON.parse(post_json))
 if question.existing_forecast? && !%w[578 14333 22427 38880].include?(post_id)
@@ -40,18 +39,12 @@ if question.existing_forecast? && !%w[578 14333 22427 38880].include?(post_id)
   exit
 end
 
-@forecast_prompt = FORECAST_PROMPT_TEMPLATE.result(binding)
-puts @forecast_prompt
-
-Formatador.display "\n[bold][green]# Researcher: Loading Cached Research(#{post_id})[/] "
 research_json = cache_read!(post_id, 'research.json')
 research = Perplexity::Response.new(data: JSON.parse(research_json))
 @research_output = research.formatted_research
-puts @research_output
 
 @revised_forecasts = []
 FORECASTERS.each_with_index do |provider, index|
-  Formatador.display "\n[bold][green]# Superforecaster[#{index}: #{provider}]: Loading Cached Revised Forecast(#{post_id})[/] "
   forecast_json = cache_read!(post_id, "forecasts/revision.#{index}.json")
   @revised_forecasts << case provider
                         when :anthropic
@@ -61,15 +54,15 @@ FORECASTERS.each_with_index do |provider, index|
                         end
 end
 
-Formatador.display "\n[bold][green]# Superforecaster: Summarizing Consensus…[/] "
+Formatador.display "\n[bold][green]# Superforecaster: Summarizing Consensus(#{post_id})…[/] "
 consensus_json = cache(post_id, 'forecasts/consensus.json') do
   llm = Anthropic.new
   consensus_prompt = prompt_with_type(llm, question, CONSENSUS_FORECAST_PROMPT_TEMPLATE)
   consensus = llm.eval({ 'role': 'user', 'content': consensus_prompt })
+  consensus = Anthropic::Response.new(data: JSON.parse(consensus_json))
+  puts consensus.content
   consensus.to_json
 end
 consensus = Anthropic::Response.new(data: JSON.parse(consensus_json))
-puts consensus.content
 
-Formatador.display_line "\n[bold][green]## Post Prep:[/]"
 question.submit(consensus)
