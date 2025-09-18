@@ -29,7 +29,8 @@ jobs:
           METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
       - uses: actions/upload-artifact@v4
-        path: tmp/${{ inputs.post_id }}.research.json
+        with:
+          path: tmp/${{ inputs.post_id }}.research.json
 
   forecast:
     needs: research
@@ -51,7 +52,8 @@ jobs:
           METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
       - uses: actions/upload-artifact@v4
-        path: tmp/${{ inputs.post_id }}/forecasts/forecast.${{ matrix.forecaster_index }}.json
+        with:
+          path: tmp/${{ inputs.post_id }}/forecasts/forecast.${{ matrix.forecaster_index }}.json
 
   revise_forecast:
     needs: forecast
@@ -73,7 +75,8 @@ jobs:
           METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
       - uses: actions/upload-artifact@v4
-        path: tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.json
+        with:
+          path: tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.json
 
   finalize:
     needs: revise_forecast
