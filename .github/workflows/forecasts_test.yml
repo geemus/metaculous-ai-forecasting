@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  forecast:
+  research:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -28,9 +28,60 @@ jobs:
           METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
           METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
-      - run: ./forecasts.rb ${{ inputs.post_id }}
+      - uses: actions/upload-artifact@v4
+        path: tmp/${{ inputs.post_id }}.research.json
+
+  forecast:
+    needs: research
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        forecaster_index: [0, 1, 2, 3]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+      - run: ./forecast.rb ${{ inputs.post_id }} ${{ matrix.forecaster_index }}
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
           METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+      - uses: actions/upload-artifact@v4
+        path: tmp/${{ inputs.post_id }}/forecasts/forecast.${{ matrix.forecaster_index }}.json
+
+  revise_forecast:
+    needs: forecast
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        forecaster_index: [0, 1, 2, 3]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+      - run: ./revise_forecast.rb ${{ inputs.post_id }} ${{ matrix.forecaster_index }}
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
+          METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+      - uses: actions/upload-artifact@v4
+        path: tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.json
+
+  finalize:
+    needs: revise_forecast
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
