@@ -21,8 +21,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           merge-multiple: true
-      - run: |
-          [ -d ./artifact ] && mv ./artifact ./tmp || true # reuse artifacts, if they exist, on retries
+          path: tmp
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4'
@@ -51,7 +50,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           merge-multiple: true
-      - run: mv ./artifact ./tmp
+          path: tmp
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4'
@@ -77,7 +76,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           merge-multiple: true
-      - run: mv ./artifact ./tmp
+          path: tmp
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4'
@@ -100,7 +99,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           merge-multiple: true
-      - run: mv ./artifact ./tmp
+          path: tmp
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4'
