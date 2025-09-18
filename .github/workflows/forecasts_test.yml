@@ -32,8 +32,8 @@ jobs:
         with:
           path: tmp/${{ inputs.post_id }}/research.json
       - run: |
-        echo "# $(cat tmp/${{ inputs.post_id }}/post.json | jq '.title')" >> $GITHUB_STEP_SUMMARY
-        echo "$(cat tmp/${{ inputs.post_id }}/post.json | jq '.question.description')" >> $GITHUB_STEP_SUMMARY
+          echo "# $(cat tmp/${{ inputs.post_id }}/post.json | jq '.title')" >> $GITHUB_STEP_SUMMARY
+          echo "$(cat tmp/${{ inputs.post_id }}/post.json | jq '.question.description')" >> $GITHUB_STEP_SUMMARY
 
   forecast:
     needs: research
