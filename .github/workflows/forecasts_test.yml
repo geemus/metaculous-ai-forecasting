@@ -19,6 +19,8 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
       - run: mv ./artifact ./tmp
       - uses: ruby/setup-ruby@v1
         with:
@@ -46,7 +48,10 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: actions/download-artifact@v4
-      - run: mv ./artifact ./tmp
+        with:
+          merge-multiple: true
+      - run: |
+          [ -d artifact ] && mv ./artifact ./tmp
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4'
@@ -70,6 +75,8 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
       - run: mv ./artifact ./tmp
       - uses: ruby/setup-ruby@v1
         with:
@@ -91,6 +98,8 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
       - run: mv ./artifact ./tmp
       - uses: ruby/setup-ruby@v1
         with:
