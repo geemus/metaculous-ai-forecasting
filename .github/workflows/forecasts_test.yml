@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/download-artifact@v4
         with:
-          name: research
+          merge-multiple: true
           path: tmp
       - uses: ruby/setup-ruby@v1
         with:
