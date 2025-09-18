@@ -50,78 +50,6 @@ research = Perplexity::Response.new(data: JSON.parse(research_json))
 @research_output = research.formatted_research
 puts @research_output
 
-shared_forecast_prompt_template = ERB.new(<<~SHARED_FORECAST_PROMPT_TEMPLATE, trim_mode: '-')
-  Create a forecast based on the following information.
-
-  <%= @forecast_prompt -%>
-
-  Here is a summary of relevant data from your research assistant:
-  <research>
-  <%= @research_output -%>
-  </research>
-
-  1. Today is <%= Time.now.strftime('%B %d, %Y') %>. Consider the time remaining before the outcome of the question will become known.
-  <%- unless %w[sonar-reasoning sonar-reasoning-pro sonar-deep-research].include?(llm.model) -%>
-  2. Before providing your forecast, show step-by-step reasoning in clear, logical order starting with <think> on the line before and ending with </think> on the line after.
-  <%- end -%>
-
-SHARED_FORECAST_PROMPT_TEMPLATE
-
-BINARY_FORECAST_PROMPT = <<~BINARY_FORECAST_PROMPT
-  - At the end of your forecast provide a probabilistic prediction.
-
-  Your prediction should be in this format:
-  <probability>
-  X%
-  </probability>
-BINARY_FORECAST_PROMPT
-
-NUMERIC_FORECAST_PROMPT = <<~NUMERIC_FORECAST_PROMPT
-  - At the end of your forecast provide percentile predictions of values in the given units and range, only include the values and units, do not use ranges of values.
-
-  Your predictions should be in this format:
-  <percentiles>
-  Percentile  5: A {unit}
-  Percentile 10: B {unit}
-  Percentile 20: C {unit}
-  Percentile 30: D {unit}
-  Percentile 40: E {unit}
-  Percentile 50: F {unit}
-  Percentile 60: G {unit}
-  Percentile 70: H {unit}
-  Percentile 80: I {unit}
-  Percentile 90: J {unit}
-  Percentile 95: K {unit}
-  </percentiles>
-NUMERIC_FORECAST_PROMPT
-
-MULTIPLE_CHOICE_FORECAST_PROMPT = <<~MULTIPLE_CHOICE_FORECAST_PROMPT
-  - At the end of your forecast provide your probabilistic predictions for each option, only include the probability itself.
-
-  Your predictions should be in this format:
-  <probabilities>
-  Option "A": A%
-  Option "B": B%
-  ...
-  Option "N": N%
-  </probabilities>
-MULTIPLE_CHOICE_FORECAST_PROMPT
-
-def prompt_with_type(llm, question, prompt_template)
-  prompt = prompt_template.result(binding)
-  prompt += case question.type
-            when 'binary'
-              BINARY_FORECAST_PROMPT
-            when 'discrete', 'numeric'
-              NUMERIC_FORECAST_PROMPT
-            when 'multiple_choice'
-              MULTIPLE_CHOICE_FORECAST_PROMPT
-            else
-              raise "Missing template for type: #{question.type}"
-            end
-  prompt
-end
-
 provider = FORECASTERS[forecaster_index]
 Formatador.display "\n[bold][green]# Superforecaster[#{forecaster_index}: #{provider}]: Forecasting(#{post_id})…[/] "
 cache(post_id, "forecasts/forecast.#{forecaster_index}.json") do
@@ -134,7 +62,7 @@ cache(post_id, "forecasts/forecast.#{forecaster_index}.json") do
             temperature: 0.9
           ) # 0-2
         end
-  forecast_prompt = prompt_with_type(llm, question, shared_forecast_prompt_template)
+  forecast_prompt = prompt_with_type(llm, question, SHARED_FORECAST_PROMPT_TEMPLATE)
   forecast = llm.eval({ 'role': 'user', 'content': forecast_prompt })
   puts forecast.content
   forecast.to_json

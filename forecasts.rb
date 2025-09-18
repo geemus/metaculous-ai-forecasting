@@ -52,78 +52,6 @@ research = Perplexity::Response.new(data: JSON.parse(research_json))
 @research_output = research.formatted_research
 puts @research_output
 
-shared_forecast_prompt_template = ERB.new(<<~SHARED_FORECAST_PROMPT_TEMPLATE, trim_mode: '-')
-  Create a forecast based on the following information.
-
-  <%= @forecast_prompt -%>
-
-  Here is a summary of relevant data from your research assistant:
-  <research>
-  <%= @research_output -%>
-  </research>
-
-  1. Today is <%= Time.now.strftime('%B %d, %Y') %>. Consider the time remaining before the outcome of the question will become known.
-  <%- unless %w[sonar-reasoning sonar-reasoning-pro sonar-deep-research].include?(llm.model) -%>
-  2. Before providing your forecast, show step-by-step reasoning in clear, logical order starting with <think> on the line before and ending with </think> on the line after.
-  <%- end -%>
-
-SHARED_FORECAST_PROMPT_TEMPLATE
-
-BINARY_FORECAST_PROMPT = <<~BINARY_FORECAST_PROMPT
-  - At the end of your forecast provide a probabilistic prediction.
-
-  Your prediction should be in this format:
-  <probability>
-  X%
-  </probability>
-BINARY_FORECAST_PROMPT
-
-NUMERIC_FORECAST_PROMPT = <<~NUMERIC_FORECAST_PROMPT
-  - At the end of your forecast provide percentile predictions of values in the given units and range, only include the values and units, do not use ranges of values.
-
-  Your predictions should be in this format:
-  <percentiles>
-  Percentile  5: A {unit}
-  Percentile 10: B {unit}
-  Percentile 20: C {unit}
-  Percentile 30: D {unit}
-  Percentile 40: E {unit}
-  Percentile 50: F {unit}
-  Percentile 60: G {unit}
-  Percentile 70: H {unit}
-  Percentile 80: I {unit}
-  Percentile 90: J {unit}
-  Percentile 95: K {unit}
-  </percentiles>
-NUMERIC_FORECAST_PROMPT
-
-MULTIPLE_CHOICE_FORECAST_PROMPT = <<~MULTIPLE_CHOICE_FORECAST_PROMPT
-  - At the end of your forecast provide your probabilistic predictions for each option, only include the probability itself.
-
-  Your predictions should be in this format:
-  <probabilities>
-  Option "A": A%
-  Option "B": B%
-  ...
-  Option "N": N%
-  </probabilities>
-MULTIPLE_CHOICE_FORECAST_PROMPT
-
-def prompt_with_type(llm, question, prompt_template)
-  prompt = prompt_template.result(binding)
-  prompt += case question.type
-            when 'binary'
-              BINARY_FORECAST_PROMPT
-            when 'discrete', 'numeric'
-              NUMERIC_FORECAST_PROMPT
-            when 'multiple_choice'
-              MULTIPLE_CHOICE_FORECAST_PROMPT
-            else
-              raise "Missing template for type: #{question.type}"
-            end
-  prompt
-end
-
 @forecasts = []
 FORECASTERS.each_with_index do |provider, index|
   Formatador.display "\n[bold][green]# Superforecaster[#{index}: #{provider}]: Forecasting…[/] "
@@ -137,7 +65,7 @@ FORECASTERS.each_with_index do |provider, index|
               temperature: 0.9
             ) # 0-2
           end
-    forecast_prompt = prompt_with_type(llm, question, shared_forecast_prompt_template)
+    forecast_prompt = prompt_with_type(llm, question, SHARED_FORECAST_PROMPT_TEMPLATE)
     forecast = llm.eval({ 'role': 'user', 'content': forecast_prompt })
     puts forecast.content
     forecast.to_json
@@ -149,25 +77,6 @@ FORECASTERS.each_with_index do |provider, index|
                   Perplexity::Response.new(data: JSON.parse(forecast_json))
                 end
 end
-
-forecast_delphi_prompt_template = ERB.new(<<~FORECAST_DELPHI_PROMPT, trim_mode: '-')
-  Review these predictions for the same question from other superforecasters.
-  <forecasts>
-  <%- @forecasts.each do |f| -%>
-  <%- next if f == @forecast -%>
-  <forecast>
-  <%= f.content %>
-  </forecast>
-  <%- end -%>
-  </forecasts>
-
-  1. Review these forecasts and compare each to your initial forecast. Focus on differences in probabilities, key assumptions, reasoning, and supporting evidence.
-  2. Provide a revised forecast, include your confidence level and note any uncertainties impacting your revision.
-  <%- unless %w[sonar-reasoning sonar-reasoning-pro sonar-deep-research].include?(llm.model) -%>
-  3. Before revising your forecast, show step-by-step reasoning in clear, logical order starting with <think> on the line before and ending with </think> on the line after.
-  <%- end %>
-
-FORECAST_DELPHI_PROMPT
 
 forecast_revisions = []
 Formatador.display_line "\n[bold][green]# Meta: Optimizing Forecasts[/] "
@@ -182,8 +91,8 @@ FORECASTERS.each_with_index do |provider, index|
           when :perplexity
             Perplexity.new(system: SUPERFORECASTER_SYSTEM_PROMPT)
           end
-    forecast_prompt = prompt_with_type(llm, question, shared_forecast_prompt_template)
-    forecast_delphi_prompt = prompt_with_type(llm, question, forecast_delphi_prompt_template)
+    forecast_prompt = prompt_with_type(llm, question, SHARED_FORECAST_PROMPT_TEMPLATE)
+    forecast_delphi_prompt = prompt_with_type(llm, question, FORECAST_DELPHI_PROMPT_TEMPLATE)
     revision = llm.eval(
       { 'role': 'user', 'content': forecast_prompt },
       { 'role': 'assistant', 'content': @forecast.content },
@@ -200,25 +109,10 @@ FORECASTERS.each_with_index do |provider, index|
                         end
 end
 
-consensus_forecast_prompt_template = ERB.new(<<~CONSENSUS_FORECAST_PROMPT_TEMPLATE, trim_mode: '-')
-  Review these predictions from other superforecasters.
-  <forecasts>
-  <%- @forecasts.each do |forecast| -%>
-  <forecast>
-  <%= forecast.content %>
-  </forecast>
-  <%- end -%>
-  </forecasts>
-
-  - Summarize the consensus as a final forecast.
-  - Before summarizing the consensus, show step-by-step reasoning in clear, logical order starting with <think> on the line before and ending with </think> on the line after.
-
-CONSENSUS_FORECAST_PROMPT_TEMPLATE
-
 Formatador.display "\n[bold][green]# Superforecaster: Summarizing Consensus…[/] "
 consensus_json = cache(post_id, 'forecasts/consensus.json') do
   llm = Anthropic.new
-  consensus_prompt = prompt_with_type(llm, question, consensus_forecast_prompt_template)
+  consensus_prompt = prompt_with_type(llm, question, CONSENSUS_FORECAST_PROMPT_TEMPLATE)
   consensus = llm.eval({ 'role': 'user', 'content': consensus_prompt })
   consensus.to_json
 end
