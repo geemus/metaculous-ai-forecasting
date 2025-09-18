@@ -39,7 +39,7 @@ SUPERFORECASTER_SYSTEM_PROMPT
 
 FORECAST_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/forecast.erb'), trim_mode: '-')
 
-SHARED_FORECAST_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/shared_forecast.erb', trim_mode: '-'))
+SHARED_FORECAST_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/shared_forecast.erb'), trim_mode: '-')
 
 BINARY_FORECAST_PROMPT = <<~BINARY_FORECAST_PROMPT
   - At the end of your forecast provide a probabilistic prediction.

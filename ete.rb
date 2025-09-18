@@ -19,6 +19,8 @@ if post_id.nil? || post_id.empty?
 end
 
 system "./research.rb #{post_id}"
+system "echo $(cat tmp/#{post_id}/post.json | jq -r '.title')"
+system "echo $(cat tmp/#{post_id}/post.json | jq -r '.question.description')"
 0.upto(3).each do |forecaster_index|
   fork { system("./forecast.rb #{post_id} #{forecaster_index}") }
 end
@@ -28,3 +30,5 @@ Process.waitall
 end
 Process.waitall
 system "./finalize.rb #{post_id}"
+system "echo $(cat tmp/#{post_id}/consensus/forecast.json | jq -r '.')"
+system "echo $(cat tmp/#{post_id}/consensus/comment.json | jq -r '.text')"

@@ -1,6 +1,6 @@
 Create a forecast based on the following information.
 
-<%= @forecast_prompt -%>
+<%= FORECAST_PROMPT_TEMPLATE.result(binding) -%>
 
 Here is a summary of relevant data from your research assistant:
 <research>
