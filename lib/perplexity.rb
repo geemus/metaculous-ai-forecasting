@@ -54,7 +54,7 @@ class Perplexity
         'authorization': "Bearer #{ENV['PERPLEXITY_API_KEY']}",
         'content-type': 'application/json'
       },
-      read_timeout: 360
+      read_timeout: 600
     )
   end
 
