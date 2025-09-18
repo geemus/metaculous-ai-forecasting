@@ -22,7 +22,7 @@ jobs:
         with:
           merge-multiple: true
       - run: |
-          [ -d ./artifact ] && mv ./artifact ./tmp
+          [ -d ./artifact ] && mv ./artifact ./tmp || true # reuse artifacts, if they exist, on retries
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4'
