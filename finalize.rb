@@ -59,7 +59,6 @@ consensus_json = cache(post_id, 'forecasts/consensus.json') do
   llm = Anthropic.new
   consensus_prompt = prompt_with_type(llm, question, CONSENSUS_FORECAST_PROMPT_TEMPLATE)
   consensus = llm.eval({ 'role': 'user', 'content': consensus_prompt })
-  consensus = Anthropic::Response.new(data: JSON.parse(consensus_json))
   puts consensus.content
   consensus.to_json
 end

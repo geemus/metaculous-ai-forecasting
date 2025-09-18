@@ -168,7 +168,7 @@ FORECAST_DELPHI_PROMPT
 CONSENSUS_FORECAST_PROMPT_TEMPLATE = ERB.new(<<~CONSENSUS_FORECAST_PROMPT_TEMPLATE, trim_mode: '-')
   Review these predictions from other superforecasters.
   <forecasts>
-  <%- @forecasts.each do |forecast| -%>
+  <%- @revised_forecasts.each do |forecast| -%>
   <forecast>
   <%= forecast.content %>
   </forecast>
