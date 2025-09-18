@@ -1,0 +1,34 @@
+Forecast Question:
+<question>
+<%= question.title %>
+</question>
+<%- if question.options && !question.options.empty? -%>
+<options>
+<%= question.options %>
+</options>
+<%- end -%>
+
+Forecast Background:
+<background>
+<%= question.background %>
+</background>
+<%- unless question.metadata_content.empty? -%>
+
+Question Metadata:
+<metadata>
+<%= question.metadata_content %>
+</metadata>
+<%- end -%>
+
+Criteria for determining forecast outcome, which have not yet been met:
+<criteria>
+<%= question.criteria_content %>
+</criteria>
+<%- unless question.aggregate_content.empty? -%>
+<%- if false -%>
+Existing Metaculus Forecasts Aggregate:
+<aggregate>
+<%= question.aggregate_content %>
+</aggregate>
+<%- end -%>
+<%- end -%>

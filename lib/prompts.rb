@@ -37,59 +37,9 @@ SUPERFORECASTER_SYSTEM_PROMPT = <<~SUPERFORECASTER_SYSTEM_PROMPT
   - Maintain awareness of cognitive biases and actively correct for them.
 SUPERFORECASTER_SYSTEM_PROMPT
 
-FORECAST_PROMPT_TEMPLATE = ERB.new(<<~FORECAST_PROMPT_TEMPLATE, trim_mode: '-')
-  Forecast Question:
-  <question>
-  <%= question.title %>
-  </question>
-  <%- if question.options && !question.options.empty? -%>
-  <options>
-  <%= question.options %>
-  </options>
-  <%- end -%>
+FORECAST_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/forecast.erb'), trim_mode: '-')
 
-  Forecast Background:
-  <background>
-  <%= question.background %>
-  </background>
-  <%- unless question.metadata_content.empty? -%>
-
-  Question Metadata:
-  <metadata>
-  <%= question.metadata_content %>
-  </metadata>
-  <%- end -%>
-
-  Criteria for determining forecast outcome, which have not yet been met:
-  <criteria>
-  <%= question.criteria_content %>
-  </criteria>
-  <%- unless question.aggregate_content.empty? -%>
-  <%- if false -%>
-  Existing Metaculus Forecasts Aggregate:
-  <aggregate>
-  <%= question.aggregate_content %>
-  </aggregate>
-  <%- end -%>
-  <%- end -%>
-FORECAST_PROMPT_TEMPLATE
-
-SHARED_FORECAST_PROMPT_TEMPLATE = ERB.new(<<~SHARED_FORECAST_PROMPT_TEMPLATE, trim_mode: '-')
-  Create a forecast based on the following information.
-
-  <%= @forecast_prompt -%>
-
-  Here is a summary of relevant data from your research assistant:
-  <research>
-  <%= @research_output -%>
-  </research>
-
-  1. Today is <%= Time.now.strftime('%B %d, %Y') %>. Consider the time remaining before the outcome of the question will become known.
-  <%- unless %w[sonar-reasoning sonar-reasoning-pro sonar-deep-research].include?(llm.model) -%>
-  2. Before providing your forecast, show step-by-step reasoning in clear, logical order starting with <think> on the line before and ending with </think> on the line after.
-  <%- end -%>
-
-SHARED_FORECAST_PROMPT_TEMPLATE
+SHARED_FORECAST_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/shared_forecast.erb', trim_mode: '-'))
 
 BINARY_FORECAST_PROMPT = <<~BINARY_FORECAST_PROMPT
   - At the end of your forecast provide a probabilistic prediction.
@@ -146,36 +96,6 @@ def prompt_with_type(llm, question, prompt_template)
   prompt
 end
 
-FORECAST_DELPHI_PROMPT_TEMPLATE = ERB.new(<<~FORECAST_DELPHI_PROMPT, trim_mode: '-')
-  Review these predictions for the same question from other superforecasters.
-  <forecasts>
-  <%- @forecasts.each do |f| -%>
-  <%- next if f == @forecast -%>
-  <forecast>
-  <%= f.content %>
-  </forecast>
-  <%- end -%>
-  </forecasts>
+FORECAST_DELPHI_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/forecast_delphi.erb', trim_mode: '-'))
 
-  1. Review these forecasts and compare each to your initial forecast. Focus on differences in probabilities, key assumptions, reasoning, and supporting evidence.
-  2. Provide a revised forecast, include your confidence level and note any uncertainties impacting your revision.
-  <%- unless %w[sonar-reasoning sonar-reasoning-pro sonar-deep-research].include?(llm.model) -%>
-  3. Before revising your forecast, show step-by-step reasoning in clear, logical order starting with <think> on the line before and ending with </think> on the line after.
-  <%- end %>
-
-FORECAST_DELPHI_PROMPT
-
-CONSENSUS_FORECAST_PROMPT_TEMPLATE = ERB.new(<<~CONSENSUS_FORECAST_PROMPT_TEMPLATE, trim_mode: '-')
-  Review these predictions from other superforecasters.
-  <forecasts>
-  <%- @revised_forecasts.each do |forecast| -%>
-  <forecast>
-  <%= forecast.content %>
-  </forecast>
-  <%- end -%>
-  </forecasts>
-
-  - Summarize the consensus as a final forecast.
-  - Before summarizing the consensus, show step-by-step reasoning in clear, logical order starting with <think> on the line before and ending with </think> on the line after.
-
-CONSENSUS_FORECAST_PROMPT_TEMPLATE
+FORECAST_CONSENSUS_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/forecast_consensus.erb', trim_mode: '-'))

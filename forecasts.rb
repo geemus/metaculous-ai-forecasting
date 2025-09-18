@@ -112,7 +112,7 @@ end
 Formatador.display "\n[bold][green]# Superforecaster: Summarizing Consensus…[/] "
 consensus_json = cache(post_id, 'forecasts/consensus.json') do
   llm = Anthropic.new
-  consensus_prompt = prompt_with_type(llm, question, CONSENSUS_FORECAST_PROMPT_TEMPLATE)
+  consensus_prompt = prompt_with_type(llm, question, FORECAST_CONSENSUS_PROMPT_TEMPLATE)
   consensus = llm.eval({ 'role': 'user', 'content': consensus_prompt })
   consensus.to_json
 end

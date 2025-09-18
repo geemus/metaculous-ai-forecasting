@@ -1,0 +1,12 @@
+Review these predictions from other superforecasters.
+<forecasts>
+<%- @revised_forecasts.each do |forecast| -%>
+<forecast>
+<%= forecast.content %>
+</forecast>
+<%- end -%>
+</forecasts>
+
+- Summarize the consensus as a final forecast.
+- Before summarizing the consensus, show step-by-step reasoning in clear, logical order starting with <think> on the line before and ending with </think> on the line after.
+

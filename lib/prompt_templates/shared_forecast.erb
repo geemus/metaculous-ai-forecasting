@@ -1,0 +1,14 @@
+Create a forecast based on the following information.
+
+<%= @forecast_prompt -%>
+
+Here is a summary of relevant data from your research assistant:
+<research>
+<%= @research_output -%>
+</research>
+
+1. Today is <%= Time.now.strftime('%B %d, %Y') %>. Consider the time remaining before the outcome of the question will become known.
+<%- unless %w[sonar-reasoning sonar-reasoning-pro sonar-deep-research].include?(llm.model) -%>
+2. Before providing your forecast, show step-by-step reasoning in clear, logical order starting with <think> on the line before and ending with </think> on the line after.
+<%- end -%>
+
