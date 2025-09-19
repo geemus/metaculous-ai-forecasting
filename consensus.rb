@@ -52,9 +52,9 @@ Formatador.display "\n[bold][green]# Superforecaster: Summarizing Consensus(#{po
 consensus_json = cache(post_id, 'forecasts/consensus.json') do
   llm = Anthropic.new
   consensus_prompt = prompt_with_type(llm, question, FORECAST_CONSENSUS_PROMPT_TEMPLATE)
+  cache_write(post_id, 'prompts/consensus.md', consensus_prompt)
   consensus = llm.eval({ 'role': 'user', 'content': consensus_prompt })
   puts consensus.content
-  cache_write(post_id, 'prompts/consensus.md', consensus_prompt)
   cache_write(post_id, 'forecasts/consensus.md', consensus.content)
   consensus.to_json
 end
