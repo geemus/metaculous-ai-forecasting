@@ -16,7 +16,7 @@ jobs:
   setup:
     runs-on: ubuntu-latest
     outputs:
-      post_ids: ${{ steps.ids.outputs.post_ids || inputs.post_id }}
+      post_id: ${{ steps.ids.outputs.post_id || inputs.post_id }}
     steps:
       - if: ${{ inputs.post_id == null }}
         uses: actions/checkout@v5
@@ -28,20 +28,20 @@ jobs:
       - if: ${{ inputs.post_id == null }}
         id: ids
         run: |
-          echo "POST_IDS=$(./tournament_questions.rb minibench)" >> $GITHUB_OUTPUT
+          echo "POST_ID=$(./tournament_questions.rb minibench)" >> $GITHUB_OUTPUT
         env:
           METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
           METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
-      - if: ${{ inputs.post_id || steps.ids.post_ids }}
+      - if: ${{ inputs.post_id || steps.ids.post_id }}
         run: |
-          echo "Metaculus Post ID(s): ${{ inputs.post_id || steps.ids.post_ids }}" >> $GITHUB_STEP_SUMMARY
-      - if: ${{ !inputs.post_id && !steps.ids.post_ids }}
+          echo "Metaculus Post ID(s): ${{ inputs.post_id || steps.ids.post_id }}" >> $GITHUB_STEP_SUMMARY
+      - if: ${{ !inputs.post_id && !steps.ids.post_id }}
         run: |
           echo "minibench: No Unanswered Open Posts Found" >> $GITHUB_STEP_SUMMARY
 
   research:
     needs: setup
-    if: ${{ needs.setup.outputs.post_ids }}
+    if: ${{ needs.setup.outputs.post_id }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -53,7 +53,7 @@ jobs:
         with:
           ruby-version: '3.4'
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-      - run: ./research.rb ${{ needs.setup.outputs.post_ids }}
+      - run: ./research.rb ${{ needs.setup.outputs.post_id }}
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
@@ -77,7 +77,7 @@ jobs:
     needs:
       - setup
       - research
-    if: ${{ needs.setup.outputs.post_ids }}
+    if: ${{ needs.setup.outputs.post_id }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -114,7 +114,7 @@ jobs:
     needs:
       - setup
       - forecast
-    if: ${{ needs.setup.outputs.post_ids }}
+    if: ${{ needs.setup.outputs.post_id }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -156,7 +156,7 @@ jobs:
     needs:
      - setup
      - revise_forecast
-    if: ${{ needs.setup.outputs.post_ids }}
+    if: ${{ needs.setup.outputs.post_id }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
