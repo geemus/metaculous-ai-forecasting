@@ -49,3 +49,10 @@ end
 def strip_xml(tag, text)
   text.gsub(%r{<#{tag}>([\s\S]*?)</#{tag}>}, '').strip
 end
+
+def stddev(values)
+  average = values.sum / values.count
+  deviation_squares = values.map { |v| (v - average) * (v - average) }
+  deviation_squares_average = deviation_squares.sum / deviation_squares.count
+  Math.sqrt(deviation_squares_average)
+end

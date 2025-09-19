@@ -52,6 +52,29 @@ end
 provider = FORECASTERS[forecaster_index]
 @forecast = @forecasts[forecaster_index]
 
+case question.type
+when 'binary'
+  count = @forecasts.count
+  values = @forecasts.map(&:probability)
+  sorted = values.sort
+  mid = (sorted.count - 1) / 2.0
+  median = (sorted[mid.floor] + sorted[mid.ceil]) / 2.0
+  standard_deviation = stddev(values).round(10)
+  Formatador.display "\n[bold][green]## Forecast[#{@forecast.probability}]: #{values}, count: #{count}, median: #{median}, stddev: #{standard_deviation}[/]\n"
+when 'multiple_choice'
+  count = @forecasts.count
+  probabilities = @forecasts.map(&:probabilities)
+  probabilities.first.keys.each do |key|
+    values = probabilities.map { |forecast_probabilities| forecast_probabilities[key] }
+    sorted = values.sort
+    mid = (sorted.count - 1) / 2.0
+    median = (sorted[mid.floor] + sorted[mid.ceil]) / 2.0
+    standard_deviation = stddev(values).round(10)
+    Formatador.display "\n[bold][green]## Forecast[#{@forecast.probabilities[key]}]: `#{key}` = #{values}, count: #{count}, median: #{median}, stddev: #{standard_deviation}[/]"
+  end
+  puts
+end
+
 Formatador.display "\n[bold][green]## Superforecaster[#{forecaster_index}: #{provider}]: Revising Forecast(#{post_id})…[/] "
 cache(post_id, "forecasts/revision.#{forecaster_index}.json") do
   llm = case provider
