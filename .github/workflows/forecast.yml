@@ -1,4 +1,4 @@
-name: Forecasts Test
+name: Forecast
 
 on:
   workflow_call:
