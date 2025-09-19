@@ -29,6 +29,6 @@ Process.waitall
   fork { system("./revise_forecast.rb #{post_id} #{forecaster_index}") }
 end
 Process.waitall
-system "./finalize.rb #{post_id}"
+system "./consensus.rb #{post_id}"
 system "echo $(cat tmp/#{post_id}/consensus/forecast.json | jq -r '.')"
 system "echo $(cat tmp/#{post_id}/consensus/comment.json | jq -r '.text')"
