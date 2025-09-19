@@ -25,9 +25,7 @@ FORECASTERS = %i[
 # metaculus test questions: (binary: 578, numeric: 14333, multiple-choice: 22427, discrete: 38880)
 post_id = ARGV[0] || raise('post id argument is required')
 forecaster_index = ARGV[1]&.to_i || raise('forecaster index argv[1] is required')
-
-FileUtils.mkdir_p("./tmp/#{post_id}") # create cache directory if needed
-FileUtils.mkdir_p("./tmp/#{post_id}/forecasts") # create cache directory if needed
+init_cache(post_id)
 
 post_json = cache_read!(post_id, 'post.json')
 question = Metaculus::Question.new(data: JSON.parse(post_json))

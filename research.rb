@@ -16,8 +16,7 @@ require './lib/utility'
 
 # metaculus test questions: (binary: 578, numeric: 14333, multiple-choice: 22427, discrete: 38880)
 post_id = ARGV[0] || raise('post id argument is required')
-
-FileUtils.mkdir_p("./tmp/#{post_id}") # create cache directory if needed
+init_cache(post_id)
 
 Formatador.display "\n[bold][green]# Metaculus: Getting Post(#{post_id})…[/] "
 post_json = cache(post_id, 'post.json') do

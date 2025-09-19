@@ -8,8 +8,16 @@ require 'formatador'
 Thread.current[:formatador] = Formatador.new
 Thread.current[:formatador].instance_variable_set(:@indent, 0)
 
-def cache(question_id, path, &block)
-  tmp_path = "./tmp/#{question_id}/#{path}"
+# create cache directories as needed
+def init_cache(post_id)
+  FileUtils.mkdir_p("./tmp/#{post_id}")
+  FileUtils.mkdir_p("./tmp/#{post_id}/consensus")
+  FileUtils.mkdir_p("./tmp/#{post_id}/forecasts")
+  FileUtils.mkdir_p("./tmp/#{post_id}/prompts")
+end
+
+def cache(post_id, path, &block)
+  tmp_path = "./tmp/#{post_id}/#{path}"
   if File.exist?(tmp_path)
     File.read(tmp_path)
   else
