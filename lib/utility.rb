@@ -1,5 +1,13 @@
 # frozen_string_literal: true
 
+require 'bundler'
+Bundler.setup
+
+require 'formatador'
+
+Thread.current[:formatador] = Formatador.new
+Thread.current[:formatador].instance_variable_set(:@indent, 0)
+
 def cache(question_id, path, &block)
   tmp_path = "./tmp/#{question_id}/#{path}"
   if File.exist?(tmp_path)

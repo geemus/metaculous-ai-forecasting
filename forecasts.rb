@@ -7,7 +7,6 @@ Bundler.setup
 require 'erb'
 require 'excon'
 require 'fileutils'
-require 'formatador'
 require 'json'
 
 require './lib/anthropic'
@@ -15,9 +14,6 @@ require './lib/metaculus'
 require './lib/perplexity'
 require './lib/prompts'
 require './lib/utility'
-
-Thread.current[:formatador] = Formatador.new
-Thread.current[:formatador].instance_variable_set(:@indent, 0)
 
 FORECASTERS = %i[
   anthropic

@@ -7,16 +7,12 @@ Bundler.setup
 require 'erb'
 require 'excon'
 require 'fileutils'
-require 'formatador'
 require 'json'
 
 require './lib/metaculus'
 require './lib/perplexity'
 require './lib/prompts'
 require './lib/utility'
-
-Thread.current[:formatador] = Formatador.new
-Thread.current[:formatador].instance_variable_set(:@indent, 0)
 
 # metaculus test questions: (binary: 578, numeric: 14333, multiple-choice: 22427, discrete: 38880)
 post_id = ARGV[0] || raise('post id argument is required')
