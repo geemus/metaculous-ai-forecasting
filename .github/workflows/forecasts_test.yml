@@ -16,7 +16,7 @@ jobs:
   setup:
     runs-on: ubuntu-latest
     outputs:
-      post_ids: ${{ steps.ids.post_ids || inputs.post_id }}
+      post_ids: ${{ steps.ids.outputs.post_ids || inputs.post_id }}
     steps:
       - if: ${{ inputs.post_id == null }}
         uses: actions/checkout@v5
