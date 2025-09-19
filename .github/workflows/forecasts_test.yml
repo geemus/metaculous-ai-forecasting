@@ -39,9 +39,9 @@ jobs:
       - run: |
           echo "# $(cat tmp/${{ inputs.post_id }}/post.json | jq -r '.title')" >> $GITHUB_STEP_SUMMARY
           echo "$(cat tmp/${{ inputs.post_id }}/post.json | jq -r '.question.description')" >> $GITHUB_STEP_SUMMARY
-          echo '```md' >> $GITHUB_STEP_SUMMARY
+          echo '<details><summary>Research</summary>' >> $GITHUB_STEP_SUMMARY
           echo "$(cat tmp/${{ inputs.post_id }}/research.md)" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo '<details>' >> $GITHUB_STEP_SUMMARY
 
   forecast:
     needs: research
@@ -70,7 +70,9 @@ jobs:
           name: forecast.${{ matrix.forecaster_index }}
           path: tmp/${{ inputs.post_id }}/forecasts/forecast.${{ matrix.forecaster_index }}.json
       - run: |
+          echo '<details><summary>Forecast</summary>' >> $GITHUB_STEP_SUMMARY
           echo "$(cat tmp/${{ inputs.post_id }}/forecasts/forecast.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
+          echo '</details>' >> $GITHUB_STEP_SUMMARY
 
   revise_forecast:
     needs: forecast
@@ -104,7 +106,9 @@ jobs:
           name: revision.${{ matrix.forecaster_index }}
           path: tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.json
       - run: |
+          echo '<details><summary>Revision</summary>' >> $GITHUB_STEP_SUMMARY
           echo "$(cat tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
+          echo '</details>' >> $GITHUB_STEP_SUMMARY
 
   finalize:
     needs: revise_forecast
@@ -131,6 +135,9 @@ jobs:
           METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
       - run: |
+          echo '<details><summary>Consensus</summary>' >> $GITHUB_STEP_SUMMARY
+          echo "$(cat tmp/${{ inputs.post_id }}/consensus.md)" >> $GITHUB_STEP_SUMMARY
+          echo '</details>' >> $GITHUB_STEP_SUMMARY
           echo '```json' >> $GITHUB_STEP_SUMMARY
           echo "$(cat tmp/${{ inputs.post_id }}/consensus/forecast.json | jq -r '.')" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY

@@ -40,6 +40,6 @@ cache(post_id, 'research.json') do
   # perplexity = Perplexity.new(model: 'sonar-deep-research')
   perplexity = Perplexity.new(model: 'sonar-pro')
   research = perplexity.eval({ 'role': 'user', 'content': @research_prompt })
-  cache_write(post_id, 'research.md', research.content)
+  cache_write(post_id, 'research.md', research.formatted_research)
   research.to_json
 end
