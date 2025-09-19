@@ -5,11 +5,13 @@ on:
     inputs:
       post_id:
         description: 'Metaculus post id to forecast:'
+        required: true
         type: string
   workflow_dispatch:
     inputs:
       post_id:
         description: 'Metaculus post id to forecast:'
+        required: true
         type: string
 
 # prevent parallel runs
