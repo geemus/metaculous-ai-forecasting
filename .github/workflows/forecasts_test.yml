@@ -17,7 +17,7 @@ jobs:
   init:
     runs-on: ubuntu-latest
     outputs:
-      post_ids: ${{ inputs.post_id || steps.ids.post_ids }}
+      post_ids: ${{ steps.ids.post_ids || inputs.post_id }}
     steps:
       - if: ${{ inputs.post_id == null }}
         uses: actions/checkout@v5
@@ -29,7 +29,6 @@ jobs:
       - if: ${{ inputs.post_id == null }}
         id: ids
         run: |
-          ./tournament_questions.rb minibench
           echo "POST_IDS=$(./tournament_questions.rb minibench)" >> $GITHUB_OUTPUT
         env:
           METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
