@@ -35,7 +35,7 @@ jobs:
           METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
           METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
       - run: |
-          echo "Metaculus Post ID(s): `${{ inputs.post_id || steps.ids.post_ids }}`" >> $GITHUB_STEP_SUMMARY
+          echo "Metaculus Post ID(s): \`${{ inputs.post_id || steps.ids.post_ids }}\`" >> $GITHUB_STEP_SUMMARY
 
   # research:
   #   runs-on: ubuntu-latest
