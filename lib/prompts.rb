@@ -79,6 +79,7 @@ NUMERIC_FORECAST_PROMPT
 MULTIPLE_CHOICE_FORECAST_PROMPT = <<~MULTIPLE_CHOICE_FORECAST_PROMPT
     - A brief description of a scenario that results in an unexpected outcome.
   - At the end of your forecast provide your probabilistic predictions for each option, only include the probability itself.
+  - Predictions for each option must be between 0.1% and 99.9% and their sum must be 100%
 
   Your predictions should be in this format:
   <probabilities>
