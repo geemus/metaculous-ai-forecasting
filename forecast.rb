@@ -53,6 +53,7 @@ cache(post_id, "forecasts/forecast.#{forecaster_index}.json") do
   forecast_prompt = prompt_with_type(llm, question, SHARED_FORECAST_PROMPT_TEMPLATE)
   forecast = llm.eval({ 'role': 'user', 'content': forecast_prompt })
   puts forecast.content
+  cache_write(post_id, "prompts/forecast.#{forecaster_index}.md", forecast_prompt)
   cache_write(post_id, "forecasts/forecast.#{forecaster_index}.md", forecast.content)
   forecast.to_json
 end

@@ -68,6 +68,7 @@ cache(post_id, "forecasts/revision.#{forecaster_index}.json") do
     { 'role': 'user', 'content': forecast_delphi_prompt }
   )
   puts revision.content
+  cache_write(post_id, "prompts/revision.#{forecaster_index}.md", forecast_delphi_prompt)
   cache_write(post_id, "forecasts/revision.#{forecaster_index}.md", revision.content)
   revision.to_json
 end
