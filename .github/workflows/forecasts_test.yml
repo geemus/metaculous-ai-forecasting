@@ -41,7 +41,7 @@ jobs:
           echo "$(cat tmp/${{ inputs.post_id }}/post.json | jq -r '.question.description')" >> $GITHUB_STEP_SUMMARY
           echo '<details><summary>Research</summary>' >> $GITHUB_STEP_SUMMARY
           echo "$(cat tmp/${{ inputs.post_id }}/research.md)" >> $GITHUB_STEP_SUMMARY
-          echo '<details>' >> $GITHUB_STEP_SUMMARY
+          echo '</details>' >> $GITHUB_STEP_SUMMARY
 
   forecast:
     needs: research
