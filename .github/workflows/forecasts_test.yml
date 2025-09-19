@@ -41,6 +41,7 @@ jobs:
 
   research:
     needs: setup
+    if: ${{ needs.setup.post_ids }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
