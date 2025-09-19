@@ -37,7 +37,8 @@ end
 @research_prompt = FORECAST_PROMPT_TEMPLATE.result(binding)
 Formatador.display "\n[bold][green]# Researcher: Drafting Research(#{post_id})…[/] "
 cache(post_id, 'research.json') do
-  perplexity = Perplexity.new(model: 'sonar-deep-research')
+  # perplexity = Perplexity.new(model: 'sonar-deep-research')
+  perplexity = Perplexity.new(model: 'sonar-pro')
   research = perplexity.eval({ 'role': 'user', 'content': @research_prompt })
   research.to_json
 end
