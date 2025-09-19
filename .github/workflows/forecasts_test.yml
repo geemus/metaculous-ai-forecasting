@@ -92,7 +92,7 @@ jobs:
         with:
           ruby-version: '3.4'
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-      - run: ./forecast.rb ${{ needs.setup.post_id }} ${{ matrix.forecaster_index }}
+      - run: ./forecast.rb ${{ needs.setup.outputs.post_id }} ${{ matrix.forecaster_index }}
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
@@ -101,13 +101,13 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: forecast.${{ matrix.forecaster_index }}
-          path: tmp/${{ needs.setup.post_id }}/forecasts/forecast.${{ matrix.forecaster_index }}.json
+          path: tmp/${{ needs.setup.outputs.post_id }}/forecasts/forecast.${{ matrix.forecaster_index }}.json
       - run: |
           echo '<details><summary>Prompt</summary>' >> $GITHUB_STEP_SUMMARY
-          echo "$(cat tmp/${{ needs.setup.post_id }}/prompts/forecast.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
+          echo "$(cat tmp/${{ needs.setup.outputs.post_id }}/prompts/forecast.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
           echo '</details>' >> $GITHUB_STEP_SUMMARY
           echo '<details><summary>Result</summary>' >> $GITHUB_STEP_SUMMARY
-          echo "$(cat tmp/${{ needs.setup.post_id }}/forecasts/forecast.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
+          echo "$(cat tmp/${{ needs.setup.outputs.post_id }}/forecasts/forecast.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
           echo '</details>' >> $GITHUB_STEP_SUMMARY
 
   revise_forecast:
@@ -129,12 +129,12 @@ jobs:
         with:
           merge-multiple: true
           pattern: forecast.*
-          path: tmp/${{ needs.setup.post_id }}/forecasts
+          path: tmp/${{ needs.setup.outputs.post_id }}/forecasts
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4'
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-      - run: ./revise_forecast.rb ${{ needs.setup.post_id }} ${{ matrix.forecaster_index }}
+      - run: ./revise_forecast.rb ${{ needs.setup.outputs.post_id }} ${{ matrix.forecaster_index }}
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
@@ -143,13 +143,13 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: revision.${{ matrix.forecaster_index }}
-          path: tmp/${{ needs.setup.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.json
+          path: tmp/${{ needs.setup.outputs.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.json
       - run: |
           echo '<details><summary>Prompt</summary>' >> $GITHUB_STEP_SUMMARY
-          echo "$(cat tmp/${{ needs.setup.post_id }}/prompts/revision.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
+          echo "$(cat tmp/${{ needs.setup.outputs.post_id }}/prompts/revision.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
           echo '</details>' >> $GITHUB_STEP_SUMMARY
           echo '<details><summary>Result</summary>' >> $GITHUB_STEP_SUMMARY
-          echo "$(cat tmp/${{ needs.setup.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
+          echo "$(cat tmp/${{ needs.setup.outputs.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
           echo '</details>' >> $GITHUB_STEP_SUMMARY
 
   consensus:
