@@ -55,7 +55,7 @@ provider = FORECASTERS[forecaster_index]
 case question.type
 when 'binary'
   count = @forecasts.count
-  values = @forecasts.map(&:probability)
+  values = @forecasts.map(&:probability).map { |p| p.round(10) }
   sorted = values.sort
   mid = (sorted.count - 1) / 2.0
   median = (sorted[mid.floor] + sorted[mid.ceil]) / 2.0
@@ -65,7 +65,7 @@ when 'multiple_choice'
   count = @forecasts.count
   probabilities = @forecasts.map(&:probabilities)
   probabilities.first.keys.each do |key|
-    values = probabilities.map { |forecast_probabilities| forecast_probabilities[key] }
+    values = probabilities.map { |forecast_probabilities| forecast_probabilities[key].round(10) }
     sorted = values.sort
     mid = (sorted.count - 1) / 2.0
     median = (sorted[mid.floor] + sorted[mid.ceil]) / 2.0
