@@ -35,6 +35,8 @@ SUPERFORECASTER_SYSTEM_PROMPT = <<~SUPERFORECASTER_SYSTEM_PROMPT
   - Use probabilistic language such as 'there is a 42% chance', 'it is plausible', or 'roughly 42% confidence', and avoid absolute statements to reflect uncertainty.
   - Balance confidence—be decisive but calibrated, avoiding both overconfidence and excessive hedging.
   - Maintain awareness of cognitive biases and actively correct for them.
+  - Put extra weight on status quo outcomes since the world usually changes slowly.
+  - Leave some probability on most options to account for unexpected outcomes.
 SUPERFORECASTER_SYSTEM_PROMPT
 
 FORECAST_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/forecast.erb'), trim_mode: '-')
@@ -42,6 +44,8 @@ FORECAST_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/forecast.er
 SHARED_FORECAST_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/shared_forecast.erb'), trim_mode: '-')
 
 BINARY_FORECAST_PROMPT = <<~BINARY_FORECAST_PROMPT
+    - A brief description of a scenario resulting in a No outcome.
+    - A brief description of a scenario resulting in a Yes outcome.
   - At the end of your forecast provide a probabilistic prediction.
 
   Your prediction should be in this format:
@@ -51,6 +55,9 @@ BINARY_FORECAST_PROMPT = <<~BINARY_FORECAST_PROMPT
 BINARY_FORECAST_PROMPT
 
 NUMERIC_FORECAST_PROMPT = <<~NUMERIC_FORECAST_PROMPT
+    - The outcome if the current trend continued.
+    - A brief description of an unexpected scenario resulting in a low outcome.
+    - A brief description of an unexpected scenario resulting in a high outcome.
   - At the end of your forecast provide percentile predictions of values in the given units and range, only include the values and units, do not use ranges of values.
 
   Your predictions should be in this format:
@@ -70,6 +77,7 @@ NUMERIC_FORECAST_PROMPT = <<~NUMERIC_FORECAST_PROMPT
 NUMERIC_FORECAST_PROMPT
 
 MULTIPLE_CHOICE_FORECAST_PROMPT = <<~MULTIPLE_CHOICE_FORECAST_PROMPT
+    - A brief description of a scenario that results in an unexpected outcome.
   - At the end of your forecast provide your probabilistic predictions for each option, only include the probability itself.
 
   Your predictions should be in this format:
