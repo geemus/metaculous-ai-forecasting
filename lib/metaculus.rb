@@ -341,7 +341,7 @@ class Metaculus
                       end
       metaculus = Metaculus.new
       metaculus.post_forecasts(forecast_data)
-      cache_write(id, 'consensus/forecast.json', forecast_data.to_json)
+      cache_write(post_id, 'consensus/forecast.json', forecast_data.to_json)
       comment_text = response.stripped_content('think')
       %w[percentiles probability probabilities].each do |tag|
         comment_text = strip_xml(tag, comment_text)
@@ -354,7 +354,7 @@ class Metaculus
         on_post: post_id
       }
       metaculus.post_comment(comment_data)
-      cache_write(id, 'consensus/comment.json', comment_data.to_json)
+      cache_write(post_id, 'consensus/comment.json', comment_data.to_json)
     end
 
     def title
