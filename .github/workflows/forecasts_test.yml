@@ -32,8 +32,12 @@ jobs:
         env:
           METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
           METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
-      - run: |
+      - if: ${{ inputs.post_id || steps.ids.post_ids }}
+        run: |
           echo "Metaculus Post ID(s): ${{ inputs.post_id || steps.ids.post_ids }}" >> $GITHUB_STEP_SUMMARY
+      - if: ${{ !inputs.post_id && !steps.ids.post_ids }}
+        run: |
+          echo "minibench: No Unanswered Open Posts Found" >> $GITHUB_STEP_SUMMARY
 
   # research:
   #   runs-on: ubuntu-latest
