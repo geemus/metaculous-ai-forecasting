@@ -184,7 +184,7 @@ jobs:
           echo "$(cat tmp/${{ needs.setup.outputs.post_id }}/prompts/consensus.md)" >> $GITHUB_STEP_SUMMARY
           echo '</details>' >> $GITHUB_STEP_SUMMARY
           echo '<details><summary>Result</summary>' >> $GITHUB_STEP_SUMMARY
-          echo "$(cat tmp/${{ needs.setup.outputs.post_id }}/consensus.md)" >> $GITHUB_STEP_SUMMARY
+          echo "$(cat tmp/${{ needs.setup.outputs.post_id }}/forecasts/consensus.md)" >> $GITHUB_STEP_SUMMARY
           echo '</details>' >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
