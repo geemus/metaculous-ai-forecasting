@@ -319,60 +319,22 @@ class Metaculus
       @post_id ||= data['id']
     end
 
-    def percentiles
-      raise("#percentiles not supported for #{type} questions") unless %w[discrete numeric].include?(type)
-
-      @percentiles ||= begin
-        percentiles = {}
-        response.extracted_content('percentiles').split("\n").each do |line|
-          key, value = line.split(': ', 2)
-          key = key.split('Percentile ', 2).last
-          value = value.split(' ', 2).first
-          percentiles[key.to_i] = data.dig('question', 'scaling', 'continuous_range').first.is_a?(Float) ? value.to_f : value.to_i
-        end
-        percentiles
-      end
-    end
-
-    def probabilities
-      raise("#probabilities not supported for #{type} questions")  unless type == 'multiple_choice'
-
-      @probabilities ||= begin
-        probabilities = {}
-        response.extracted_content('probabilities').split("\n").each do |line|
-          pair = line.split('Option "', 2).last
-          key, value = pair.split('": ', 2)
-          probabilities[key] = value.include?('%') ? value.to_f / 100.0 : value.to_f
-        end
-        probabilities
-      end
-    end
-
-    def probability
-      raise("#probability not supported for #{type} questions") unless type == 'binary'
-
-      @probability ||= begin
-        probability = response.extracted_content('probability')
-        probability.include?('%') ? probability.to_f / 100.0 : probability.to_f
-      end
-    end
-
     def submit(response)
       forecast_data = case type
                       when 'binary'
                         [{
                           question: id,
-                          probability_yes: probability
+                          probability_yes: response.probability
                         }]
                       when 'discrete', 'numeric'
                         [{
                           question: id,
-                          continuous_cdf: continuous_cdf(percentiles)
+                          continuous_cdf: continuous_cdf(response.percentiles)
                         }]
                       when 'multiple_choice'
                         [{
                           question: id,
-                          probability_yes_per_category: probabilities
+                          probability_yes_per_category: response.probabilities
                         }]
                       else
                         raise("NOT IMPLEMENTED: question#submit for #{type} questions")
