@@ -14,145 +14,168 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  research:
+  init:
     runs-on: ubuntu-latest
+    outputs:
+      post_ids: ${{ inputs.post_id || steps.ids.post_ids }}
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/download-artifact@v4
-        with:
-          merge-multiple: true
-          path: tmp
-      - uses: ruby/setup-ruby@v1
+      - if: ${{ inputs.post_id == null }}
+        uses: actions/checkout@v5
+      - if: ${{ inputs.post_id == null }}
+        uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4'
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-      - run: ./research.rb ${{ inputs.post_id }}
+      - if: ${{ inputs.post_id == null }}
+        id: ids
+        run: |
+          ./tournament_questions.rb minibench
+          echo "POST_IDS=$(./tournament_questions.rb minibench)" >> $GITHUB_OUTPUT
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
           METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
-          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
-      - uses: actions/upload-artifact@v4
-        with:
-          name: research
-          path: tmp
-      - run: |
-          echo "# $(cat tmp/${{ inputs.post_id }}/post.json | jq -r '.title')" >> $GITHUB_STEP_SUMMARY
-          echo "$(cat tmp/${{ inputs.post_id }}/post.json | jq -r '.question.description')" >> $GITHUB_STEP_SUMMARY
-          echo '<details><summary>Prompt</summary>' >> $GITHUB_STEP_SUMMARY
-          echo "$(cat tmp/${{ inputs.post_id }}/prompts/research.md)" >> $GITHUB_STEP_SUMMARY
-          echo '</details>' >> $GITHUB_STEP_SUMMARY
-          echo '<details><summary>Result</summary>' >> $GITHUB_STEP_SUMMARY
-          echo "$(cat tmp/${{ inputs.post_id }}/research.md)" >> $GITHUB_STEP_SUMMARY
-          echo '</details>' >> $GITHUB_STEP_SUMMARY
+        run: |
+          echo "Post ID(s): ${{ inputs.post_id || steps.ids.post_ids }}" >> $GITHUB_STEP_SUMMARY
 
-  forecast:
-    needs: research
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        forecaster_index: [0, 1, 2, 3]
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/download-artifact@v4
-        with:
-          name: research
-          path: tmp
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.4'
-          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-      - run: ./forecast.rb ${{ inputs.post_id }} ${{ matrix.forecaster_index }}
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
-          METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
-          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
-      - uses: actions/upload-artifact@v4
-        with:
-          name: forecast.${{ matrix.forecaster_index }}
-          path: tmp/${{ inputs.post_id }}/forecasts/forecast.${{ matrix.forecaster_index }}.json
-      - run: |
-          echo '<details><summary>Prompt</summary>' >> $GITHUB_STEP_SUMMARY
-          echo "$(cat tmp/${{ inputs.post_id }}/prompts/forecast.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
-          echo '</details>' >> $GITHUB_STEP_SUMMARY
-          echo '<details><summary>Result</summary>' >> $GITHUB_STEP_SUMMARY
-          echo "$(cat tmp/${{ inputs.post_id }}/forecasts/forecast.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
-          echo '</details>' >> $GITHUB_STEP_SUMMARY
-
-  revise_forecast:
-    needs: forecast
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        forecaster_index: [0, 1, 2, 3]
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/download-artifact@v4
-        with:
-          name: research
-          path: tmp
-      - uses: actions/download-artifact@v4
-        with:
-          merge-multiple: true
-          pattern: forecast.*
-          path: tmp/${{ inputs.post_id }}/forecasts
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.4'
-          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-      - run: ./revise_forecast.rb ${{ inputs.post_id }} ${{ matrix.forecaster_index }}
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
-          METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
-          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
-      - uses: actions/upload-artifact@v4
-        with:
-          name: revision.${{ matrix.forecaster_index }}
-          path: tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.json
-      - run: |
-          echo '<details><summary>Prompt</summary>' >> $GITHUB_STEP_SUMMARY
-          echo "$(cat tmp/${{ inputs.post_id }}/prompts/revision.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
-          echo '</details>' >> $GITHUB_STEP_SUMMARY
-          echo '<details><summary>Result</summary>' >> $GITHUB_STEP_SUMMARY
-          echo "$(cat tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
-          echo '</details>' >> $GITHUB_STEP_SUMMARY
-
-  consensus:
-    needs: revise_forecast
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/download-artifact@v4
-        with:
-          name: research
-          path: tmp
-      - uses: actions/download-artifact@v4
-        with:
-          merge-multiple: true
-          pattern: revision.*
-          path: tmp/${{ inputs.post_id }}/forecasts
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.4'
-          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-      - run: ./consensus.rb ${{ inputs.post_id }}
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
-          METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
-          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
-      - run: |
-          echo '<details><summary>Prompt</summary>' >> $GITHUB_STEP_SUMMARY
-          echo "$(cat tmp/${{ inputs.post_id }}/prompts/consensus.md)" >> $GITHUB_STEP_SUMMARY
-          echo '</details>' >> $GITHUB_STEP_SUMMARY
-          echo '<details><summary>Result</summary>' >> $GITHUB_STEP_SUMMARY
-          echo "$(cat tmp/${{ inputs.post_id }}/consensus.md)" >> $GITHUB_STEP_SUMMARY
-          echo '</details>' >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          echo "$(cat tmp/${{ inputs.post_id }}/consensus/forecast.json | jq -r '.[] | .percentiles // .probabilities? // .probability_yes?')" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "$(cat tmp/${{ inputs.post_id }}/consensus/comment.json | jq -r '.text')" >> $GITHUB_STEP_SUMMARY
+  # research:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v5
+  #     - uses: actions/download-artifact@v4
+  #       with:
+  #         merge-multiple: true
+  #         path: tmp
+  #     - uses: ruby/setup-ruby@v1
+  #       with:
+  #         ruby-version: '3.4'
+  #         bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+  #     - run: ./research.rb ${{ inputs.post_id }}
+  #       env:
+  #         ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+  #         METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
+  #         METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
+  #         PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+  #     - uses: actions/upload-artifact@v4
+  #       with:
+  #         name: research
+  #         path: tmp
+  #     - run: |
+  #         echo "# $(cat tmp/${{ inputs.post_id }}/post.json | jq -r '.title')" >> $GITHUB_STEP_SUMMARY
+  #         echo "$(cat tmp/${{ inputs.post_id }}/post.json | jq -r '.question.description')" >> $GITHUB_STEP_SUMMARY
+  #         echo '<details><summary>Prompt</summary>' >> $GITHUB_STEP_SUMMARY
+  #         echo "$(cat tmp/${{ inputs.post_id }}/prompts/research.md)" >> $GITHUB_STEP_SUMMARY
+  #         echo '</details>' >> $GITHUB_STEP_SUMMARY
+  #         echo '<details><summary>Result</summary>' >> $GITHUB_STEP_SUMMARY
+  #         echo "$(cat tmp/${{ inputs.post_id }}/research.md)" >> $GITHUB_STEP_SUMMARY
+  #         echo '</details>' >> $GITHUB_STEP_SUMMARY
+  #
+  # forecast:
+  #   needs: research
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       forecaster_index: [0, 1, 2, 3]
+  #   steps:
+  #     - uses: actions/checkout@v5
+  #     - uses: actions/download-artifact@v4
+  #       with:
+  #         name: research
+  #         path: tmp
+  #     - uses: ruby/setup-ruby@v1
+  #       with:
+  #         ruby-version: '3.4'
+  #         bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+  #     - run: ./forecast.rb ${{ inputs.post_id }} ${{ matrix.forecaster_index }}
+  #       env:
+  #         ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+  #         METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
+  #         METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
+  #         PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+  #     - uses: actions/upload-artifact@v4
+  #       with:
+  #         name: forecast.${{ matrix.forecaster_index }}
+  #         path: tmp/${{ inputs.post_id }}/forecasts/forecast.${{ matrix.forecaster_index }}.json
+  #     - run: |
+  #         echo '<details><summary>Prompt</summary>' >> $GITHUB_STEP_SUMMARY
+  #         echo "$(cat tmp/${{ inputs.post_id }}/prompts/forecast.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
+  #         echo '</details>' >> $GITHUB_STEP_SUMMARY
+  #         echo '<details><summary>Result</summary>' >> $GITHUB_STEP_SUMMARY
+  #         echo "$(cat tmp/${{ inputs.post_id }}/forecasts/forecast.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
+  #         echo '</details>' >> $GITHUB_STEP_SUMMARY
+  #
+  # revise_forecast:
+  #   needs: forecast
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       forecaster_index: [0, 1, 2, 3]
+  #   steps:
+  #     - uses: actions/checkout@v5
+  #     - uses: actions/download-artifact@v4
+  #       with:
+  #         name: research
+  #         path: tmp
+  #     - uses: actions/download-artifact@v4
+  #       with:
+  #         merge-multiple: true
+  #         pattern: forecast.*
+  #         path: tmp/${{ inputs.post_id }}/forecasts
+  #     - uses: ruby/setup-ruby@v1
+  #       with:
+  #         ruby-version: '3.4'
+  #         bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+  #     - run: ./revise_forecast.rb ${{ inputs.post_id }} ${{ matrix.forecaster_index }}
+  #       env:
+  #         ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+  #         METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
+  #         METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
+  #         PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+  #     - uses: actions/upload-artifact@v4
+  #       with:
+  #         name: revision.${{ matrix.forecaster_index }}
+  #         path: tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.json
+  #     - run: |
+  #         echo '<details><summary>Prompt</summary>' >> $GITHUB_STEP_SUMMARY
+  #         echo "$(cat tmp/${{ inputs.post_id }}/prompts/revision.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
+  #         echo '</details>' >> $GITHUB_STEP_SUMMARY
+  #         echo '<details><summary>Result</summary>' >> $GITHUB_STEP_SUMMARY
+  #         echo "$(cat tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
+  #         echo '</details>' >> $GITHUB_STEP_SUMMARY
+  #
+  # consensus:
+  #   needs: revise_forecast
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v5
+  #     - uses: actions/download-artifact@v4
+  #       with:
+  #         name: research
+  #         path: tmp
+  #     - uses: actions/download-artifact@v4
+  #       with:
+  #         merge-multiple: true
+  #         pattern: revision.*
+  #         path: tmp/${{ inputs.post_id }}/forecasts
+  #     - uses: ruby/setup-ruby@v1
+  #       with:
+  #         ruby-version: '3.4'
+  #         bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+  #     - run: ./consensus.rb ${{ inputs.post_id }}
+  #       env:
+  #         ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+  #         METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
+  #         METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
+  #         PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+  #     - run: |
+  #         echo '<details><summary>Prompt</summary>' >> $GITHUB_STEP_SUMMARY
+  #         echo "$(cat tmp/${{ inputs.post_id }}/prompts/consensus.md)" >> $GITHUB_STEP_SUMMARY
+  #         echo '</details>' >> $GITHUB_STEP_SUMMARY
+  #         echo '<details><summary>Result</summary>' >> $GITHUB_STEP_SUMMARY
+  #         echo "$(cat tmp/${{ inputs.post_id }}/consensus.md)" >> $GITHUB_STEP_SUMMARY
+  #         echo '</details>' >> $GITHUB_STEP_SUMMARY
+  #         echo "" >> $GITHUB_STEP_SUMMARY
+  #         echo '```' >> $GITHUB_STEP_SUMMARY
+  #         echo "$(cat tmp/${{ inputs.post_id }}/consensus/forecast.json | jq -r '.[] | .percentiles // .probabilities? // .probability_yes?')" >> $GITHUB_STEP_SUMMARY
+  #         echo '```' >> $GITHUB_STEP_SUMMARY
+  #         echo "" >> $GITHUB_STEP_SUMMARY
+  #         echo "$(cat tmp/${{ inputs.post_id }}/consensus/comment.json | jq -r '.text')" >> $GITHUB_STEP_SUMMARY
