@@ -36,7 +36,7 @@ jobs:
     concurrency:
       group: ${{ github.workflow }}-${{ matrix.post_id }}
       cancel-in-progress: false
-    env:
+    secrets:
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
       METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
