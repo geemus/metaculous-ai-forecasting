@@ -9,7 +9,9 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  forecast:
+  query:
+    outputs:
+      post_ids: ${{ steps.post_ids.outputs.post_ids }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -25,9 +27,14 @@ jobs:
         env:
           METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
           METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
-      - strategy:
-          matrix:
-            post_id: ${{ fromJSON(steps.post_ids.outputs.post_ids) }}
-        uses: ./.github/workflows/forecast.yml
+
+  enqueue:
+    needs: query
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        post_id: ${{ fromJSON(needs.query.outputs.post_ids) }}
+    steps:
+      - uses: ./.github/workflows/forecast.yml
         with:
           post_id: ${{ matrix.post_id }}
