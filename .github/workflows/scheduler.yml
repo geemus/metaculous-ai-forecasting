@@ -37,6 +37,7 @@ jobs:
       matrix:
         post_id: ${{ fromJSON(needs.query.outputs.post_ids) }}
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/workflows/forecast.yml
         with:
           post_id: ${{ matrix.post_id }}
