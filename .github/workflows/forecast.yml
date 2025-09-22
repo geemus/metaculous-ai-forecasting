@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           merge-multiple: true
           path: tmp
@@ -70,7 +70,7 @@ jobs:
         forecaster_index: [0, 1, 2, 3]
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: ${{ inputs.post_id }}.research
           path: tmp
@@ -105,11 +105,11 @@ jobs:
         forecaster_index: [0, 1, 2, 3]
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: ${{ inputs.post_id }}.research
           path: tmp
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           merge-multiple: true
           pattern: ${{ inputs.post_id }}.forecast.*
@@ -142,11 +142,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: ${{ inputs.post_id }}.research
           path: tmp
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           merge-multiple: true
           pattern: ${{ inputs.post_id }}.revision.*
