@@ -7,6 +7,15 @@ on:
         description: 'Metaculus post id to forecast:'
         required: true
         type: string
+    secrets:
+      ANTHROPIC_API_KEY:
+        required: true
+      METACULUS_BOT_API_TOKEN:
+        required: true
+      METACULUS_BOT_ID:
+        required: true
+      PERPLEXITY_API_KEY:
+        required: true
   workflow_dispatch:
     inputs:
       post_id:
