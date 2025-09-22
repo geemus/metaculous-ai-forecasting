@@ -4,7 +4,7 @@ class Anthropic
   attr_accessor :model, :system, :temperature
 
   def initialize(
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-sonnet-4-latest',
     system: SUPERFORECASTER_SYSTEM_PROMPT,
     temperature: 0.1
   )
