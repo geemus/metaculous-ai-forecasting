@@ -1,17 +1,17 @@
-name: Minibench Forecast
+name: Minibench Executor
 
 on:
   workflow_dispatch:
   schedule:
     - cron: "5/15 * * * *" # run every 15 minutes
 
-# prevent parallel runs
-concurrency:
-  group: ${{ github.workflow }}
-  cancel-in-progress: false
-
 jobs:
-  forecast:
+  query:
+    concurrency:
+      group: scheduled-forecast-query
+      cancel-in-progress: false
+    outputs:
+      post_ids: ${{ steps.post_ids.outputs.post_ids }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -19,24 +19,27 @@ jobs:
         with:
           ruby-version: '3.4'
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-      - id: ids
+      - id: post_ids
         run: |
-          ./tournament_questions.rb minibench
-          echo "POST_IDS=$(./tournament_questions.rb minibench)" >> $GITHUB_OUTPUT
+          echo "post_ids=$(./tournament_questions.rb minibench)" >> $GITHUB_OUTPUT
         env:
           METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
           METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
-      - if: steps.ids.outputs.POST_IDS != ''
-        run: ./research.rb ${{ steps.ids.outputs.POST_IDS }}
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
-          METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
-          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
-      - if: steps.ids.outputs.POST_IDS != ''
-        run: ./forecasts.rb ${{ steps.ids.outputs.POST_IDS }}
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
-          METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
-          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+
+  enqueue:
+    if: ${{ needs.query.outputs.post_ids != '[]' }}
+    needs: query
+    strategy:
+      matrix:
+        post_id: ${{ fromJSON(needs.query.outputs.post_ids) }}
+    concurrency:
+      group: scheduled-forecast-enqueue
+      cancel-in-progress: false
+    secrets:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
+      METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
+      PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+    uses: ./.github/workflows/forecast.yml
+    with:
+      post_id: ${{ matrix.post_id }}
