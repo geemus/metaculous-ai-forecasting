@@ -32,7 +32,6 @@ jobs:
   enqueue:
     if: ${{ needs.query.outputs.post_ids != '[]' }}
     needs: query
-    runs-on: ubuntu-latest
     strategy:
       matrix:
         post_id: ${{ fromJSON(needs.query.outputs.post_ids) }}
