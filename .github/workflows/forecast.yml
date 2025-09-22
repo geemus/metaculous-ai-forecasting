@@ -49,7 +49,7 @@ jobs:
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
       - uses: actions/upload-artifact@v4
         with:
-          name: research
+          name: ${{ inputs.post_id }}.research
           path: tmp
       - run: |
           echo "# $(cat tmp/${{ inputs.post_id }}/post.json | jq -r '.title')" >> $GITHUB_STEP_SUMMARY
@@ -72,7 +72,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/download-artifact@v4
         with:
-          name: research
+          name: ${{ inputs.post_id }}.research
           path: tmp
       - uses: ruby/setup-ruby@v1
         with:
@@ -86,7 +86,7 @@ jobs:
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
       - uses: actions/upload-artifact@v4
         with:
-          name: forecast.${{ matrix.forecaster_index }}
+          name: ${{ inputs.post_id}}.forecast.${{ matrix.forecaster_index }}
           path: tmp/${{ inputs.post_id }}/forecasts/forecast.${{ matrix.forecaster_index }}.json
       - run: |
           echo '<details><summary>Prompt</summary>' >> $GITHUB_STEP_SUMMARY
@@ -107,12 +107,12 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/download-artifact@v4
         with:
-          name: research
+          name: ${{ inputs.post_id }}.research
           path: tmp
       - uses: actions/download-artifact@v4
         with:
           merge-multiple: true
-          pattern: forecast.*
+          pattern: ${{ inputs.post_id }}.forecast.*
           path: tmp/${{ inputs.post_id }}/forecasts
       - uses: ruby/setup-ruby@v1
         with:
@@ -126,7 +126,7 @@ jobs:
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
       - uses: actions/upload-artifact@v4
         with:
-          name: revision.${{ matrix.forecaster_index }}
+          name: ${{ inputs.post_id }}.revision.${{ matrix.forecaster_index }}
           path: tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.json
       - run: |
           echo '<details><summary>Prompt</summary>' >> $GITHUB_STEP_SUMMARY
@@ -144,12 +144,12 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/download-artifact@v4
         with:
-          name: research
+          name: ${{ inputs.post_id }}.research
           path: tmp
       - uses: actions/download-artifact@v4
         with:
           merge-multiple: true
-          pattern: revision.*
+          pattern: ${{ inputs.post_id }}.revision.*
           path: tmp/${{ inputs.post_id }}/forecasts
       - uses: ruby/setup-ruby@v1
         with:
