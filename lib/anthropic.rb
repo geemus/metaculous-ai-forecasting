@@ -102,7 +102,7 @@ class Anthropic
           key, value = line.split(': ', 2)
           key = key.split('Percentile ', 2).last
           value = value.split(' ', 2).first
-          percentiles[key.to_i] = data.dig('question', 'scaling', 'continuous_range').first.is_a?(Float) ? value.to_f : value.to_i
+          percentiles[key.to_i] = value.include?('.') ? value.to_f : value.to_i
         end
         percentiles
       end
