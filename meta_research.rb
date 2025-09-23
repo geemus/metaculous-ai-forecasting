@@ -19,6 +19,7 @@ post_id = ARGV[0] || raise('post id argument is required')
 init_cache(post_id)
 
 system "./research.rb #{post_id}"
+puts
 research_json = cache_read!(post_id, 'research.json')
 research = Perplexity::Response.new(data: JSON.parse(research_json))
 puts research.content

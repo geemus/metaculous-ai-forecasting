@@ -67,12 +67,6 @@ META_FORECAST_TEMPLATE = ERB.new(<<~META_FORECAST_TEMPLATE, trim_mode: '-')
   </response>
   <%- end -%>
   </responses>
-
-  # Instructions
-  - Your goal is to ensure future prompts elicit more accurate and relevant responses.
-  - Identify weaknesses in the responses and suggest concrete improvements to the provided system and assistant prompt that would prevent these issues.
-  - Structure your feedback as a numbered list and explain the reasoning behind each suggestion.
-  - Reference best practices in prompt engineering where relevant.
 META_FORECAST_TEMPLATE
 
 Formatador.display "\n[bold][green]# Forecaster: Reviewing Forecasts…[/] "
