@@ -30,5 +30,3 @@ Process.waitall
 end
 Process.waitall
 system "./consensus.rb #{post_id}"
-system "echo $(cat tmp/#{post_id}/consensus/forecast.json | jq -r '.')"
-system "echo $(cat tmp/#{post_id}/consensus/comment.json | jq -r '.text')"

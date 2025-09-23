@@ -36,7 +36,7 @@ end
 
 research_json = cache_read!(post_id, 'research.json')
 research = Perplexity::Response.new(data: JSON.parse(research_json))
-@research_output = research.formatted_research
+@research_output = research.content
 
 provider = FORECASTERS[forecaster_index]
 Formatador.display "\n[bold][green]# Superforecaster[#{forecaster_index}: #{provider}]: Forecasting(#{post_id})…[/] "
