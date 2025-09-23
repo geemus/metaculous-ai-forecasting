@@ -47,7 +47,7 @@ end
 @forecast_prompt = cache_read!(post_id, 'prompts/forecast.0.md')
 
 META_FORECAST_TEMPLATE = ERB.new(<<~META_FORECAST_TEMPLATE, trim_mode: '-')
-  Review the following responses in the context of the provided system and assistant prompts:
+  Review the following system prompt, assistant prompt, and responses:
 
   # System Prompt
   <system-prompt>

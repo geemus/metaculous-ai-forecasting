@@ -36,7 +36,7 @@ if question.existing_forecast? && !%w[578 14333 22427 38880].include?(post_id)
 end
 
 META_RESEARCH_TEMPLATE = ERB.new(<<~META_RESEARCH_TEMPLATE, trim_mode: '-')
-  Review the following response in the context of the provided system and assistant prompts:
+  Review the following system prompt, assistant prompt, and response:
 
   # System Prompt
   <system-prompt>
@@ -52,12 +52,6 @@ META_RESEARCH_TEMPLATE = ERB.new(<<~META_RESEARCH_TEMPLATE, trim_mode: '-')
   <response>
   <%= research.content %>
   </response>
-
-  # Instructions
-  - Your goal is to ensure future prompts elicit more accurate and relevant research summaries.
-  - Identify weaknesses in the response and suggest concrete improvements to the provided system and assistant prompt that would prevent these issues.
-  - Structure your feedback as a numbered list and explain the reasoning behind each suggestion.
-  - Reference best practices in prompt engineering where relevant.
 META_RESEARCH_TEMPLATE
 
 Formatador.display "\n[bold][green]# Forecaster: Reviewing Research(#{post_id})…[/] "
