@@ -6,7 +6,7 @@ class Anthropic
   attr_accessor :model, :system, :temperature
 
   def initialize(
-    model: 'claude-sonnet-4-latest',
+    model: 'claude-sonnet-4-0',
     system: SUPERFORECASTER_SYSTEM_PROMPT,
     temperature: 0.1
   )
@@ -36,6 +36,7 @@ class Anthropic
     response
   rescue Excon::Error => e
     puts e
+    puts e.response.body
     exit(1)
   end
 
