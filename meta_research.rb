@@ -60,7 +60,7 @@ META_RESEARCH_TEMPLATE = ERB.new(<<~META_RESEARCH_TEMPLATE, trim_mode: '-')
 META_RESEARCH_TEMPLATE
 
 Formatador.display "\n[bold][green]# Forecaster: Reviewing Research(#{post_id})…[/] "
-research_review_json = cache(post_id, 'research_review.json') do
+meta_research_json = cache(post_id, 'meta_research.json') do
   # perplexity = Perplexity.new(model: 'sonar-deep-research')
   perplexity = Perplexity.new(
     model: 'sonar-pro',
@@ -68,15 +68,15 @@ research_review_json = cache(post_id, 'research_review.json') do
   )
   @research_prompt = FORECAST_PROMPT_TEMPLATE.result(binding)
   @meta_research_prompt = META_RESEARCH_TEMPLATE.result(binding)
-  cache_write(post_id, 'messages/research_review_input.md', @meta_research_prompt)
+  cache_write(post_id, 'messages/meta_research_input.md', @meta_research_prompt)
   research = perplexity.eval(
     { 'role': 'user', 'content': @research_prompt },
     { 'role': 'assistant', 'content': research.content },
     { 'role': 'user', 'content': @meta_research_prompt }
   )
-  cache_write(post_id, 'messages/research_review_output.md', research.formatted_research)
+  cache_write(post_id, 'messages/meta_research_output.md', research.formatted_research)
   research.to_json
 end
-research_review = Perplexity::Response.new(data: JSON.parse(research_review_json))
+meta_research = Perplexity::Response.new(data: JSON.parse(meta_research_json))
 
-puts research_review.content
+puts meta_research.content
