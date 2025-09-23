@@ -64,19 +64,14 @@ meta_research_json = cache(post_id, 'meta_research.json') do
   # perplexity = Perplexity.new(model: 'sonar-deep-research')
   perplexity = Perplexity.new(
     model: 'sonar-pro',
-    system: SUPERFORECASTER_SYSTEM_PROMPT
+    system: PROMPT_ENGINEER_SYSTEM_PROMPT
   )
   @research_prompt = FORECAST_PROMPT_TEMPLATE.result(binding)
   @meta_research_prompt = META_RESEARCH_TEMPLATE.result(binding)
   cache_write(post_id, 'messages/meta_research_input.md', @meta_research_prompt)
-  research = perplexity.eval(
-    { 'role': 'user', 'content': @research_prompt },
-    { 'role': 'assistant', 'content': research.content },
-    { 'role': 'user', 'content': @meta_research_prompt }
-  )
-  cache_write(post_id, 'messages/meta_research_output.md', research.formatted_research)
-  research.to_json
+  meta_research = perplexity.eval({ 'role': 'user', 'content': @meta_research_prompt })
+  cache_write(post_id, 'messages/meta_research_output.md', meta_research.formatted_research)
+  meta_research.to_json
 end
 meta_research = Perplexity::Response.new(data: JSON.parse(meta_research_json))
-
 puts meta_research.content
