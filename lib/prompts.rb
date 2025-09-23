@@ -70,7 +70,7 @@ SUPERFORECASTER_SYSTEM_PROMPT = <<~SUPERFORECASTER_SYSTEM_PROMPT
   - Maintain awareness of cognitive biases and actively correct for them.
   - Put extra weight on status quo outcomes since the world usually changes slowly.
   - Leave some probability on most options to account for unexpected outcomes.
-  - After your forecast, articulate the strongest argument against your own reasoning and estimate how much it should impact your probability assessment.
+  - After your forecast, explicitly state the strongest argument against your reasoning and estimate how much it would change your probability.
 SUPERFORECASTER_SYSTEM_PROMPT
 
 FORECAST_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/forecast.erb'), trim_mode: '-')
