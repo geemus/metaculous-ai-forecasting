@@ -35,7 +35,7 @@ end
 
 research_json = cache_read!(post_id, 'research.json')
 research = Perplexity::Response.new(data: JSON.parse(research_json))
-@research_output = research.formatted_research
+@research_output = research.content
 
 @revised_forecasts = []
 FORECASTERS.each_with_index do |provider, index|

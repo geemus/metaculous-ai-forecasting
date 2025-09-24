@@ -65,7 +65,7 @@ meta_research_json = cache(post_id, 'meta_research.json') do
   @meta_research_prompt = META_RESEARCH_TEMPLATE.result(binding)
   cache_write(post_id, 'messages/meta_research_input.md', @meta_research_prompt)
   meta_research = perplexity.eval({ 'role': 'user', 'content': @meta_research_prompt })
-  cache_write(post_id, 'messages/meta_research_output.md', meta_research.formatted_research)
+  cache_write(post_id, 'messages/meta_research_output.md', meta_research.content)
   meta_research.to_json
 end
 meta_research = Perplexity::Response.new(data: JSON.parse(meta_research_json))

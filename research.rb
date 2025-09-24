@@ -36,6 +36,6 @@ cache(post_id, 'research.json') do
   @research_prompt = FORECAST_PROMPT_TEMPLATE.result(binding)
   cache_write(post_id, 'prompts/research.md', @research_prompt)
   research = perplexity.eval({ 'role': 'user', 'content': @research_prompt })
-  cache_write(post_id, 'research.md', research.formatted_research)
+  cache_write(post_id, 'research.md', research.content)
   research.to_json
 end
