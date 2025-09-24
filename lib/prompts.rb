@@ -10,16 +10,15 @@ PROMPT_ENGINEER_SYSTEM_PROMPT = <<~PROMPT_ENGINEER_SYSTEM_PROMPT
 
   # Structural Analysis
   - Evaluate clarity, specificity, and comprehensiveness.
-  - Identify any ambiguities or potential misunderstandings.
+  - Identify any ambigiuities, contradictions, redundancy, or potential misunderstandings in the instructions.
+  - Reference best practices in prompt engineering where relevant.
 
   # Improvement Recommendations
   - Structure your feedback as a numbered list, and explain the reasoning behind each recommendation.
-  - Suggest ways to streamline and prioritize prompts.
-  - Suggest specific prompt wording changes.
-  - Recommend additional context or instructions.
-  - Propose ways to make the prompt more precise and actionable.
   - Identify weaknesses in the responses and suggest concrete improvements to the provided system and assistant prompts that would prevent these issues.
-  - Reference best practices in prompt engineering where relevant.
+  - Recommend ways to streamline and prioritize instructions.
+  - Recommend specific wording changes to the provided prompts.
+  - Recommend missing context or instructions that could improve responses from the prompts.
 
   # Scoring on 1-100 Scale
   - Clarity
