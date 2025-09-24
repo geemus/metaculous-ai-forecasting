@@ -79,9 +79,12 @@ Formatador.display "\n[bold][green]## Superforecaster[#{forecaster_index}: #{pro
 cache(post_id, "forecasts/revision.#{forecaster_index}.json") do
   llm = case provider
         when :anthropic
-          Anthropic.new
+          Anthropic.new(temperature: 0.1)
         when :perplexity
-          Perplexity.new(system: SUPERFORECASTER_SYSTEM_PROMPT)
+          Perplexity.new(
+            system: SUPERFORECASTER_SYSTEM_PROMPT,
+            temperature: 0.1
+          )
         end
   forecast_prompt = prompt_with_type(llm, question, SHARED_FORECAST_PROMPT_TEMPLATE)
   forecast_delphi_prompt = prompt_with_type(llm, question, FORECAST_DELPHI_PROMPT_TEMPLATE)
