@@ -24,6 +24,7 @@ FORECASTERS = %i[
 
 # metaculus test questions: (binary: 578, numeric: 14333, multiple-choice: 22427, discrete: 38880)
 post_id = ARGV[0] || raise('post id argument is required')
+forecaster_index = ARGV[1]&.to_i || raise('forecaster index argv[1] is required')
 init_cache(post_id)
 
 post_json = cache_read!(post_id, 'post.json')
@@ -33,18 +34,17 @@ if question.existing_forecast? && !%w[578 14333 22427 38880].include?(post_id)
   exit
 end
 
-@forecasts = []
-FORECASTERS.each_with_index do |provider, index|
-  forecast_json = cache_read!(post_id, "forecasts/forecast.#{index}.json")
-  @forecasts << case provider
-                when :anthropic
-                  Anthropic::Response.new(data: JSON.parse(forecast_json))
-                when :perplexity
-                  Perplexity::Response.new(data: JSON.parse(forecast_json))
-                end
-end
+system "./forecast.rb #{post_id} #{forecaster_index}"
+puts
+forecast_json = cache_read!(post_id, "forecasts/forecast.#{forecaster_index}.json")
+@forecast = case FORECASTERS[forecaster_index]
+            when :anthropic
+              Anthropic::Response.new(data: JSON.parse(forecast_json))
+            when :perplexity
+              Perplexity::Response.new(data: JSON.parse(forecast_json))
+            end
 
-@forecast_prompt = cache_read!(post_id, 'prompts/forecast.0.md')
+@forecast_prompt = cache_read!(post_id, "prompts/forecast.#{forecaster_index}.md")
 
 META_FORECAST_TEMPLATE = ERB.new(<<~META_FORECAST_TEMPLATE, trim_mode: '-')
   Review the following system prompt, assistant prompt, and responses:
@@ -60,26 +60,22 @@ META_FORECAST_TEMPLATE = ERB.new(<<~META_FORECAST_TEMPLATE, trim_mode: '-')
   </assistant-prompt>
 
   # Responses
-  <responses>
-  <%- @forecasts.each do |forecast| -%>
   <response>
-  <%= forecast.content %>
+  <%= @forecast.content %>
   </response>
-  <%- end -%>
-  </responses>
 META_FORECAST_TEMPLATE
 
 Formatador.display "\n[bold][green]# Forecaster: Reviewing Forecasts…[/] "
-meta_forecast_json = cache(post_id, 'meta_forecast.json') do
+meta_forecast_json = cache(post_id, "meta_forecast.#{forecaster_index}.json") do
   # perplexity = Perplexity.new(model: 'sonar-deep-research')
   perplexity = Perplexity.new(
     model: 'sonar-pro',
     system: PROMPT_ENGINEER_SYSTEM_PROMPT
   )
   @meta_forecast_prompt = META_FORECAST_TEMPLATE.result(binding)
-  cache_write(post_id, 'messages/meta_forecast_input.md', @meta_forecast_prompt)
+  cache_write(post_id, "messages/meta_forecast_input.#{forecaster_index}.md", @meta_forecast_prompt)
   meta_forecast = perplexity.eval({ 'role': 'user', 'content': @meta_forecast_prompt })
-  cache_write(post_id, 'messages/meta_forecast_output.md', meta_forecast.content)
+  cache_write(post_id, "messages/meta_forecast_output.#{forecaster_index}.md", meta_forecast.content)
   meta_forecast.to_json
 end
 meta_forecast = Perplexity::Response.new(data: JSON.parse(meta_forecast_json))
