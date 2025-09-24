@@ -6,6 +6,7 @@ Bundler.setup
 require 'excon'
 require 'formatador'
 require 'json'
+require 'time'
 
 class Metaculus
   def self.get_post(id)
@@ -292,6 +293,8 @@ class Metaculus
     def metadata_content
       @metadata_content ||= begin
         content = []
+        asked_on = Time.parse(data['created_at'])
+        content << "Asked On: #{asked_on.strftime('%B %d, %Y')}"
         unless lower_bound.nil?
           content << if scaling['open_lower_bound']
                        "Nominal Lower Bound: #{lower_bound}"
