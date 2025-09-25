@@ -30,7 +30,7 @@ class Perplexity
         ].concat(messages),
         temperature: temperature,
         web_search_options: {
-          search_context_size: 'low'
+          search_context_size: 'medium'
         }
       }.to_json
     )
