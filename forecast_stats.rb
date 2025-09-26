@@ -52,7 +52,8 @@ when 'binary'
   sorted = values.sort
   mid = (sorted.count - 1) / 2.0
   median = (sorted[mid.floor] + sorted[mid.ceil]) / 2.0
-  standard_deviation = stddev(values).round(10)
+  median = median.round(3)
+  standard_deviation = stddev(values).round(6)
   Formatador.display "\n[bold][green]# #{type} Stats #{values}: count: #{count}, median: #{median}, stddev: #{standard_deviation}[/]\n"
 when 'multiple_choice'
   count = @forecasts.count
@@ -62,7 +63,8 @@ when 'multiple_choice'
     sorted = values.sort
     mid = (sorted.count - 1) / 2.0
     median = (sorted[mid.floor] + sorted[mid.ceil]) / 2.0
-    standard_deviation = stddev(values).round(10)
+    median = median.round(3)
+    standard_deviation = stddev(values).round(6)
     Formatador.display "\n[bold][green]# #{type} Stats `#{key}` = #{values}: count: #{count}, median: #{median}, stddev: #{standard_deviation}[/]"
   end
   puts
