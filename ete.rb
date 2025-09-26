@@ -25,8 +25,10 @@ system "echo $(cat tmp/#{post_id}/post.json | jq -r '.question.description')"
   fork { system("./forecast.rb #{post_id} #{forecaster_index}") }
 end
 Process.waitall
+system "./forecast_stats.rb #{post_id} forecast"
 0.upto(3).each do |forecaster_index|
   fork { system("./revise_forecast.rb #{post_id} #{forecaster_index}") }
 end
 Process.waitall
+system "./forecast_stats.rb #{post_id} revision"
 system "./consensus.rb #{post_id}"

@@ -48,29 +48,6 @@ FORECASTERS.each_with_index do |provider, index|
                         end
 end
 
-case question.type
-when 'binary'
-  count = @revised_forecasts.count
-  values = @revised_forecasts.map(&:probability).map { |p| p.round(10) }
-  sorted = values.sort
-  mid = (sorted.count - 1) / 2.0
-  median = (sorted[mid.floor] + sorted[mid.ceil]) / 2.0
-  standard_deviation = stddev(values).round(10)
-  Formatador.display "\n[bold][green]## Forecast: #{values}, count: #{count}, median: #{median}, stddev: #{standard_deviation}[/]\n"
-when 'multiple_choice'
-  count = @revised_forecasts.count
-  probabilities = @revised_forecasts.map(&:probabilities)
-  probabilities.first.keys.each do |key|
-    values = probabilities.map { |forecast_probabilities| forecast_probabilities[key].round(10) }
-    sorted = values.sort
-    mid = (sorted.count - 1) / 2.0
-    median = (sorted[mid.floor] + sorted[mid.ceil]) / 2.0
-    standard_deviation = stddev(values).round(10)
-    Formatador.display "\n[bold][green]## Forecasts: `#{key}` = #{values}, count: #{count}, median: #{median}, stddev: #{standard_deviation}[/]"
-  end
-  puts
-end
-
 Formatador.display "\n[bold][green]# Superforecaster: Summarizing Consensus(#{post_id})…[/] "
 consensus_json = cache(post_id, 'forecasts/consensus.json') do
   llm = Anthropic.new
