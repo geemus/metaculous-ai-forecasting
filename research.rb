@@ -39,6 +39,7 @@ cache(post_id, 'research.json') do
   cache_write(post_id, 'inputs/research.md', @research_prompt)
   research = perplexity.eval({ 'role': 'user', 'content': @research_prompt })
   cache_write(post_id, 'outputs/research.md', research.content)
-  cache_write(post_id, 'reflects/research.md', research.extracted_content('reflect'))
+  cache_concat(post_id, 'reflects.md',
+               "# Research\n#{research.extracted_content('reflect')}\n\n")
   research.to_json
 end

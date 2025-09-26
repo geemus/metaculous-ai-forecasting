@@ -57,6 +57,7 @@ cache(post_id, "forecasts/forecast.#{forecaster_index}.json") do
   forecast = llm.eval({ 'role': 'user', 'content': forecast_prompt })
   puts forecast.content
   cache_write(post_id, "outputs/forecast.#{forecaster_index}.md", forecast.content)
-  cache_write(post_id, "reflects/forecast.#{forecaster_index}.md", forecast.extracted_content('reflect'))
+  cache_concat(post_id, 'reflects.md',
+               "# Forecast {#{forecaster_index}: #{provider}}\n#{forecast.extracted_content('reflect')}\n\n")
   forecast.to_json
 end

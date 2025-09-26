@@ -11,7 +11,7 @@ Thread.current[:formatador].instance_variable_set(:@indent, 0)
 # create cache directories as needed
 def init_cache(post_id)
   FileUtils.mkdir_p("./tmp/#{post_id}")
-  %w[consensus forecasts inputs outputs reflects].each do |dir|
+  %w[consensus forecasts inputs outputs].each do |dir|
     FileUtils.mkdir_p("./tmp/#{post_id}/#{dir}")
   end
 end
@@ -25,6 +25,12 @@ def cache(post_id, path, &block)
     File.write(tmp_path, data)
     data
   end
+end
+
+def cache_concat(question_id, path, data)
+  tmp_path = "./tmp/#{question_id}/#{path}"
+  cached = File.read(tmp_path) if File.exist?(tmp_path)
+  File.write(tmp_path, [cached, data].compact.join("\n"))
 end
 
 def cache_read!(question_id, path)

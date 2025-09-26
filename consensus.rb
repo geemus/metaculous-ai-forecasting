@@ -78,7 +78,7 @@ consensus_json = cache(post_id, 'forecasts/consensus.json') do
   cache_write(post_id, 'inputs/consensus.md', consensus_prompt)
   consensus = llm.eval({ 'role': 'user', 'content': consensus_prompt })
   cache_write(post_id, 'outputs/consensus.md', consensus.content)
-  cache_write(post_id, 'reflects/consensus.md', consensus.extracted_content('reflect'))
+  cache_concat(post_id, 'reflects.md', "# Consensus\n#{consensus.extracted_content('reflect')}")
   consensus.to_json
 end
 consensus = Anthropic::Response.new(data: JSON.parse(consensus_json))
