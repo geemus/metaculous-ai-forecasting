@@ -13,8 +13,8 @@ def init_cache(post_id)
   FileUtils.mkdir_p("./tmp/#{post_id}")
   FileUtils.mkdir_p("./tmp/#{post_id}/consensus")
   FileUtils.mkdir_p("./tmp/#{post_id}/forecasts")
-  FileUtils.mkdir_p("./tmp/#{post_id}/prompts") # FIXME: deprecate/remove?
-  FileUtils.mkdir_p("./tmp/#{post_id}/messages")
+  FileUtils.mkdir_p("./tmp/#{post_id}/inputs")
+  FileUtils.mkdir_p("./tmp/#{post_id}/outputs")
 end
 
 def cache(post_id, path, &block)
