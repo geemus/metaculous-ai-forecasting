@@ -3,16 +3,18 @@
 require './lib/helpers/response'
 
 class Anthropic
-  attr_accessor :model, :system, :temperature
+  attr_accessor :model, :system, :temperature, :tools
 
   def initialize(
     model: 'claude-sonnet-4-0',
     system: SUPERFORECASTER_SYSTEM_PROMPT,
-    temperature: 0.1
+    temperature: 0.1,
+    tools: []
   )
     @model = model
     @system = system
     @temperature = temperature
+    @tools = tools
   end
 
   # https://docs.anthropic.com/en/api/messages
@@ -25,7 +27,8 @@ class Anthropic
         max_tokens: 4096,
         messages: messages,
         system: system,
-        temperature: temperature
+        temperature: temperature,
+        tools: tools
       }.to_json
     )
     response = Response.new(

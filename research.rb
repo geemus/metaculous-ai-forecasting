@@ -10,6 +10,7 @@ require 'fileutils'
 require 'json'
 
 require './lib/metaculus'
+require './lib/anthropic'
 require './lib/perplexity'
 require './lib/prompts'
 require './lib/utility'
