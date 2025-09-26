@@ -3,14 +3,19 @@ Review these predictions for the same question from other superforecasters.
 <%- @forecasts.each do |f| -%>
 <%- next if f == @forecast -%>
 <forecast>
-<%= f.content %>
+<%= f.stripped_content('reflect') %>
 </forecast>
 <%- end -%>
 </forecasts>
 
-1. Review these forecasts and compare each to your initial forecast. Focus on differences in probabilities, key assumptions, reasoning, and supporting evidence.
-2. Provide a revised forecast, include your confidence level and note any uncertainties impacting your revision.
+- Compare each of these forecasts to your initial forecast. Focus on differences in probabilities, key assumptions, and reasoning.
 <%- unless %w[sonar-reasoning sonar-reasoning-pro sonar-deep-research].include?(llm.model) -%>
-3. Before revising your forecast, show step-by-step reasoning in clear, logical order starting with <think> on the line before and ending with </think> on the line after.
-<%- end %>
+- Before responding, show step-by-step reasoning in clear, logical order starting with `<think>` on the line before and ending with `</think>` on the line after.
+<%- end -%>
+- After responding, provide actionable recommendations to improve the prompt's effectiveness with reasoning explanations starting with `<reflect>` on the line before and ending with `</reflect>` on the line after.
+- Provide a revised forecast, include your confidence level and note any uncertainties impacting your revision.
 
+- Before your forecast, write:
+  - The time remaining before the outcome of the question will become known.
+  - The status quo outcome if nothing changed.
+  - The expectations of experts and markets.

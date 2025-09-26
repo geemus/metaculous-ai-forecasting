@@ -35,7 +35,7 @@ end
 
 research_json = cache_read!(post_id, 'research.json')
 research = Perplexity::Response.new(data: JSON.parse(research_json))
-@research_output = research.content
+@research_output = research.stripped_content('reflect')
 
 @revised_forecasts = []
 FORECASTERS.each_with_index do |provider, index|
@@ -78,6 +78,7 @@ consensus_json = cache(post_id, 'forecasts/consensus.json') do
   cache_write(post_id, 'inputs/consensus.md', consensus_prompt)
   consensus = llm.eval({ 'role': 'user', 'content': consensus_prompt })
   cache_write(post_id, 'outputs/consensus.md', consensus.content)
+  cache_write(post_id, 'reflects/consensus.md', consensus.extracted_content('reflect'))
   consensus.to_json
 end
 consensus = Anthropic::Response.new(data: JSON.parse(consensus_json))

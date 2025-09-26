@@ -12,7 +12,7 @@ Today is <%= Time.now.strftime('%B %d, %Y') %>.
 <%- unless %w[sonar-reasoning sonar-reasoning-pro sonar-deep-research].include?(llm.model) -%>
 - Before responding, show step-by-step reasoning in clear, logical order starting with `<think>` on the line before and ending with `</think>` on the line after.
 <%- end -%>
-- Before providing your forecast, write:
+- Before your forecast, write:
   - The time remaining before the outcome of the question will become known.
   - The status quo outcome if nothing changed.
   - The expectations of experts and markets.

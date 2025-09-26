@@ -34,9 +34,11 @@ if question.existing_forecast? && !%w[578 14333 22427 38880].include?(post_id)
   exit
 end
 
+cache_write(post_id, 'inputs/system.superforecaster.md', SUPERFORECASTER_SYSTEM_PROMPT)
+
 research_json = cache_read!(post_id, 'research.json')
 research = Perplexity::Response.new(data: JSON.parse(research_json))
-@research_output = research.content
+@research_output = research.stripped_content('reflect')
 
 provider = FORECASTERS[forecaster_index]
 Formatador.display "\n[bold][green]# Superforecaster[#{forecaster_index}: #{provider}]: Forecasting(#{post_id})…[/] "
@@ -55,5 +57,6 @@ cache(post_id, "forecasts/forecast.#{forecaster_index}.json") do
   forecast = llm.eval({ 'role': 'user', 'content': forecast_prompt })
   puts forecast.content
   cache_write(post_id, "outputs/forecast.#{forecaster_index}.md", forecast.content)
+  cache_write(post_id, "reflects/forecast.#{forecaster_index}.md", forecast.extracted_content('reflect'))
   forecast.to_json
 end

@@ -29,6 +29,8 @@ if question.existing_forecast? && !%w[578 14333 22427 38880].include?(post_id)
   exit
 end
 
+cache_write(post_id, 'inputs/system.researcher.md', RESEARCHER_SYSTEM_PROMPT)
+
 Formatador.display "\n[bold][green]# Researcher: Drafting Research(#{post_id})…[/] "
 cache(post_id, 'research.json') do
   # perplexity = Perplexity.new(model: 'sonar-deep-research')
@@ -37,5 +39,6 @@ cache(post_id, 'research.json') do
   cache_write(post_id, 'inputs/research.md', @research_prompt)
   research = perplexity.eval({ 'role': 'user', 'content': @research_prompt })
   cache_write(post_id, 'outputs/research.md', research.content)
+  cache_write(post_id, 'reflects/research.md', research.extracted_content('reflect'))
   research.to_json
 end

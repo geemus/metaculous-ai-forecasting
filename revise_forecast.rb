@@ -36,7 +36,7 @@ end
 
 research_json = cache_read!(post_id, 'research.json')
 research = Perplexity::Response.new(data: JSON.parse(research_json))
-@research_output = research.content
+@research_output = research.stripped_content('reflect')
 
 @forecasts = []
 FORECASTERS.each_with_index do |provider, index|
@@ -96,5 +96,6 @@ cache(post_id, "forecasts/revision.#{forecaster_index}.json") do
   )
   puts revision.content
   cache_write(post_id, "outputs/revision.#{forecaster_index}.md", revision.content)
+  cache_write(post_id, "reflects/revision.#{forecaster_index}.md", revision.extracted_content('reflect'))
   revision.to_json
 end

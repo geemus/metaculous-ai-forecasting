@@ -11,10 +11,9 @@ Thread.current[:formatador].instance_variable_set(:@indent, 0)
 # create cache directories as needed
 def init_cache(post_id)
   FileUtils.mkdir_p("./tmp/#{post_id}")
-  FileUtils.mkdir_p("./tmp/#{post_id}/consensus")
-  FileUtils.mkdir_p("./tmp/#{post_id}/forecasts")
-  FileUtils.mkdir_p("./tmp/#{post_id}/inputs")
-  FileUtils.mkdir_p("./tmp/#{post_id}/outputs")
+  %w[consensus forecasts inputs outputs reflects].each do |dir|
+    FileUtils.mkdir_p("./tmp/#{post_id}/#{dir}")
+  end
 end
 
 def cache(post_id, path, &block)
@@ -49,7 +48,7 @@ def extract_xml(text, *tags)
     match = text.match(regex)
     extracted << match[1].strip if match
   end
-  extracted.join("\n")
+  extracted.join("\n").strip
 end
 
 def strip_xml(text, *tags)
@@ -58,7 +57,7 @@ def strip_xml(text, *tags)
     regex = %r{<#{tag}>([\s\S]*)</#{tag}>}
     stripped.gsub!(regex, '')&.strip
   end
-  stripped
+  stripped.strip
 end
 
 def stddev(values)
