@@ -42,13 +42,23 @@ end
 
 # https://github.com/anthropics/anthropic-cookbook/blob/main/patterns/agents/util.py
 # https://ruby-doc.org/3.4.1/String.html#method-i-match
-def extract_xml(tag, text)
-  match = text.match(%r{<#{tag}>([\s\S]*?)</#{tag}>})
-  match[1].strip if match
+def extract_xml(text, *tags)
+  extracted = []
+  tags.each do |tag|
+    regex = %r{<#{tag}>([\s\S]*)</#{tag}>}
+    match = text.match(regex)
+    extracted << match[1].strip if match
+  end
+  extracted.join("\n")
 end
 
-def strip_xml(tag, text)
-  text.gsub(%r{<#{tag}>([\s\S]*?)</#{tag}>}, '').strip
+def strip_xml(text, *tags)
+  stripped = text.dup
+  tags.each do |tag|
+    regex = %r{<#{tag}>([\s\S]*)</#{tag}>}
+    stripped.gsub!(regex, '')&.strip
+  end
+  stripped
 end
 
 def stddev(values)

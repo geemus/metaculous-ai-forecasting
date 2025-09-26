@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module ResponseHelpers
-  def extracted_content(tag)
-    extract_xml(tag, content)
+  def extracted_content(*tags)
+    extract_xml(content, *tags)
   end
 
   def percentiles
@@ -37,8 +37,8 @@ module ResponseHelpers
     end
   end
 
-  def stripped_content(tag)
-    strip_xml(tag, content)
+  def stripped_content(*tags)
+    strip_xml(content, *tags)
   end
 
   def to_json(*args)
