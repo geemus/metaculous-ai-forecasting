@@ -112,10 +112,9 @@ class Metaculus
         if type == 'multiple_choice'
           options.each_with_index do |option, index|
             content << format(
-              'Option "%<option>s": { mean: %0.2<mean>f%%, lowest: %0.2<lowest>f%%, median: %0.2<median>f%%, highest: %0.2<highest>f%% }',
+              'Option "%<option>s": { lowest: %0.2<lowest>f%%, median: %0.2<median>f%%, highest: %0.2<highest>f%% }',
               {
                 option: option,
-                mean: latest_aggregations['means'][index] * 100,
                 lowest: latest_aggregations['interval_lower_bounds'][index] * 100,
                 median: latest_aggregations['centers'][index] * 100,
                 highest: latest_aggregations['interval_upper_bounds'][index] * 100
@@ -124,7 +123,6 @@ class Metaculus
           end
         else
           units_string = units.empty? ? '' : " #{units}"
-          content << "Mean: #{latest_mean}#{units_string}" if latest_mean
           if %w[discrete numeric].include?(type) && scaling['open_lower_bound']
             below_lower_bound = (1 - latest_aggregations['forecast_values'].first) * 100
             content << format(
@@ -173,17 +171,6 @@ class Metaculus
 
     def latest_forecaster_count
       @latest_forecaster_count ||= latest_aggregations['forecaster_count']
-    end
-
-    def latest_mean
-      @latest_mean ||= case type
-                       when 'binary'
-                         format('%0.2f%%', latest_aggregations['means'].first * 100)
-                       when 'multiple_choice'
-                         # handled in aggregate_content
-                       else
-                         latest_aggregations['means'] && (latest_aggregations['means'].first * 100).round
-                       end
     end
 
     def latest_median
