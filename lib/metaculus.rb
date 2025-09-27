@@ -176,7 +176,14 @@ class Metaculus
     end
 
     def latest_mean
-      @latest_mean ||= latest_aggregations['means'] && (latest_aggregations['means'].first * 100).round
+      @latest_mean ||= case type
+                       when 'binary'
+                         format('%0.2f%%', latest_aggregations['means'].first * 100)
+                       when 'multiple_choice'
+                         # handled in aggregate_content
+                       else
+                         latest_aggregations['means'] && (latest_aggregations['means'].first * 100).round
+                       end
     end
 
     def latest_median
@@ -184,7 +191,7 @@ class Metaculus
                          when 'binary'
                            format('%0.2f%%', latest_aggregations['centers'].first * 100)
                          when 'multiple_choice'
-                           # TODO: implement
+                           # handled in aggregate_content
                          else
                            (latest_aggregations['centers'].first * upper_bound).round(2)
                          end

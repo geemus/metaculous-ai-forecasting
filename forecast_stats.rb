@@ -45,6 +45,13 @@ FORECASTERS.each_with_index do |provider, index|
                 end
 end
 
+unless question.aggregate_content.empty?
+  Formatador.display "\n[bold][green]# Aggregates:[/]\n"
+  Formatador.indent do
+    question.aggregate_content.split("\n").each { |line| Formatador.display_line(line) }
+  end
+end
+
 case question.type
 when 'binary'
   count = @forecasts.count
