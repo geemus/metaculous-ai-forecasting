@@ -384,7 +384,9 @@ class Metaculus
     end
 
     def latest_aggregations
-      @latest_aggregations ||= data.dig('question', 'aggregations', 'recency_weighted', 'latest')
+      @latest_aggregations ||= begin
+        data.dig('question', 'aggregations', 'recency_weighted', 'latest') || synced_question&.send(:latest_aggregations)
+      end
     end
 
     def question
@@ -393,6 +395,26 @@ class Metaculus
 
     def scaling
       @scaling ||= data.dig('question', 'scaling')
+    end
+
+    def synced_question
+      @synced_question ||= begin
+        return nil unless synced_question_id
+
+        init_cache(synced_question_id)
+        post_json = cache(synced_question_id, 'post.json') do
+          Metaculus.get_post(synced_question_id).to_json
+        end
+        Metaculus::Question.new(data: JSON.parse(post_json))
+      end
+    end
+
+    def synced_question_id
+      @synced_question_id ||= begin
+        regex = %r{This question is synced with an identical question on Metaculus. The original question opened on \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} and can be found \[here\]\(https://www.metaculus.com/questions\/(\d+)\).}
+        match = background.match(regex)
+        match[1] if match
+      end
     end
   end
 end
