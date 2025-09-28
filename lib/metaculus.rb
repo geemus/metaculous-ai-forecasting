@@ -112,12 +112,10 @@ class Metaculus
         if type == 'multiple_choice'
           options.each_with_index do |option, index|
             content << format(
-              'Option "%<option>s": { lowest: %0.2<lowest>f%%, median: %0.2<median>f%%, highest: %0.2<highest>f%% }',
+              'Option "%<option>s" Median: %0.2<median>f%%',
               {
                 option: option,
-                lowest: latest_aggregations['interval_lower_bounds'][index] * 100,
-                median: latest_aggregations['centers'][index] * 100,
-                highest: latest_aggregations['interval_upper_bounds'][index] * 100
+                median: latest_aggregations['centers'][index] * 100
               }
             )
           end
