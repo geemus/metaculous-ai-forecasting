@@ -3,7 +3,7 @@ name: fall-aib-2025 Executor
 on:
   workflow_dispatch:
   schedule:
-    - cron: "5/15 * * * *" # run every 15 minutes, starting at 5 past the hour
+    - cron: "5/20 * * * *" # run every 20 minutes, starting at 5 past the hour
 
 jobs:
   query:

@@ -3,7 +3,7 @@ name: minibench Executor
 on:
   workflow_dispatch:
   schedule:
-    - cron: "10/15 * * * *" # run every 15 minutes, starting at 10 past the hour
+    - cron: "10/20 * * * *" # run every 20 minutes, starting at 10 past the hour
 
 jobs:
   query:
