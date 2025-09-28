@@ -403,9 +403,9 @@ class Metaculus
 
     def synced_question_id
       @synced_question_id ||= begin
-        regex = %r{This question is synced with an identical question on Metaculus. The original question opened on \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} and can be found \[here\]\(https://www.metaculus.com/questions\/(\d+)\).}
-        match = background.match(regex)
-        match[1] if match
+        json = background.split("\n").last[1...-1]
+        data = JSON.parse(json)
+        data.dig('info', 'post_id')
       end
     end
   end
