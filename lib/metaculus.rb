@@ -406,6 +406,8 @@ class Metaculus
         json = background.split("\n").last[1...-1]
         data = JSON.parse(json)
         data.dig('info', 'post_id')
+      rescue JSON::ParserError
+        nil
       end
     end
   end
