@@ -1,9 +1,9 @@
-name: fall-aib-2025 Executor
+name: Tournaments
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: "5/20 * * * *" # run every 20 minutes, starting at 5 past the hour
+    - cron: "5/15 * * * *" # run every 15 minutes, starting at 5 past the hour
 
 jobs:
   query:
@@ -16,7 +16,7 @@ jobs:
     steps:
       - id: post_ids
         run: |
-          echo "post_ids=$(curl "https://www.metaculus.com/api/posts/?forecast_type=binary,discrete,multiple_choice,numeric&include_description=true&not_forecaster_id=$METACULUS_BOT_ID&offset=0&statuses=open&tournaments=fall-aib-2025" -H "Authorization: Token $METACULUS_BOT_API_TOKEN" \
+          echo "post_ids=$(curl "https://www.metaculus.com/api/posts/?forecast_type=binary,discrete,multiple_choice,numeric&include_description=true&not_forecaster_id=$METACULUS_BOT_ID&offset=0&statuses=open&tournaments=fall-aib-2025&tournaments=minibench" -H "Authorization: Token $METACULUS_BOT_API_TOKEN" \
             | jq -c '.results | map(.id)')" >> $GITHUB_OUTPUT
         env:
           METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
