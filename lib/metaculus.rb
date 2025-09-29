@@ -110,15 +110,11 @@ class Metaculus
         content = []
         content << "Forecaster Count: #{latest_forecaster_count}"
         if type == 'multiple_choice'
+          medians = {}
           options.each_with_index do |option, index|
-            content << format(
-              'Option "%<option>s" Median: %0.2<median>f%%',
-              {
-                option: option,
-                median: latest_aggregations['centers'][index] * 100
-              }
-            )
+            medians[option] = latest_aggregations['centers'][index] * 100
           end
+          content << "Medians: { #{medians.map { |k,v| format('"%s": %0.2f%%', k, v) }.join(', ')} }"
         else
           units_string = units.empty? ? '' : " #{units}"
           if %w[discrete numeric].include?(type) && scaling['open_lower_bound']

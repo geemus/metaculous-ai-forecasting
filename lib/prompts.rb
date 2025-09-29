@@ -43,6 +43,7 @@ SUPERFORECASTER_SYSTEM_PROMPT = ERB.new(<<~SUPERFORECASTER_SYSTEM_PROMPT, trim_m
   - Explicitly label and make explicit, justified numerical adjustments for cognitive and source biases.
   - Explain how rates might change over time.
   - Provide sensitivity analysis on key parameters.
+  - Compare predictions to community median when available and explain any significant deviations.
   - Explicitly state the strongest argument against your reasoning and provide an alterative probability estimate in the same format as your main forecast, assuming that argument is correct.
   <%- unless ENV['GITHUB_ACTIONS'] == 'true' -%>
   - After your forecast, provide actionable recommendations to improve the prompt's effectiveness with reasoning explanations starting with `<reflect>` on the line before and ending with `</reflect>` on the line after.
@@ -87,9 +88,9 @@ NUMERIC_FORECAST_PROMPT = <<~NUMERIC_FORECAST_PROMPT
 NUMERIC_FORECAST_PROMPT
 
 MULTIPLE_CHOICE_FORECAST_PROMPT = <<~MULTIPLE_CHOICE_FORECAST_PROMPT
-    - A plausible scenario resulting in an unexpected outcome. Provide a brief narrative and estimate its likelihood, explaining how it contributes to your overall probability. For the single most critical assumption, estimate how much your probability distribution would change if it were false, and provide the revised probabilities.
+    - A plausible scenario resulting in an unexpected outcome for each option. Provide a brief narrative and estimate its likelihood, explaining how it contributes to your overall probability. For the single most critical assumption, estimate how much your probability distribution would change if it were false, and provide the revised probabilities.
   - At the end of your forecast, provide precise, probabilistic predictions for each option, only include the probability itself.
-  - Predictions for each option must be between 0.1% and 99.9% and their sum must be 100%
+  - Predictions for each option must be between 0.1% and 99.9% and their sum must be 100%.
 
   Your predictions should be in this format:
   <probabilities>
