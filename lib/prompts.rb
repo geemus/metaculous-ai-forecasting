@@ -55,8 +55,8 @@ FORECAST_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/forecast.er
 SHARED_FORECAST_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/shared_forecast.erb'), trim_mode: '-')
 
 BINARY_FORECAST_PROMPT = <<~BINARY_FORECAST_PROMPT
-    - A plausible scenario resulting in a No outcome. Provide a brief narrative and estimate its likelihood, explaining how it contributes to your overall probability. For the single most critical assumption, estimate how much your probability distribution would change if it were false, and provide the revised probabilities.
-    - A plausible scenario resulting in a Yes outcome. Provide a brief narrative and estimate its likelihood, explaining how it contributes to your overall probability. For the single most critical assumption, estimate how much your probability distribution would change if it were false, and provide the revised probabilities.
+    - A plausible scenario resulting in a No outcome. Provide a brief narrative and estimate its likelihood, explaining how it contributes to your overall probability. For the 2-3 most critical assumption, estimate how much your probability distribution would change if it were false, and provide the revised probabilities.
+    - A plausible scenario resulting in a Yes outcome. Provide a brief narrative and estimate its likelihood, explaining how it contributes to your overall probability. For the 2-3 most critical assumption, estimate how much your probability distribution would change if it were false, and provide the revised probabilities.
   - At the end of your forecast, provide a single, precise probability in the specified format.
 
   Your prediction should be in this format:
@@ -67,8 +67,8 @@ BINARY_FORECAST_PROMPT
 
 NUMERIC_FORECAST_PROMPT = <<~NUMERIC_FORECAST_PROMPT
     - The outcome if the current trend continued.
-    - A plausible scenario resulting in a low outcome. Provide a brief narrative and estimate its likelihood, explaining how it contributes to your overall probability. For the single most critical assumption, estimate how much your probability distribution would change if it were false, and provide the revised probabilities.
-    - A plausible scenario resulting in a high outcome. Provide a brief narrative and estimate its likelihood, explaining how it contributes to your overall probability. For the single most critical assumption, estimate how much your probability distribution would change if it were false, and provide the revised probabilities.
+    - A plausible scenario resulting in a low outcome. Provide a brief narrative and estimate its likelihood, explaining how it contributes to your overall probability. For the 2-3 most critical assumption, estimate how much your probability distribution would change if it were false, and provide the revised probabilities.
+    - A plausible scenario resulting in a high outcome. Provide a brief narrative and estimate its likelihood, explaining how it contributes to your overall probability. For the 2-3 assumption, estimate how much your probability distribution would change if it were false, and provide the revised probabilities.
   - At the end of your forecast, provide precise, percentile predictions of values in the given units and range, only include the values and units, do not use ranges of values.
 
   Your predictions should be in this format:
@@ -88,7 +88,7 @@ NUMERIC_FORECAST_PROMPT = <<~NUMERIC_FORECAST_PROMPT
 NUMERIC_FORECAST_PROMPT
 
 MULTIPLE_CHOICE_FORECAST_PROMPT = <<~MULTIPLE_CHOICE_FORECAST_PROMPT
-    - A plausible scenario resulting in an unexpected outcome for each option. Provide a brief narrative and estimate its likelihood, explaining how it contributes to your overall probability. For the single most critical assumption, estimate how much your probability distribution would change if it were false, and provide the revised probabilities.
+    - A plausible scenario resulting in an unexpected outcome for each option. Provide a brief narrative and estimate its likelihood, explaining how it contributes to your overall probability. For the 2-3 most critical assumption, estimate how much your probability distribution would change if it were false, and provide the revised probabilities.
   - At the end of your forecast, provide precise, probabilistic predictions for each option, only include the probability itself.
   - Predictions for each option must be between 0.1% and 99.9% and their sum must be 100%.
 
