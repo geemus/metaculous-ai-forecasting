@@ -55,10 +55,10 @@ jobs:
           echo "# $(cat tmp/${{ inputs.post_id }}/post.json | jq -r '.title')" >> $GITHUB_STEP_SUMMARY
           echo "$(cat tmp/${{ inputs.post_id }}/post.json | jq -r '.question.description')" >> $GITHUB_STEP_SUMMARY
           echo '<details><summary>Prompt</summary>' >> $GITHUB_STEP_SUMMARY
-          echo "$(cat tmp/${{ inputs.post_id }}/prompts/research.md)" >> $GITHUB_STEP_SUMMARY
+          echo "$(cat tmp/${{ inputs.post_id }}/inputs/research.md)" >> $GITHUB_STEP_SUMMARY
           echo '</details>' >> $GITHUB_STEP_SUMMARY
           echo '<details><summary>Result</summary>' >> $GITHUB_STEP_SUMMARY
-          echo "$(cat tmp/${{ inputs.post_id }}/research.md)" >> $GITHUB_STEP_SUMMARY
+          echo "$(cat tmp/${{ inputs.post_id }}/outputs/research.md)" >> $GITHUB_STEP_SUMMARY
           echo '</details>' >> $GITHUB_STEP_SUMMARY
 
   forecast:
@@ -90,10 +90,10 @@ jobs:
           path: tmp/${{ inputs.post_id }}/forecasts/forecast.${{ matrix.forecaster_index }}.json
       - run: |
           echo '<details><summary>Prompt</summary>' >> $GITHUB_STEP_SUMMARY
-          echo "$(cat tmp/${{ inputs.post_id }}/prompts/forecast.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
+          echo "$(cat tmp/${{ inputs.post_id }}/inputs/forecast.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
           echo '</details>' >> $GITHUB_STEP_SUMMARY
           echo '<details><summary>Result</summary>' >> $GITHUB_STEP_SUMMARY
-          echo "$(cat tmp/${{ inputs.post_id }}/forecasts/forecast.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
+          echo "$(cat tmp/${{ inputs.post_id }}/outputs/forecast.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
           echo '</details>' >> $GITHUB_STEP_SUMMARY
 
   revise_forecast:
@@ -130,10 +130,10 @@ jobs:
           path: tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.json
       - run: |
           echo '<details><summary>Prompt</summary>' >> $GITHUB_STEP_SUMMARY
-          echo "$(cat tmp/${{ inputs.post_id }}/prompts/revision.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
+          echo "$(cat tmp/${{ inputs.post_id }}/inputs/revision.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
           echo '</details>' >> $GITHUB_STEP_SUMMARY
           echo '<details><summary>Result</summary>' >> $GITHUB_STEP_SUMMARY
-          echo "$(cat tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
+          echo "$(cat tmp/${{ inputs.post_id }}/outputs/revision.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
           echo '</details>' >> $GITHUB_STEP_SUMMARY
 
   consensus:
@@ -163,10 +163,10 @@ jobs:
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
       - run: |
           echo '<details><summary>Prompt</summary>' >> $GITHUB_STEP_SUMMARY
-          echo "$(cat tmp/${{ inputs.post_id }}/prompts/consensus.md)" >> $GITHUB_STEP_SUMMARY
+          echo "$(cat tmp/${{ inputs.post_id }}/inputs/consensus.md)" >> $GITHUB_STEP_SUMMARY
           echo '</details>' >> $GITHUB_STEP_SUMMARY
           echo '<details><summary>Result</summary>' >> $GITHUB_STEP_SUMMARY
-          echo "$(cat tmp/${{ inputs.post_id }}/forecasts/consensus.md)" >> $GITHUB_STEP_SUMMARY
+          echo "$(cat tmp/${{ inputs.post_id }}/outputs/consensus.md)" >> $GITHUB_STEP_SUMMARY
           echo '</details>' >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "---" >> $GITHUB_STEP_SUMMARY
