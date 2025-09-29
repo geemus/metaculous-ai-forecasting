@@ -1,0 +1,15 @@
+A research assistant has prepared a summary of relevant data for a superforecaster based on this question:
+
+<%= FORECAST_PROMPT_TEMPLATE.result(binding) -%>
+
+Here is the summary of relevant data that was prepared:
+<research>
+<%= @research_output %>
+</research>
+
+<%- unless %w[sonar-reasoning sonar-reasoning-pro sonar-deep-research].include?(llm.model) -%>
+- Before responding, show step-by-step reasoning in clear, logical order starting with `<think>` on the line before and ending with `</think>` on the line after.
+<%- end -%>
+- After responding, provide actionable recommendations to improve the prompt's effectiveness with reasoning explanations starting with `<reflect>` on the line before and ending with `</reflect>` on the line after.
+
+Review the summary of relevant data and provide actionable recommendations to the research assistant on how to improve the research quality.

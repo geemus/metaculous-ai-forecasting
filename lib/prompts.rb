@@ -119,3 +119,5 @@ end
 FORECAST_DELPHI_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/forecast_delphi.erb'), trim_mode: '-')
 
 FORECAST_CONSENSUS_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/forecast_consensus.erb'), trim_mode: '-')
+
+REVIEW_RESEARCH_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/review_research.erb'), trim_mode: '-')
