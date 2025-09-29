@@ -152,7 +152,7 @@ class Metaculus
     end
 
     def background
-      @background ||= question['description']
+      @background ||= question && question['description']
     end
 
     def criteria_content
@@ -403,6 +403,8 @@ class Metaculus
 
     def synced_question_id
       @synced_question_id ||= begin
+        return nil unless background
+
         json = background.split("\n").last[1...-1]
         data = JSON.parse(json)
         data.dig('info', 'post_id')
