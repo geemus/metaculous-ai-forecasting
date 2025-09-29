@@ -20,9 +20,8 @@ post_id = ARGV[0] || raise('post id argument is required')
 init_cache(post_id)
 
 Formatador.display "\n[bold][green]# Metaculus: Getting Post(#{post_id})…[/] "
-post_json = cache(post_id, 'post.json') do
-  Metaculus.get_post(post_id).to_json
-end
+post_json = Metaculus.get_post(post_id).to_json
+cache_write(post_id, 'post.json', post_json)
 question = Metaculus::Question.new(data: JSON.parse(post_json))
 
 if question.existing_forecast? && !%w[578 14333 22427 38880].include?(post_id)

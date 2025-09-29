@@ -27,7 +27,8 @@ post_id = ARGV[0] || raise('post id argv[0] is required')
 forecaster_index = ARGV[1]&.to_i || raise('forecaster index argv[1] is required')
 init_cache(post_id)
 
-post_json = cache_read!(post_id, 'post.json')
+post_json = Metaculus.get_post(post_id).to_json
+cache_write(post_id, 'post.json', post_json)
 question = Metaculus::Question.new(data: JSON.parse(post_json))
 if question.existing_forecast? && !%w[578 14333 22427 38880].include?(post_id)
   Formatador.display "\n[bold][green]# Skipping: Already Submitted Forecast for #{post_id}[/] "
