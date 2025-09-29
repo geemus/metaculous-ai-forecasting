@@ -39,7 +39,7 @@ research = Perplexity::Response.new(data: JSON.parse(research_json))
 provider = FORECASTERS[forecaster_index]
 
 Formatador.display "\n[bold][green]# Forecaster: Reviewing Research(#{post_id})…[/] "
-cache(post_id, 'research.revision.json') do
+cache(post_id, "research.revision.#{forecaster_index}.json") do
   llm_args = {
     system: '',
     temperature: 0.1
@@ -54,14 +54,14 @@ cache(post_id, 'research.revision.json') do
   research_prompt = FORECAST_PROMPT_TEMPLATE.result(binding)
   review_research_prompt = REVIEW_RESEARCH_PROMPT_TEMPLATE.result(binding)
 
-  cache_write(post_id, 'inputs/research.revision.md', review_research_prompt)
+  cache_write(post_id, "inputs/research.revision.#{forecaster_index}.md", review_research_prompt)
   revision = llm.eval(
     { 'role': 'user', 'content': research_prompt },
     { 'role': 'assistant', 'content': @research_output },
     { 'role': 'user', 'content': review_research_prompt }
   )
   puts revision.content
-  cache_write(post_id, 'outputs/research.revision.md', revision.content)
+  cache_write(post_id, "outputs/research.revision.#{forecaster_index}.md", revision.content)
   cache_concat(post_id, 'reflects.md',
                "# Research Revision #{provider}\n#{revision.extracted_content('reflect')}\n\n")
   revision.to_json
