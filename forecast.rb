@@ -10,6 +10,7 @@ require 'fileutils'
 require 'json'
 
 require './lib/anthropic'
+require './lib/deepseek'
 require './lib/metaculus'
 require './lib/openai'
 require './lib/perplexity'
@@ -48,8 +49,10 @@ cache(post_id, "forecasts/forecast.#{forecaster_index}.json") do
   llm = case provider
         when :anthropic
           Anthropic.new(temperature: 0.9) # 0-1
+        when :deepseek
+          DeepSeek.new(temperature: 0.9) # 0-2
         when :openai
-          OpenAI.new
+          OpenAI.new # temp not supported for micro/nano
         when :perplexity
           Perplexity.new(
             system: SUPERFORECASTER_SYSTEM_PROMPT,

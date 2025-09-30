@@ -93,7 +93,6 @@ class Anthropic
     end
 
     def cost
-      # NOTE: Anthropic API doesn't appear to provide cost data
       @cost ||= begin
         # FIXME: this is sonnet pricing specifically, fwiw
         cost = 0
