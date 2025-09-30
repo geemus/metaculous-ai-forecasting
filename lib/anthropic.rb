@@ -70,16 +70,16 @@ class Anthropic
       @duration = duration
     end
 
-    # NOTE: Anthropic API doesn't appear to return cost data
     def display_meta
       Formatador.display_line(
         format(
-          '[light_green](%<total>d: %<input>d -> %<output>d tokens in %<minutes>dm %<seconds>ds)[/]',
+          '[light_green](%<total>d: %<input>d -> %<output>d tokens in %<minutes>dm %<seconds>ds @ $%<cost>0.2f)[/]',
           {
             total: total_tokens,
             input: input_tokens,
             output: output_tokens,
-            minutes: duration / 60, seconds: duration % 60
+            minutes: duration / 60, seconds: duration % 60,
+            cost: cost
           }
         )
       )
@@ -89,6 +89,17 @@ class Anthropic
       @content ||= begin
         text_array = data['content'].select { |content| content['type'] == 'text' }
         text_array.map { |content| content['text'] }.join("\n")
+      end
+    end
+
+    def cost
+      # NOTE: Anthropic API doesn't appear to provide cost data
+      @cost ||= begin
+        # FIXME: this is sonnet pricing specifically, fwiw
+        cost = 0
+        cost += (input_tokens / 1_000_000.0) * 3.0 # $3/MTok
+        cost += (output_tokens / 1_000_000.0) * 15.0 # $15/MTok
+        cost.round(2)
       end
     end
 
