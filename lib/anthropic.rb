@@ -6,7 +6,7 @@ class Anthropic
   attr_accessor :model, :system, :temperature, :tools
 
   def initialize(
-    model: 'claude-sonnet-4-0',
+    model: 'claude-sonnet-4-5',
     system: SUPERFORECASTER_SYSTEM_PROMPT,
     temperature: 0.1,
     tools: []
@@ -26,6 +26,7 @@ class Anthropic
         model: model,
         max_tokens: 4096,
         messages: messages,
+        stream: false,
         system: system,
         temperature: temperature,
         tools: tools
