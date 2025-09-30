@@ -39,9 +39,9 @@ FORECASTERS.each_with_index do |provider, index|
   forecast_json = cache_read!(post_id, "forecasts/#{type}.#{index}.json")
   @forecasts << case provider
                 when :anthropic
-                  Anthropic::Response.new(data: JSON.parse(forecast_json))
+                  Anthropic::Response.new(json: forecast_json)
                 when :perplexity
-                  Perplexity::Response.new(data: JSON.parse(forecast_json))
+                  Perplexity::Response.new(json: forecast_json)
                 end
 end
 

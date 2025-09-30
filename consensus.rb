@@ -35,7 +35,7 @@ if question.existing_forecast? && !%w[578 14333 22427 38880].include?(post_id)
 end
 
 research_json = cache_read!(post_id, 'research.json')
-research = Perplexity::Response.new(data: JSON.parse(research_json))
+research = Perplexity::Response.new(json: research_json)
 @research_output = research.stripped_content('reflect')
 
 @revised_forecasts = []
@@ -43,9 +43,9 @@ FORECASTERS.each_with_index do |provider, index|
   forecast_json = cache_read!(post_id, "forecasts/revision.#{index}.json")
   @revised_forecasts << case provider
                         when :anthropic
-                          Anthropic::Response.new(data: JSON.parse(forecast_json))
+                          Anthropic::Response.new(json: forecast_json)
                         when :perplexity
-                          Perplexity::Response.new(data: JSON.parse(forecast_json))
+                          Perplexity::Response.new(json: forecast_json)
                         end
 end
 
@@ -59,7 +59,7 @@ consensus_json = cache(post_id, 'forecasts/consensus.json') do
   cache_concat(post_id, 'reflects.md', "# Consensus\n#{consensus.extracted_content('reflect')}")
   consensus.to_json
 end
-consensus = Anthropic::Response.new(data: JSON.parse(consensus_json))
+consensus = Anthropic::Response.new(json: consensus_json)
 puts consensus.content
 
 question.submit(consensus)

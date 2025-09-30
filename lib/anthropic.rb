@@ -33,7 +33,7 @@ class Anthropic
     )
     response = Response.new(
       duration: Time.now - start_time,
-      data: JSON.parse(excon_response.body)
+      json: excon_response.body
     )
     response.display_meta
     response
@@ -64,8 +64,8 @@ class Anthropic
 
     attr_accessor :data, :duration
 
-    def initialize(data:, duration: nil)
-      @data = data
+    def initialize(duration: nil, json: '{}')
+      @data = JSON.parse(json)
       @duration = duration
     end
 

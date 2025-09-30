@@ -34,7 +34,7 @@ if question.existing_forecast? && !%w[578 14333 22427 38880].include?(post_id)
 end
 
 research_json = cache_read!(post_id, 'research.json')
-research = Perplexity::Response.new(data: JSON.parse(research_json))
+research = Perplexity::Response.new(json: research_json)
 @research_output = research.stripped_content('reflect')
 
 provider = FORECASTERS[forecaster_index]
