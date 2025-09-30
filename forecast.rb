@@ -11,6 +11,7 @@ require 'json'
 
 require './lib/anthropic'
 require './lib/metaculus'
+require './lib/openai'
 require './lib/perplexity'
 require './lib/prompts'
 require './lib/utility'
@@ -47,6 +48,8 @@ cache(post_id, "forecasts/forecast.#{forecaster_index}.json") do
   llm = case provider
         when :anthropic
           Anthropic.new(temperature: 0.9) # 0-1
+        when :openai
+          OpenAI.new
         when :perplexity
           Perplexity.new(
             system: SUPERFORECASTER_SYSTEM_PROMPT,

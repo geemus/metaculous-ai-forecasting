@@ -11,6 +11,7 @@ require 'json'
 
 require './lib/anthropic'
 require './lib/metaculus'
+require './lib/openai'
 require './lib/perplexity'
 require './lib/prompts'
 require './lib/utility'
