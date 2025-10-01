@@ -44,6 +44,7 @@ jobs:
       - run: ./research.rb ${{ inputs.post_id }}
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
           METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
@@ -81,6 +82,7 @@ jobs:
       - run: ./forecast.rb ${{ inputs.post_id }} ${{ matrix.forecaster_index }}
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
           METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
@@ -122,6 +124,7 @@ jobs:
       - run: ./revise_forecast.rb ${{ inputs.post_id }} ${{ matrix.forecaster_index }}
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
           METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
@@ -160,6 +163,7 @@ jobs:
       - run: ./consensus.rb ${{ inputs.post_id }}
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
           METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
