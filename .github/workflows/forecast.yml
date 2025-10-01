@@ -10,6 +10,8 @@ on:
     secrets:
       ANTHROPIC_API_KEY:
         required: true
+      DEEPSEEK_API_KEY:
+        required: true
       METACULUS_BOT_API_TOKEN:
         required: true
       METACULUS_BOT_ID:
