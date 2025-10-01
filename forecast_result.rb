@@ -48,9 +48,31 @@ provider = FORECASTERS[forecaster_index]
 
 case question.type
 when 'binary'
+  puts format(
+    '%<type>s[%<index>i: %<provider>s]: %<probability>s @ $%<cost>0.2f',
+    type: type,
+    index: forecaster_index,
+    provider: provider,
+    probability: @forecast.probability.round(10).to_s,
+    cost: @forecast.cost
+  )
   puts "#{type}[#{forecaster_index}: #{provider}]: #{@forecast.probability.round(10)}"
 when 'discrete', 'numeric'
-  puts "#{type}[#{forecaster_index}: #{provider}]: #{@forecast.percentiles}"
+  puts format(
+    '%<type>s[%<index>i: %<provider>s]: %<percentiles>s @ $%<cost>0.2f',
+    type: type,
+    index: forecaster_index,
+    provider: provider,
+    percentiles: @forecast.percentiles.to_s,
+    cost: @forecast.cost
+  )
 when 'multiple_choice'
-  puts "#{type}[#{forecaster_index}: #{provider}]: #{@forecast.probabilities}"
+  puts format(
+    '%<type>s[%<index>i: %<provider>s]: %<probabilities>s @ $%<cost>0.2f',
+    type: type,
+    index: forecaster_index,
+    provider: provider,
+    probabilitie: @forecast.probabilities.to_s,
+    cost: @forecast.cost
+  )
 end
