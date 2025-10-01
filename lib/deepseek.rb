@@ -6,7 +6,7 @@ class DeepSeek
   attr_accessor :model, :system, :temperature
 
   def initialize(
-    model: 'deepseek-chat',
+    model: 'deepseek-reasoner',
     system: SUPERFORECASTER_SYSTEM_PROMPT,
     temperature: 0.1
   )

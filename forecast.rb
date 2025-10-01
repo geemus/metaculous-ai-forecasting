@@ -22,6 +22,8 @@ FORECASTERS = %i[
   anthropic
   perplexity
   perplexity
+  deepseek
+  deepseek
 ].freeze
 
 # metaculus test questions: (binary: 578, numeric: 14333, multiple-choice: 22427, discrete: 38880)
@@ -46,18 +48,14 @@ research = Perplexity::Response.new(json: research_json)
 provider = FORECASTERS[forecaster_index]
 Formatador.display "\n[bold][green]# Superforecaster[#{forecaster_index}: #{provider}]: Forecasting(#{post_id})…[/] "
 cache(post_id, "forecasts/forecast.#{forecaster_index}.json") do
+  llm_args = { system: SUPERFORECASTER_SYSTEM_PROMPT, temperature: 0.9 }
   llm = case provider
         when :anthropic
-          Anthropic.new(temperature: 0.9) # 0-1
+          Anthropic.new(**llm_args)
         when :deepseek
-          DeepSeek.new(temperature: 0.9) # 0-2
-        when :openai
-          OpenAI.new # temp not supported for micro/nano
+          DeepSeek.new(**llm_args)
         when :perplexity
-          Perplexity.new(
-            system: SUPERFORECASTER_SYSTEM_PROMPT,
-            temperature: 0.9
-          ) # 0-2
+          Perplexity.new(**llm_args)
         end
   forecast_prompt = prompt_with_type(llm, question, SHARED_FORECAST_PROMPT_TEMPLATE)
   cache_write(post_id, "inputs/forecast.#{forecaster_index}.md", forecast_prompt)

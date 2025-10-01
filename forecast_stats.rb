@@ -10,6 +10,7 @@ require 'fileutils'
 require 'json'
 
 require './lib/anthropic'
+require './lib/deepseek'
 require './lib/metaculus'
 require './lib/openai'
 require './lib/perplexity'
@@ -21,6 +22,8 @@ FORECASTERS = %i[
   anthropic
   perplexity
   perplexity
+  deepseek
+  deepseek
 ].freeze
 
 # metaculus test questions: (binary: 578, numeric: 14333, multiple-choice: 22427, discrete: 38880)
@@ -41,6 +44,8 @@ FORECASTERS.each_with_index do |provider, index|
   @forecasts << case provider
                 when :anthropic
                   Anthropic::Response.new(json: forecast_json)
+                when :deepseek
+                  DeepSeek::Response.new(json: forecast_json)
                 when :perplexity
                   Perplexity::Response.new(json: forecast_json)
                 end

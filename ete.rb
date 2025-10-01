@@ -21,12 +21,12 @@ end
 system "./research.rb #{post_id}"
 system "echo $(cat tmp/#{post_id}/post.json | jq -r '.title')"
 system "echo $(cat tmp/#{post_id}/post.json | jq -r '.question.description')"
-0.upto(3).each do |forecaster_index|
+0.upto(5).each do |forecaster_index|
   fork { system("./forecast.rb #{post_id} #{forecaster_index}") }
 end
 Process.waitall
 system "./forecast_stats.rb #{post_id} forecast"
-0.upto(3).each do |forecaster_index|
+0.upto(5).each do |forecaster_index|
   fork { system("./revise_forecast.rb #{post_id} #{forecaster_index}") }
 end
 Process.waitall

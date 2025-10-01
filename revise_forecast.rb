@@ -10,6 +10,7 @@ require 'fileutils'
 require 'json'
 
 require './lib/anthropic'
+require './lib/deepseek'
 require './lib/metaculus'
 require './lib/openai'
 require './lib/perplexity'
@@ -21,6 +22,8 @@ FORECASTERS = %i[
   anthropic
   perplexity
   perplexity
+  deepseek
+  deepseek
 ].freeze
 
 # metaculus test questions: (binary: 578, numeric: 14333, multiple-choice: 22427, discrete: 38880)
@@ -46,6 +49,8 @@ FORECASTERS.each_with_index do |provider, index|
   @forecasts << case provider
                 when :anthropic
                   Anthropic::Response.new(json: forecast_json)
+                when :deepseek
+                  DeepSeek::Response.new(json: forecast_json)
                 when :perplexity
                   Perplexity::Response.new(json: forecast_json)
                 end
@@ -56,14 +61,14 @@ provider = FORECASTERS[forecaster_index]
 
 Formatador.display "\n[bold][green]# Superforecaster[#{forecaster_index}: #{provider}]: Revising Forecast(#{post_id})…[/] "
 cache(post_id, "forecasts/revision.#{forecaster_index}.json") do
+  llm_args = { system: SUPERFORECASTER_SYSTEM_PROMPT, temperature: 0.1 }
   llm = case provider
         when :anthropic
-          Anthropic.new(temperature: 0.1)
+          Anthropic.new(**llm_args)
+        when :deepseek
+          DeepSeek.new(**llm_args)
         when :perplexity
-          Perplexity.new(
-            system: SUPERFORECASTER_SYSTEM_PROMPT,
-            temperature: 0.1
-          )
+          Perplexity.new(**llm_args)
         end
   forecast_prompt = prompt_with_type(llm, question, SHARED_FORECAST_PROMPT_TEMPLATE)
   forecast_delphi_prompt = prompt_with_type(llm, question, FORECAST_DELPHI_PROMPT_TEMPLATE)

@@ -9,7 +9,7 @@ Review these predictions for the same question from other superforecasters.
 </forecasts>
 
 - Compare your initial forecast to each of these forecasts, identifying the largest differences and root causes.
-<%- unless %w[sonar-reasoning sonar-reasoning-pro sonar-deep-research].include?(llm.model) -%>
+<%- unless %w[deepseek-reasoner sonar-reasoning sonar-reasoning-pro sonar-deep-research].include?(llm.model) -%>
 - Before responding, show step-by-step reasoning in clear, logical order starting with `<think>` on the line before and ending with `</think>` on the line after.
 <%- end -%>
 - After responding, provide actionable recommendations to improve the prompt's effectiveness with reasoning explanations starting with `<reflect>` on the line before and ending with `</reflect>` on the line after.
