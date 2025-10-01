@@ -49,6 +49,8 @@ provider = FORECASTERS[forecaster_index]
 case question.type
 when 'binary'
   puts "#{type}[#{forecaster_index}: #{provider}]: #{@forecast.probability.round(10)}"
+when 'discrete', 'numeric'
+  puts "#{type}[#{forecaster_index}: #{provider}]: #{@forecast.percentiles}"
 when 'multiple_choice'
   puts "#{type}[#{forecaster_index}: #{provider}]: #{@forecast.probabilities}"
 end
