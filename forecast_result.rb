@@ -72,7 +72,7 @@ when 'multiple_choice'
     type: type,
     index: forecaster_index,
     provider: provider,
-    probabilitie: @forecast.probabilities.to_s,
+    probabilities: @forecast.probabilities.to_s,
     cost: @forecast.cost
   )
 end
