@@ -34,10 +34,6 @@ init_cache(post_id)
 
 post_json = cache_read!(post_id, 'post.json')
 question = Metaculus::Question.new(data: JSON.parse(post_json))
-if question.existing_forecast? && !%w[578 14333 22427 38880].include?(post_id)
-  Formatador.display "\n[bold][green]# Skipping: Already Submitted Forecast for #{post_id}[/] "
-  exit
-end
 
 forecast_json = cache_read!(post_id, "forecasts/#{type}.#{forecaster_index}.json")
 provider = FORECASTERS[forecaster_index]
