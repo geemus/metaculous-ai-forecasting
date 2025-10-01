@@ -133,7 +133,7 @@ jobs:
           name: ${{ inputs.post_id }}.revision.${{ matrix.forecaster_index }}
           path: tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.json
       - run: |
-          ./forecast_result.rb ${{ inputs.post_id }} ${{ matrix.forecaster_index }} revise >> $GITHUB_STEP_SUMMARY
+          ./forecast_result.rb ${{ inputs.post_id }} ${{ matrix.forecaster_index }} revision >> $GITHUB_STEP_SUMMARY
           echo '<details><summary>Prompt</summary>' >> $GITHUB_STEP_SUMMARY
           echo "$(cat tmp/${{ inputs.post_id }}/inputs/revision.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
           echo '</details>' >> $GITHUB_STEP_SUMMARY
