@@ -56,7 +56,6 @@ when 'binary'
     probability: @forecast.probability.round(10).to_s,
     cost: @forecast.cost
   )
-  puts "#{type}[#{forecaster_index}: #{provider}]: #{@forecast.probability.round(10)}"
 when 'discrete', 'numeric'
   puts format(
     '%<type>s[%<index>i: %<provider>s]: %<percentiles>s @ $%<cost>0.2f',
