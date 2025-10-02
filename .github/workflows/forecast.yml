@@ -54,12 +54,17 @@ jobs:
         with:
           name: ${{ inputs.post_id }}.research
           path: tmp
-      - run: |
+      - if: hashFiles("tmp/${{ inputs.post_id }}/post.json") != ''
+        run: |
           echo "# $(cat tmp/${{ inputs.post_id }}/post.json | jq -r '.title')" >> $GITHUB_STEP_SUMMARY
           echo "$(cat tmp/${{ inputs.post_id }}/post.json | jq -r '.question.description')" >> $GITHUB_STEP_SUMMARY
+      - if: hashFiles("tmp/${{ inputs.post_id }}/inputs/research.md") != ''
+        run: |
           echo '<details><summary>Prompt</summary>' >> $GITHUB_STEP_SUMMARY
           echo "$(cat tmp/${{ inputs.post_id }}/inputs/research.md)" >> $GITHUB_STEP_SUMMARY
           echo '</details>' >> $GITHUB_STEP_SUMMARY
+      - if: hashFiles("tmp/${{ inputs.post_id }}/outputs/research.md") != ''
+        run: |
           echo '<details><summary>Result</summary>' >> $GITHUB_STEP_SUMMARY
           echo "$(cat tmp/${{ inputs.post_id }}/outputs/research.md)" >> $GITHUB_STEP_SUMMARY
           echo '</details>' >> $GITHUB_STEP_SUMMARY
@@ -92,11 +97,16 @@ jobs:
         with:
           name: ${{ inputs.post_id}}.forecast.${{ matrix.forecaster_index }}
           path: tmp/${{ inputs.post_id }}/forecasts/forecast.${{ matrix.forecaster_index }}.json
-      - run: |
+      - if: hashFiles("tmp/${{ inputs.post_id }}/forecasts/forecast.${{ matrix.forecaster_index }}.json") != ''
+        run: |
           ./forecast_result.rb ${{ inputs.post_id }} ${{ matrix.forecaster_index }} forecast >> $GITHUB_STEP_SUMMARY
+      - if: hashFiles("tmp/${{ inputs.post_id }}/inputs/forecast.${{ matrix.forecaster_index }}.md") != ''
+        run: |
           echo '<details><summary>Prompt</summary>' >> $GITHUB_STEP_SUMMARY
           echo "$(cat tmp/${{ inputs.post_id }}/inputs/forecast.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
           echo '</details>' >> $GITHUB_STEP_SUMMARY
+      - if: hashFiles("tmp/${{ inputs.post_id }}/outputs/forecast.${{ matrix.forecaster_index }}.md") != ''
+        run: |
           echo '<details><summary>Result</summary>' >> $GITHUB_STEP_SUMMARY
           echo "$(cat tmp/${{ inputs.post_id }}/outputs/forecast.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
           echo '</details>' >> $GITHUB_STEP_SUMMARY
@@ -134,11 +144,16 @@ jobs:
         with:
           name: ${{ inputs.post_id }}.revision.${{ matrix.forecaster_index }}
           path: tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.json
-      - run: |
+      - if: hashFiles("tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.json") != ''
+        run: |
           ./forecast_result.rb ${{ inputs.post_id }} ${{ matrix.forecaster_index }} revision >> $GITHUB_STEP_SUMMARY
+      - if: hashFiles("tmp/${{ inputs.post_id }}/inputs/revision.${{ matrix.forecaster_index }}.md") != ''
+        run: |
           echo '<details><summary>Prompt</summary>' >> $GITHUB_STEP_SUMMARY
           echo "$(cat tmp/${{ inputs.post_id }}/inputs/revision.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
           echo '</details>' >> $GITHUB_STEP_SUMMARY
+      - if: hashFiles("tmp/${{ inputs.post_id }}/outputs/revision.${{ matrix.forecaster_index }}.md") != ''
+        run: |
           echo '<details><summary>Result</summary>' >> $GITHUB_STEP_SUMMARY
           echo "$(cat tmp/${{ inputs.post_id }}/outputs/revision.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
           echo '</details>' >> $GITHUB_STEP_SUMMARY
@@ -169,14 +184,21 @@ jobs:
           METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
           METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
-      - run: |
+      - if: hashFiles("tmp/${{ inputs.post_id }}/consensus/forecast.json") != ''
+        run: |
           echo "$(cat tmp/${{ inputs.post_id }}/consensus/forecast.json | jq -r '.[] | .continuous_cdf // .probability_yes // .probability_yes_per_category')" >> $GITHUB_STEP_SUMMARY
+      - if: hashFiles("tmp/${{ inputs.post_id }}/inputs/consensus.md") != ''
+        run: |
           echo '<details><summary>Prompt</summary>' >> $GITHUB_STEP_SUMMARY
           echo "$(cat tmp/${{ inputs.post_id }}/inputs/consensus.md)" >> $GITHUB_STEP_SUMMARY
           echo '</details>' >> $GITHUB_STEP_SUMMARY
+      - if: hashFiles("tmp/${{ inputs.post_id }}/outputs/consensus.md") != ''
+        run: |
           echo '<details><summary>Result</summary>' >> $GITHUB_STEP_SUMMARY
           echo "$(cat tmp/${{ inputs.post_id }}/outputs/consensus.md)" >> $GITHUB_STEP_SUMMARY
           echo '</details>' >> $GITHUB_STEP_SUMMARY
+      - if: hashFiles("tmp/${{ inputs.post_id }}/consensus/comment.json") != ''
+        run: |
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "---" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
