@@ -12,7 +12,8 @@ module ResponseHelpers
         key, value = line.split(': ', 2)
         key = key.split('Percentile ', 2).last
         value = value.split(' ', 2).first
-        percentiles[key.to_i] = value.include?('.') ? value.to_f : value.to_i
+        value.gsub!(',', '')
+        percentiles[key.to_i] = value.to_f
       end
       percentiles
     end
