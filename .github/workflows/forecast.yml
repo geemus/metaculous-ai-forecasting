@@ -38,6 +38,7 @@ jobs:
       - uses: actions/cache/restore@v4
         with:
           key: ${{ inputs.post_id }}/research.json
+          path: tmp/${{ inputs.post_id }}/research.json
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4'
@@ -77,9 +78,11 @@ jobs:
       - uses: actions/cache/restore@v4
         with:
           key: ${{ inputs.post_id }}/research.json
+          path: tmp/${{ inputs.post_id }}/research.json
       - uses: actions/cache/restore@v4
         with:
           key: ${{ inputs.post_id }}/forecasts/forecast.${{ matrix.forecaster_index }}.json
+          path: tmp/${{ inputs.post_id }}/forecasts/forecast.${{ matrix.forecaster_index }}.json
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4'
@@ -118,11 +121,31 @@ jobs:
       - uses: actions/cache/restore@v4
         with:
           key: ${{ inputs.post_id }}/research.json
+          path: tmp/${{ inputs.post_id }}/research.json
       - uses: actions/cache/restore@v4
         with:
-          key: ${{ inputs.post_id }}/forecasts/forecast.X.json
-          restore-keys: |
-            ${{ inputs.post_id }}/forecasts/forecast.
+          key: ${{ inputs.post_id }}/forecasts/forecast.0.json
+          path: tmp/${{ inputs.post_id }}/forecasts/forecast.0.json
+      - uses: actions/cache/restore@v4
+        with:
+          key: ${{ inputs.post_id }}/forecasts/forecast.1.json
+          path: tmp/${{ inputs.post_id }}/forecasts/forecast.1.json
+      - uses: actions/cache/restore@v4
+        with:
+          key: ${{ inputs.post_id }}/forecasts/forecast.2.json
+          path: tmp/${{ inputs.post_id }}/forecasts/forecast.2.json
+      - uses: actions/cache/restore@v4
+        with:
+          key: ${{ inputs.post_id }}/forecasts/forecast.3.json
+          path: tmp/${{ inputs.post_id }}/forecasts/forecast.3.json
+      - uses: actions/cache/restore@v4
+        with:
+          key: ${{ inputs.post_id }}/forecasts/forecast.4.json
+          path: tmp/${{ inputs.post_id }}/forecasts/forecast.4.json
+      - uses: actions/cache/restore@v4
+        with:
+          key: ${{ inputs.post_id }}/forecasts/forecast.5.json
+          path: tmp/${{ inputs.post_id }}/forecasts/forecast.5.json
       - uses: actions/cache/restore@v4
         with:
           key: ${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.json
@@ -161,11 +184,31 @@ jobs:
       - uses: actions/cache/restore@v4
         with:
           key: ${{ inputs.post_id }}/research.json
+          path: tmp/${{ inputs.post_id }}/research.json
       - uses: actions/cache/restore@v4
         with:
-          key: ${{ inputs.post_id }}/forecasts/revision.X.json
-          restore-keys: |
-            ${{ inputs.post_id }}/forecasts/revision.
+          key: ${{ inputs.post_id }}/forecasts/revision.0.json
+          path: tmp/${{ inputs.post_id }}/forecasts/revision.0.json
+      - uses: actions/cache/restore@v4
+        with:
+          key: ${{ inputs.post_id }}/forecasts/revision.1.json
+          path: tmp/${{ inputs.post_id }}/forecasts/revision.1.json
+      - uses: actions/cache/restore@v4
+        with:
+          key: ${{ inputs.post_id }}/forecasts/revision.2.json
+          path: tmp/${{ inputs.post_id }}/forecasts/revision.2.json
+      - uses: actions/cache/restore@v4
+        with:
+          key: ${{ inputs.post_id }}/forecasts/revision.3.json
+          path: tmp/${{ inputs.post_id }}/forecasts/revision.3.json
+      - uses: actions/cache/restore@v4
+        with:
+          key: ${{ inputs.post_id }}/forecasts/revision.4.json
+          path: tmp/${{ inputs.post_id }}/forecasts/revision.4.json
+      - uses: actions/cache/restore@v4
+        with:
+          key: ${{ inputs.post_id }}/forecasts/revision.5.json
+          path: tmp/${{ inputs.post_id }}/forecasts/revision.5.json
       - uses: actions/cache/restore@v4
         with:
           key: ${{ inputs.post_id }}/forecasts/consensus.json
