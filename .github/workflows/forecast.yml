@@ -1,4 +1,4 @@
-name: Forecast
+eame: Forecast
 
 on:
   workflow_call:
@@ -213,6 +213,7 @@ jobs:
       - uses: actions/cache/restore@v4
         with:
           key: ${{ inputs.post_id }}/forecasts/consensus.json
+          path: tmp/${{ inputs.post_id }}/forecasts/consensus.json
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4'
