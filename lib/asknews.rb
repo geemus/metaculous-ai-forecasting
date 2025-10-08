@@ -16,7 +16,6 @@ class AskNews
   def search_news(query)
     start_time = Time.now
     query = get_auto_filter_params(query)
-    puts query.inspect
     sleep(10) # wait for (free) rate limit
     excon_response = connection.get(
       path: '/v1/news/search',
@@ -25,10 +24,13 @@ class AskNews
           # diversify_sources: true,
           doc_end_delimiter: '</article>',
           doc_start_delimiter: '<article>',
+          entity_guarantee_op: 'OR',
           # historical: false,
           # method: 'nl',
-          # n_articles: 8,
-          return_type: 'string'
+          # n_articles: 4, # seems to be ignored
+          return_type: 'dicts',
+          strategy: 'news knowledge',
+          string_guarantee_op: 'OR'
         }
       )
     )
@@ -39,12 +41,7 @@ class AskNews
         minutes: duration / 60, seconds: duration % 60
       )
     )
-    string = JSON.parse(excon_response.body)['as_string']
-    data = string.split("\n")
-    data.shift
-    data.pop
-    data.join("\n").strip
-    # Question.new(data: JSON.parse(excon_response.body))
+    JSON.parse(excon_response.body)
   rescue Excon::Error => e
     puts e.response.inspect
     exit(1)
@@ -144,14 +141,13 @@ class AskNews
     excon_response = connection.get(
       path: '/v1/chat/autofilter',
       query: {
-        query: query,
+        query: query
       }
     )
     data = JSON.parse(excon_response.body)
-    data['filter_params'].reject { |k,v| v.nil? }
+    data['filter_params'].select { |k, _| %w[categories query].include?(k) }
   rescue Excon::Error => e
     puts e.response.inspect
     exit(1)
   end
-
 end
