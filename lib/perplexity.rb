@@ -94,18 +94,6 @@ class Perplexity
       @data.dig('usage', 'cost', 'total_cost')
     end
 
-    def formatted_research
-      ERB.new(<<~RESEARCH_OUTPUT, trim_mode: '-').result(binding)
-        <%= stripped_content('think') %>
-
-        <sources>
-        <% data['search_results'].each do |result| -%>
-        - [<%= result['title'] %>](<%= result['url'] %>) <%= result['snippet'] %> (Published: <%= result['date'] %>, Updated: <%= result['last_updated'] %>)
-        <% end -%>
-        </sources>
-      RESEARCH_OUTPUT
-    end
-
     def input_tokens
       @input_tokens ||= data.dig('usage', 'prompt_tokens')
     end
