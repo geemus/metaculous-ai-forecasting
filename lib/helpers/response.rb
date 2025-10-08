@@ -35,7 +35,10 @@ module ResponseHelpers
   def probability
     @probability ||= begin
       probability = extracted_content('probability')
-      probability.include?('%') ? probability.to_f / 100.0 : probability.to_f
+      probability = probability.include?('%') ? probability.to_f / 100.0 : probability.to_f
+      probability = [probability, 0.001].max # probability_yes must be >= 0.001
+      probability = [probability, 0.999].min # probability_yes must be <= 0.999
+      probability
     end
   end
 
