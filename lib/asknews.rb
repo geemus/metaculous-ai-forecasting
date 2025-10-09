@@ -9,17 +9,16 @@ require 'json'
 require 'time'
 
 class AskNews
-  def self.search_news(query)
-    new.search_news(query)
+  def self.search_news(params)
+    new.search_news(params)
   end
 
-  def search_news(query)
+  def search_news(params)
     start_time = Time.now
-    query = get_auto_filter_params(query)
     sleep(10) # wait for (free) rate limit
     excon_response = connection.get(
       path: '/v1/news/search',
-      query: query.merge(
+      query: params.merge(
         {
           # diversify_sources: true,
           doc_end_delimiter: '</article>',
@@ -69,6 +68,7 @@ class AskNews
       }
     )
     data = JSON.parse(excon_response.body)
+    puts(data['filter_params'].select { |k, _| %w[categories query].include?(k) })
     data['filter_params'].select { |k, _| %w[categories query].include?(k) }
   rescue Excon::Error => e
     puts e.response.inspect

@@ -11,6 +11,7 @@ require 'json'
 
 require './lib/anthropic'
 require './lib/asknews'
+require './lib/deepseek'
 require './lib/metaculus'
 require './lib/openai'
 require './lib/perplexity'
@@ -28,22 +29,57 @@ question = Metaculus::Question.new(data: JSON.parse(post_json))
 
 if question.existing_forecast? && !%w[578 14333 22427 38880].include?(post_id)
   Formatador.display "\n[bold][green]# Skipping: Already Submitted Forecast for #{post_id}[/] "
-  exit
+  # exit
 end
+
+filter_prompt = ERB.new(<<~FILTER_PROMPT_TEMPLATE, trim_mode: '-').result(binding)
+  You are an expert researcher preparing to research this forecast question and background:
+
+  Forecast Question:
+  <question>
+  <%= question.title %>
+  </question>
+
+  Forecast Background:
+  <background>
+  <%= question.background %>
+  </background>
+
+  - Before responding, show step-by-step reasoning in clear, logical order starting with `<<<<<< think` on the line before and ending with `>>>>>>` on the line after.
+  <%- unless ENV['GITHUB_ACTIONS'] == 'true' -%>
+  - After responding, provide actionable recommendations to improve the prompt's effectiveness with reasoning explanations starting with `<<<<<< reflect` on the line before and ending with `>>>>>>` on the line after.
+  <%- end -%>
+
+  - Provide a set of the most relevant searchable keywords for general news focusing on core concepts and omitting methodologies to find related information as a comma-separated list, starting with `<query>` on the line before and ending with `</query>` on the line after.
+  - Provide the three or fewer best matching categories among [Business, Crime, Politics, Science, Sports, Technology, Military, Health, Entertainment, Finance, Culture, Climate, Environment, World] as a comma-separated list, starting with `<categories>` on the line before and ending with `</categories>` on the line after.
+FILTER_PROMPT_TEMPLATE
+
+Formatador.display "\n[bold][green]# News: Generating Filters[deepseek](#{post_id})…[/] "
+filters_json = cache(post_id, 'news_filters.json') do
+  deepseek = DeepSeek.new(
+    model: 'deepseek-chat',
+    system: ''
+  )
+  filters = deepseek.eval({ 'role': 'user', 'content': filter_prompt })
+  puts filters.content
+  {
+    categories: filters.extracted_content('categories').split(', '),
+    query: filters.extracted_content('query')
+  }.to_json
+end
+filters = JSON.parse(filters_json)
+puts filters
 
 Formatador.display "\n[bold][green]# News: Searching(#{post_id})…[/] "
 news_json = cache(post_id, 'news.json') do
   asknews = AskNews.new
-  news_prompt = [question.background, question.title].join("\n")
-  cache_write(post_id, 'inputs/news.md', news_prompt)
-  news_json = asknews.search_news(news_prompt)
-  # cache_write(post_id, 'outputs/news.md', news)
+  news_json = asknews.search_news(filters)
   cache_write(post_id, 'news.json', news_json)
   news_json.to_json
 end
 
 news = JSON.parse(news_json)
-articles = news['as_dicts'][0...8]
+articles = news['as_dicts'][0...6]
 news_prompt = ERB.new(<<~NEWS_PROMPT_TEMPLATE, trim_mode: '-')
   Forecast Related News:
   <articles>
