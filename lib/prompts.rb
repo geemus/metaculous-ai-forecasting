@@ -14,18 +14,6 @@ RESEARCHER_SYSTEM_PROMPT = ERB.new(<<~RESEARCHER_SYSTEM_PROMPT, trim_mode: '-').
     d. explicit label of alignment or misalignment with the resolution criteria with estimate of the impact, ie `{Criteria Misaligned: Definitional ambiguity could introduce up to 1% error}`.
     e. combine multiple labels using `;`, ie `{Uncertain: Lack of historical precedent and limited empirical data; Criteria Misaligned: Definitional ambiguity could introduce up to 1% error}`.
   - For repeated claims or evidence, use ‘See: [Section Header]’ and do not paraphrase or restate. Example: ‘See: Base Rates and Historical Analogs.’
-
-  1. Before responding, show step-by-step reasoning in clear, logical order starting with `<think>` on the line before and ending with `</think>` on the line after.
-  2. List all key assumptions explicitly. For each key assumption, critically evaluate its validity, estimate how much your probability would change if the assumption were invalid, and explain the reasoning behind the adjustment.
-  3. Break the analysis down into smaller, measurable components. For each, summarize the best-supported, base rates, primary evidence, and uncertainties, and explain how these inform the comparative summary.
-  4. Provide relevant, justified base rates, historical analogs, and reference classes for each decomposed risk component.
-  5. For each potential outcome, list the strongest supporting and opposing evidence, highlighting key facts and uncertainties for each.
-  6. List evidence gaps. For each evidence gap, provide a numerical estimate of its potential impact on forecast ranges and explain the reasoning behind the estimate.
-  7. Conclude with a comparative summary that integrates decomposed risk components, base rates, key assumptions, dissenting views, and cognitive bias corrections.
-  8. In the comparitive summary, list and attribute all major estimates and decomposed components. For each, describe supporting evidence, methodological rigor, areas of consensus/disagreement, and alignment with resolution criteria. Do not aggregate or summarize into a single evaluative statement.
-  <%- unless ENV['GITHUB_ACTIONS'] == 'true' -%>
-  9. After responding, provide actionable recommendations to improve the prompt's effectiveness with reasoning explanations starting with `<reflect>` on the line before and ending with `</reflect>` on the line after.
-  <%- end -%>
 RESEARCHER_SYSTEM_PROMPT
 
 SUPERFORECASTER_SYSTEM_PROMPT = ERB.new(<<~SUPERFORECASTER_SYSTEM_PROMPT, trim_mode: '-').result(binding)
@@ -51,6 +39,8 @@ SUPERFORECASTER_SYSTEM_PROMPT = ERB.new(<<~SUPERFORECASTER_SYSTEM_PROMPT, trim_m
 SUPERFORECASTER_SYSTEM_PROMPT
 
 FORECAST_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/forecast.erb'), trim_mode: '-')
+
+RESEARCH_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/research.erb'), trim_mode: '-')
 
 SHARED_FORECAST_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/shared_forecast.erb'), trim_mode: '-')
 
