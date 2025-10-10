@@ -5,7 +5,7 @@ Your consensus forecast will be based on the context of these forecasts from oth
 <forecasts>
 <%- @revised_forecasts.each do |forecast| -%>
 <forecast>
-<%= forecast.stripped_content('reflect') %>
+<%= forecast.stripped_content('think', 'reflect') %>
 </forecast>
 <%- end -%>
 </forecasts>

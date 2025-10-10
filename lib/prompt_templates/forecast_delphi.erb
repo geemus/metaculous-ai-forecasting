@@ -6,7 +6,7 @@ You will update your forecast based on the context of these forecasts from other
 <%- @forecasts.each do |f| -%>
 <%- next if f == @forecast -%>
 <forecast>
-<%= f.stripped_content('reflect') %>
+<%= f.stripped_content('think', 'reflect') %>
 </forecast>
 <%- end -%>
 </forecasts>
