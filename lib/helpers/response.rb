@@ -2,7 +2,7 @@
 
 module ResponseHelpers
   def extracted_content(*tags)
-    extract_xml(content, *tags)
+    extract_xml(content, *tags).last
   end
 
   def percentiles

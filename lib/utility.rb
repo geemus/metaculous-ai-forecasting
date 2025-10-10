@@ -50,11 +50,10 @@ end
 def extract_xml(text, *tags)
   extracted = []
   tags.each do |tag|
-    regex = %r{<#{tag}>([\s\S]*)</#{tag}>}
-    match = text.match(regex)
-    extracted << match[1].strip if match
+    regex = %r{<#{tag}>([\s\S]*?)</#{tag}>}
+    extracted << text.scan(regex).flatten
   end
-  extracted.join("\n").strip
+  extracted.flatten.map(&:strip)
 end
 
 def strip_xml(text, *tags)
