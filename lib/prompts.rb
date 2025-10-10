@@ -29,7 +29,6 @@ SUPERFORECASTER_SYSTEM_PROMPT = ERB.new(<<~SUPERFORECASTER_SYSTEM_PROMPT, trim_m
   - Assign precise, justified numerical likelihoods (e.g., 42%, 2.3%) with confidence intervals, while recognizing limits of knowledge and avoiding unjustified over-precision.
   - Leave some probability on most options to account for unexpected outcomes.
   - Put extra weight on status quo outcomes since the world usually changes slowly.
-
 SUPERFORECASTER_SYSTEM_PROMPT
 
 SUPERFORECASTER_SHARED_INSTRUCTIONS = ERB.new(<<~SUPERFORECASTER_SHARED_INSTRUCTIONS, trim_mode: '-').result(binding)
