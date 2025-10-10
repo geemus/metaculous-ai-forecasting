@@ -39,7 +39,7 @@ SUPERFORECASTER_SHARED_INSTRUCTIONS = ERB.new(<<~SUPERFORECASTER_SHARED_INSTRUCT
   - Provide sensitivity analysis on key parameters.
   - Compare predictions to community median when available and explain any significant deviations.
   - Explicitly state the strongest argument against your reasoning and provide an alterative probability estimate in the same format as your main forecast, assuming that argument is correct.
-  <%- unless ENV['GITHUB_ACTIONS'] == 'true' -%>
+  <%- unless ENV['REFLECT'] == 'true' -%>
   - After your forecast, provide actionable recommendations to improve the prompt's effectiveness with reasoning explanations starting with `<reflect>` on the line before and ending with `</reflect>` on the line after.
   <%- end -%>
 SUPERFORECASTER_SHARED_INSTRUCTIONS
