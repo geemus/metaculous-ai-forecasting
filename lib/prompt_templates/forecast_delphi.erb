@@ -1,4 +1,7 @@
-Review these predictions for the same question from other superforecasters.
+# Context
+
+You will update your forecast based on the context of these predictions from other superforecasters.
+
 <forecasts>
 <%- @forecasts.each do |f| -%>
 <%- next if f == @forecast -%>
@@ -7,6 +10,8 @@ Review these predictions for the same question from other superforecasters.
 </forecast>
 <%- end -%>
 </forecasts>
+
+# Instructions
 
 - Compare your initial forecast to each of these forecasts, identifying the largest differences and root causes.
 <%- unless %w[deepseek-reasoner sonar-reasoning sonar-reasoning-pro sonar-deep-research].include?(llm.model) -%>

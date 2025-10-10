@@ -5,6 +5,8 @@ require './lib/helpers/response'
 class Anthropic
   attr_accessor :model, :system, :temperature, :tools
 
+  MAX_TOKENS = 8192
+
   def initialize(
     model: 'claude-sonnet-4-5',
     system: SUPERFORECASTER_SYSTEM_PROMPT,
@@ -24,7 +26,7 @@ class Anthropic
       body: {
         # model: 'claude-opus-4-1-20250805',
         model: model,
-        max_tokens: 4096,
+        max_tokens: MAX_TOKENS,
         messages: messages,
         stream: false,
         system: system,
@@ -73,7 +75,7 @@ class Anthropic
     def display_meta
       Formatador.display_line(
         format(
-          '[light_green](%<total>d: %<input>d -> %<output>d tokens in %<minutes>dm %<seconds>ds @ $%<cost>0.2f)[/]',
+          '[light_green][anthropic](%<total>d: %<input>d -> %<output>d tokens in %<minutes>dm %<seconds>ds @ $%<cost>0.2f)[/]',
           {
             total: total_tokens,
             input: input_tokens,
@@ -83,6 +85,7 @@ class Anthropic
           }
         )
       )
+      Formatador.display_line('[red]! TOKEN EXHAUSTION ![/]') if output_tokens >= MAX_TOKENS
     end
 
     def content

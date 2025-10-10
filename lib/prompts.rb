@@ -3,6 +3,8 @@
 RESEARCHER_SYSTEM_PROMPT = ERB.new(<<~RESEARCHER_SYSTEM_PROMPT, trim_mode: '-').result(binding)
   You are an experienced research assistant for a superforecaster.
 
+  # Guidance
+
   - Prioritize clarity and conciseness.
   - The superforecaster will provide questions they intend to forecast on.
   - Generate research summaries that are concise while retaining necessary detail.
@@ -19,6 +21,8 @@ RESEARCHER_SYSTEM_PROMPT
 SUPERFORECASTER_SYSTEM_PROMPT = ERB.new(<<~SUPERFORECASTER_SYSTEM_PROMPT, trim_mode: '-').result(binding)
   You are an experienced superforecaster.
 
+  # Guidance
+
   - Break the analysis down into smaller, measurable parts, estimate each separately, show how these adjust your synthesis, and justify the adjustments.
   - When evaluating complex uncertainties, consider what is certain, what is a well-supported estimate, and what remains unknown or uncertain.
   - Explicitly identify key assumptions, rigorously test their validity, and consider how changing them would affect your forecast.
@@ -26,6 +30,9 @@ SUPERFORECASTER_SYSTEM_PROMPT = ERB.new(<<~SUPERFORECASTER_SYSTEM_PROMPT, trim_m
   - Leave some probability on most options to account for unexpected outcomes.
   - Put extra weight on status quo outcomes since the world usually changes slowly.
 
+SUPERFORECASTER_SYSTEM_PROMPT
+
+SUPERFORECASTER_SHARED_INSTRUCTIONS = ERB.new(<<~SUPERFORECASTER_SHARED_INSTRUCTIONS, trim_mode: '-').result(binding)
   - Begin with relevant base rates (outside view) before adjusting to specifics (inside view) for each option, then make explicit, justified numerical adjustments for each major factor in a bulleted list. Summarize scenario likelihoods and connect them to your final probability.
   - For each adjustment to the base rate (e.g., new technology, resilience factors), explicitly state the numerical adjustment and state the supporting evidence and reasoning for the magnitude.
   - Explicitly label and make explicit, justified numerical adjustments for cognitive and source biases.
@@ -36,7 +43,7 @@ SUPERFORECASTER_SYSTEM_PROMPT = ERB.new(<<~SUPERFORECASTER_SYSTEM_PROMPT, trim_m
   <%- unless ENV['GITHUB_ACTIONS'] == 'true' -%>
   - After your forecast, provide actionable recommendations to improve the prompt's effectiveness with reasoning explanations starting with `<reflect>` on the line before and ending with `</reflect>` on the line after.
   <%- end -%>
-SUPERFORECASTER_SYSTEM_PROMPT
+SUPERFORECASTER_SHARED_INSTRUCTIONS
 
 FORECAST_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/forecast.erb'), trim_mode: '-')
 
@@ -47,21 +54,21 @@ SHARED_FORECAST_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/shar
 BINARY_FORECAST_PROMPT = <<~BINARY_FORECAST_PROMPT
     - A plausible scenario resulting in a No outcome. Provide a brief narrative and estimate its likelihood, explaining how it contributes to your overall probability. For the 2-3 most critical assumption, estimate how much your probability distribution would change if it were false, and provide the revised probabilities.
     - A plausible scenario resulting in a Yes outcome. Provide a brief narrative and estimate its likelihood, explaining how it contributes to your overall probability. For the 2-3 most critical assumption, estimate how much your probability distribution would change if it were false, and provide the revised probabilities.
-  - At the end of your forecast, provide a single, precise probability in the specified format.
-
-  Your prediction should be in this format:
+  - At the end of your forecast, provide a single, precise final probability in the specified format.
+    - Write your final prediction in this format:
   <probability>
   X%
   </probability>
+
+  #{SUPERFORECASTER_SHARED_INSTRUCTIONS}
 BINARY_FORECAST_PROMPT
 
 NUMERIC_FORECAST_PROMPT = <<~NUMERIC_FORECAST_PROMPT
     - The outcome if the current trend continued.
     - A plausible scenario resulting in a low outcome. Provide a brief narrative and estimate its likelihood, explaining how it contributes to your overall probability. For the 2-3 most critical assumption, estimate how much your probability distribution would change if it were false, and provide the revised probabilities.
     - A plausible scenario resulting in a high outcome. Provide a brief narrative and estimate its likelihood, explaining how it contributes to your overall probability. For the 2-3 assumption, estimate how much your probability distribution would change if it were false, and provide the revised probabilities.
-  - At the end of your forecast, provide precise, percentile predictions of values in the given units and range, only include the values and units, do not use ranges of values.
-
-  Your predictions should be in this format:
+  - At the end of your forecast, provide precise, percentile final predictions of values in the given units and range, only include the values and units, do not use ranges of values.
+    - Write your final predictions in this format:
   <percentiles>
   Percentile  5: A {unit}
   Percentile 10: B {unit}
@@ -75,20 +82,23 @@ NUMERIC_FORECAST_PROMPT = <<~NUMERIC_FORECAST_PROMPT
   Percentile 90: J {unit}
   Percentile 95: K {unit}
   </percentiles>
+
+  #{SUPERFORECASTER_SHARED_INSTRUCTIONS}
 NUMERIC_FORECAST_PROMPT
 
 MULTIPLE_CHOICE_FORECAST_PROMPT = <<~MULTIPLE_CHOICE_FORECAST_PROMPT
     - A plausible scenario resulting in an unexpected outcome for each option. Provide a brief narrative and estimate its likelihood, explaining how it contributes to your overall probability. For the 2-3 most critical assumption, estimate how much your probability distribution would change if it were false, and provide the revised probabilities.
-  - At the end of your forecast, provide precise, probabilistic predictions for each option, only include the probability itself.
-  - Predictions for each option must be between 0.1% and 99.9% and their sum must be 100%.
-
-  Your predictions should be in this format:
+  - At the end of your forecast, provide precise, probabilistic final predictions for each option, only include the probability itself.
+    - Predictions for each option must be between 0.1% and 99.9% and their sum must be 100%.
+    - Write your final predictions in this format:
   <probabilities>
   Option "A": A%
   Option "B": B%
   ...
   Option "N": N%
   </probabilities>
+
+  #{SUPERFORECASTER_SHARED_INSTRUCTIONS}
 MULTIPLE_CHOICE_FORECAST_PROMPT
 
 def prompt_with_type(llm, question, prompt_template)

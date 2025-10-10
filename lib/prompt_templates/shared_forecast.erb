@@ -1,4 +1,6 @@
-Create a forecast based on the following information.
+# Context 
+
+Your forecast will be based on the following information.
 
 <%= FORECAST_PROMPT_TEMPLATE.result(binding) -%>
 
@@ -8,6 +10,8 @@ Here is a summary of relevant data from your research assistant:
 </research>
 
 Today is <%= Time.now.strftime('%B %d, %Y') %>.
+
+# Instructions
 
 <%- unless %w[deepseek-reasoner sonar-reasoning sonar-reasoning-pro sonar-deep-research].include?(llm.model) -%>
 - Before responding, show step-by-step reasoning in clear, logical order starting with `<think>` on the line before and ending with `</think>` on the line after.

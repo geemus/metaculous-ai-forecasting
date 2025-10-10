@@ -73,7 +73,7 @@ class Perplexity
     def display_meta
       Formatador.display_line(
         format(
-          '[light_green](%<total>d: %<input>d -> %<output>d tokens in %<minutes>dm %<seconds>ds @ $%<cost>0.2f)[/]',
+          '[light_green][perplexity](%<total>d: %<input>d -> %<output>d tokens in %<minutes>dm %<seconds>ds @ $%<cost>0.2f)[/]',
           {
             total: total_tokens,
             input: input_tokens,
