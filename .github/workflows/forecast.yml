@@ -100,6 +100,7 @@ jobs:
           path: tmp/${{ inputs.post_id }}/forecasts/forecast.${{ matrix.forecaster_index }}.json
       - run: |
           ./forecast_result.rb ${{ inputs.post_id }} ${{ matrix.forecaster_index }} forecast >> $GITHUB_STEP_SUMMARY
+        continue-on-error: true
       - run: |
           echo '<details><summary>Prompt</summary>' >> $GITHUB_STEP_SUMMARY
           echo "$(cat tmp/${{ inputs.post_id }}/inputs/forecast.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
@@ -167,6 +168,7 @@ jobs:
           path: tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.json
       - run: |
           ./forecast_result.rb ${{ inputs.post_id }} ${{ matrix.forecaster_index }} revision >> $GITHUB_STEP_SUMMARY
+        continue-on-error: true
       - run: |
           echo '<details><summary>Prompt</summary>' >> $GITHUB_STEP_SUMMARY
           echo "$(cat tmp/${{ inputs.post_id }}/inputs/revision.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
