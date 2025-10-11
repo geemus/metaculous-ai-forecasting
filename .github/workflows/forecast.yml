@@ -71,8 +71,8 @@ jobs:
     if: ${{ inputs.post_id }}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        fail-fast: false
         forecaster_index: [0, 1, 2, 3, 4, 5]
     steps:
       - uses: actions/checkout@v5
@@ -116,8 +116,8 @@ jobs:
     if: ${{ inputs.post_id }}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        fail-fast: false
         forecaster_index: [0, 1, 2, 3, 4, 5]
     steps:
       - uses: actions/checkout@v5
