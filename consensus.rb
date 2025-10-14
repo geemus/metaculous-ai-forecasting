@@ -51,9 +51,10 @@ FORECASTERS.each_with_index do |provider, index|
                         end
 end
 
+provider = DeepSeek
 Formatador.display "\n[bold][green]# Superforecaster: Summarizing Consensus(#{post_id})…[/] "
 consensus_json = cache(post_id, 'forecasts/consensus.json') do
-  llm = Anthropic.new
+  llm = provider.new
   consensus_prompt = prompt_with_type(llm, question, FORECAST_CONSENSUS_PROMPT_TEMPLATE)
   cache_write(post_id, 'inputs/consensus.md', consensus_prompt)
   consensus = llm.eval({ 'role': 'user', 'content': consensus_prompt })
@@ -61,7 +62,7 @@ consensus_json = cache(post_id, 'forecasts/consensus.json') do
   cache_concat(post_id, 'reflects.md', "# Consensus\n#{consensus.extracted_content('reflect')}")
   consensus.to_json
 end
-consensus = Anthropic::Response.new(json: consensus_json)
+consensus = provider::Response.new(json: consensus_json)
 puts consensus.content
 
 question.submit(consensus)
