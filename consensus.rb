@@ -18,10 +18,7 @@ require './lib/utility'
 
 FORECASTERS = %i[
   anthropic
-  anthropic
   perplexity
-  perplexity
-  deepseek
   deepseek
 ].freeze
 

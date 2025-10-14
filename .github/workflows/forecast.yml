@@ -73,7 +73,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        forecaster_index: [0, 1, 2, 3, 4, 5]
+        forecaster_index: [0, 1, 2]
     steps:
       - uses: actions/checkout@v5
       - uses: actions/cache/restore@v4
@@ -118,7 +118,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        forecaster_index: [0, 1, 2, 3, 4, 5]
+        forecaster_index: [0, 1, 2]
     steps:
       - uses: actions/checkout@v5
       - uses: actions/cache/restore@v4
