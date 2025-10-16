@@ -1,34 +1,18 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'bundler'
-Bundler.setup
-
-require 'erb'
-require 'excon'
-require 'fileutils'
-require 'json'
-
+require_relative 'lib/script_helpers'
 require './lib/anthropic'
 require './lib/asknews'
 require './lib/deepseek'
-require './lib/metaculus'
 require './lib/openai'
 require './lib/perplexity'
-require './lib/prompts'
-require './lib/utility'
 
-# metaculus test questions: (binary: 578, numeric: 14333, multiple-choice: 22427, discrete: 38880)
 post_id = ARGV[0] || raise('post id argument is required')
-init_cache(post_id)
 
-Formatador.display "\n[bold][green]# Metaculus: Getting Post(#{post_id})…[/] "
-post_json = Metaculus.get_post(post_id).to_json
-cache_write(post_id, 'post.json', post_json)
-question = Metaculus::Question.new(data: JSON.parse(post_json))
-
-if question.existing_forecast? && !%w[578 14333 22427 38880].include?(post_id)
-  Formatador.display "\n[bold][green]# Skipping: Already Submitted Forecast for #{post_id}[/] "
+question = fetch_question(post_id)
+if should_skip_forecast?(question, post_id)
+  # Commented out exit to allow news gathering for already-forecasted questions
   # exit
 end
 

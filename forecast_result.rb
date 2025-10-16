@@ -1,30 +1,15 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'bundler'
-Bundler.setup
-
-require 'erb'
-require 'excon'
-require 'fileutils'
-require 'json'
-
-require './lib/provider'
-require './lib/response'
-require './lib/metaculus'
-require './lib/prompts'
-require './lib/utility'
+require_relative 'lib/script_helpers'
 
 FORECASTERS = Provider::FORECASTERS
 
-# metaculus test questions: (binary: 578, numeric: 14333, multiple-choice: 22427, discrete: 38880)
 post_id = ARGV[0] || raise('post id argv[0] is required')
 forecaster_index = ARGV[1].to_i || raise('forecaster_index argv[1] is required')
 type = ARGV[2] || raise('type argv[2] is required')
-init_cache(post_id)
 
-post_json = cache_read!(post_id, 'post.json')
-question = Metaculus::Question.new(data: JSON.parse(post_json))
+question = load_cached_question(post_id)
 
 forecast_json = cache_read!(post_id, "forecasts/#{type}.#{forecaster_index}.json")
 provider = FORECASTERS[forecaster_index]
