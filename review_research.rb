@@ -9,18 +9,13 @@ require 'excon'
 require 'fileutils'
 require 'json'
 
-require './lib/anthropic'
+require './lib/provider'
+require './lib/response'
 require './lib/metaculus'
-require './lib/openai'
-require './lib/perplexity'
 require './lib/prompts'
 require './lib/utility'
 
-FORECASTERS = %i[
-  anthropic
-  perplexity
-  deepseek
-].freeze
+FORECASTERS = Provider::FORECASTERS
 
 # metaculus test questions: (binary: 578, numeric: 14333, multiple-choice: 22427, discrete: 38880)
 post_id = ARGV[0] || raise('post id argument is required')
@@ -36,7 +31,7 @@ if question.existing_forecast? && !%w[578 14333 22427 38880].include?(post_id)
 end
 
 research_json = cache_read!(post_id, 'research.json')
-research = Perplexity::Response.new(json: research_json)
+research = Response.new(:perplexity, json: research_json)
 @research_output = research.stripped_content('reflect')
 
 provider = FORECASTERS[forecaster_index]
@@ -47,12 +42,7 @@ cache(post_id, "research.revision.#{forecaster_index}.json") do
     system: '',
     temperature: 0.1
   }
-  llm = case provider
-        when :anthropic
-          Anthropic.new(**llm_args)
-        when :perplexity
-          Perplexity.new(**llm_args)
-        end
+  llm = Provider.new(provider, **llm_args)
 
   research_prompt = FORECAST_PROMPT_TEMPLATE.result(binding)
   review_research_prompt = REVIEW_RESEARCH_PROMPT_TEMPLATE.result(binding)

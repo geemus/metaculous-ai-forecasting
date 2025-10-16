@@ -9,19 +9,13 @@ require 'excon'
 require 'fileutils'
 require 'json'
 
-require './lib/anthropic'
-require './lib/deepseek'
+require './lib/provider'
+require './lib/response'
 require './lib/metaculus'
-require './lib/openai'
-require './lib/perplexity'
 require './lib/prompts'
 require './lib/utility'
 
-FORECASTERS = %i[
-  anthropic
-  perplexity
-  deepseek
-].freeze
+FORECASTERS = Provider::FORECASTERS
 
 # metaculus test questions: (binary: 578, numeric: 14333, multiple-choice: 22427, discrete: 38880)
 post_id = ARGV[0] || raise('post id argument is required')
@@ -37,20 +31,13 @@ if question.existing_forecast? && !%w[578 14333 22427 38880].include?(post_id)
 end
 
 research_json = cache_read!(post_id, 'research.json')
-research = Perplexity::Response.new(json: research_json)
+research = Response.new(:perplexity, json: research_json)
 @research_output = research.stripped_content('reflect')
 
 @forecasts = []
 FORECASTERS.each_with_index do |provider, index|
   forecast_json = cache_read!(post_id, "forecasts/forecast.#{index}.json")
-  @forecasts << case provider
-                when :anthropic
-                  Anthropic::Response.new(json: forecast_json)
-                when :deepseek
-                  DeepSeek::Response.new(json: forecast_json)
-                when :perplexity
-                  Perplexity::Response.new(json: forecast_json)
-                end
+  @forecasts << Response.new(provider, json: forecast_json)
 end
 
 provider = FORECASTERS[forecaster_index]
@@ -59,14 +46,7 @@ provider = FORECASTERS[forecaster_index]
 Formatador.display "\n[bold][green]# Superforecaster[#{forecaster_index}: #{provider}]: Revising Forecast(#{post_id})…[/] "
 cache(post_id, "forecasts/revision.#{forecaster_index}.json") do
   llm_args = { system: SUPERFORECASTER_SYSTEM_PROMPT, temperature: 0.1 }
-  llm = case provider
-        when :anthropic
-          Anthropic.new(**llm_args)
-        when :deepseek
-          DeepSeek.new(**llm_args)
-        when :perplexity
-          Perplexity.new(**llm_args)
-        end
+  llm = Provider.new(provider, **llm_args)
   forecast_prompt = prompt_with_type(llm, question, SHARED_FORECAST_PROMPT_TEMPLATE)
   forecast_delphi_prompt = prompt_with_type(llm, question, FORECAST_DELPHI_PROMPT_TEMPLATE)
   cache_write(post_id, "inputs/revision.#{forecaster_index}.md", forecast_delphi_prompt)

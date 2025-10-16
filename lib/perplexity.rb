@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require './lib/helpers/response'
+require './lib/response'
 
 class Perplexity
   attr_accessor :model, :system, :temperature
@@ -35,6 +35,7 @@ class Perplexity
       }.to_json
     )
     response = Response.new(
+      :perplexity,
       duration: Time.now - start_time,
       json: excon_response.body
     )
@@ -58,52 +59,5 @@ class Perplexity
       },
       read_timeout: 600
     )
-  end
-
-  class Response
-    include ResponseHelpers
-
-    attr_accessor :data, :duration
-
-    def initialize(duration: nil, json: '{}')
-      @data = JSON.parse(json)
-      @duration = duration
-    end
-
-    def display_meta
-      Formatador.display_line(
-        format(
-          '[light_green][perplexity](%<total>d: %<input>d -> %<output>d tokens in %<minutes>dm %<seconds>ds @ $%<cost>0.2f)[/]',
-          {
-            total: total_tokens,
-            input: input_tokens,
-            output: output_tokens,
-            minutes: @duration / 60,
-            seconds: @duration % 60,
-            cost: cost
-          }
-        )
-      )
-    end
-
-    def content
-      @content ||= data['choices'].map { |choice| choice['message']['content'] }.join("\n")
-    end
-
-    def cost
-      @data.dig('usage', 'cost', 'total_cost')
-    end
-
-    def input_tokens
-      @input_tokens ||= data.dig('usage', 'prompt_tokens')
-    end
-
-    def output_tokens
-      @output_tokens ||= data.dig('usage', 'total_tokens') - data.dig('usage', 'prompt_tokens')
-    end
-
-    def total_tokens
-      @total_tokens ||= data.dig('usage', 'total_tokens')
-    end
   end
 end
