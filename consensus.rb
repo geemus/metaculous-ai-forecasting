@@ -9,18 +9,13 @@ require 'excon'
 require 'fileutils'
 require 'json'
 
-require './lib/anthropic'
-require './lib/deepseek'
+require './lib/provider'
+require './lib/response'
 require './lib/metaculus'
-require './lib/perplexity'
 require './lib/prompts'
 require './lib/utility'
 
-FORECASTERS = %i[
-  anthropic
-  perplexity
-  deepseek
-].freeze
+FORECASTERS = Provider::FORECASTERS
 
 # metaculus test questions: (binary: 578, numeric: 14333, multiple-choice: 22427, discrete: 38880)
 post_id = ARGV[0] || raise('post id argument is required')
@@ -35,26 +30,19 @@ if question.existing_forecast? && !%w[578 14333 22427 38880].include?(post_id)
 end
 
 research_json = cache_read!(post_id, 'research.json')
-research = Perplexity::Response.new(json: research_json)
+research = Response.new(:perplexity, json: research_json)
 @research_output = research.stripped_content('reflect')
 
 @revised_forecasts = []
 FORECASTERS.each_with_index do |provider, index|
   forecast_json = cache_read!(post_id, "forecasts/revision.#{index}.json")
-  @revised_forecasts << case provider
-                        when :anthropic
-                          Anthropic::Response.new(json: forecast_json)
-                        when :deepseek
-                          DeepSeek::Response.new(json: forecast_json)
-                        when :perplexity
-                          Perplexity::Response.new(json: forecast_json)
-                        end
+  @revised_forecasts << Response.new(provider, json: forecast_json)
 end
 
-provider = DeepSeek
+provider = :deepseek
 Formatador.display "\n[bold][green]# Superforecaster: Summarizing Consensus(#{post_id})…[/] "
 consensus_json = cache(post_id, 'forecasts/consensus.json') do
-  llm = provider.new
+  llm = Provider.new(provider)
   consensus_prompt = prompt_with_type(llm, question, FORECAST_CONSENSUS_PROMPT_TEMPLATE)
   cache_write(post_id, 'inputs/consensus.md', consensus_prompt)
   consensus = llm.eval({ 'role': 'user', 'content': consensus_prompt })
@@ -62,7 +50,7 @@ consensus_json = cache(post_id, 'forecasts/consensus.json') do
   cache_concat(post_id, 'reflects.md', "# Consensus\n#{consensus.extracted_content('reflect')}")
   consensus.to_json
 end
-consensus = provider::Response.new(json: consensus_json)
+consensus = Response.new(provider, json: consensus_json)
 puts consensus.content
 
 question.submit(consensus)

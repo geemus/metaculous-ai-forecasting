@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require './lib/helpers/response'
+require './lib/response'
 
 class DeepSeek
   attr_accessor :model, :system, :temperature
@@ -32,6 +32,7 @@ class DeepSeek
       }.to_json
     )
     response = Response.new(
+      :deepseek,
       duration: Time.now - start_time,
       json: excon_response.body
     )
@@ -55,58 +56,5 @@ class DeepSeek
       },
       read_timeout: 600
     )
-  end
-
-  class Response
-    include ResponseHelpers
-
-    attr_accessor :data, :duration
-
-    def initialize(duration: nil, json: '{}')
-      @data = JSON.parse(json)
-      @duration = duration
-    end
-
-    def display_meta
-      Formatador.display_line(
-        format(
-          '[light_green][deepseek](%<total>d: %<input>d -> %<output>d tokens in %<minutes>dm %<seconds>ds @ $%<cost>0.2f)[/]',
-          {
-            total: total_tokens,
-            input: input_tokens,
-            output: output_tokens,
-            minutes: @duration / 60,
-            seconds: @duration % 60,
-            cost: cost
-          }
-        )
-      )
-    end
-
-    def content
-      @content ||= data['choices'].map { |choice| choice['message']['content'] }.join("\n")
-    end
-
-    def cost
-      @cost ||= begin
-        cost = 0
-        cost += (data.dig('usage', 'prompt_cache_hit_tokens') / 1_000_000.0) * 0.028 # $0.028/MTok
-        cost += (data.dig('usage', 'prompt_cache_miss_tokens') / 1_000_000.0) * 0.28 # $0.28/MTok
-        cost += (output_tokens / 1_000_000.0) * 0.42 # $0.42/MTok
-        cost
-      end
-    end
-
-    def input_tokens
-      @input_tokens ||= data.dig('usage', 'prompt_tokens')
-    end
-
-    def output_tokens
-      @output_tokens ||= data.dig('usage', 'completion_tokens')
-    end
-
-    def total_tokens
-      @total_tokens ||= data.dig('usage', 'total_tokens')
-    end
   end
 end

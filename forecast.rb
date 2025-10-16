@@ -9,19 +9,13 @@ require 'excon'
 require 'fileutils'
 require 'json'
 
-require './lib/anthropic'
-require './lib/deepseek'
+require './lib/provider'
+require './lib/response'
 require './lib/metaculus'
-require './lib/openai'
-require './lib/perplexity'
 require './lib/prompts'
 require './lib/utility'
 
-FORECASTERS = %i[
-  anthropic
-  perplexity
-  deepseek
-].freeze
+FORECASTERS = Provider::FORECASTERS
 
 # metaculus test questions: (binary: 578, numeric: 14333, multiple-choice: 22427, discrete: 38880)
 post_id = ARGV[0] || raise('post id argv[0] is required')
@@ -39,21 +33,14 @@ end
 cache_write(post_id, 'inputs/system.superforecaster.md', SUPERFORECASTER_SYSTEM_PROMPT)
 
 research_json = cache_read!(post_id, 'research.json')
-research = Perplexity::Response.new(json: research_json)
+research = Response.new(:perplexity, json: research_json)
 @research_output = research.stripped_content('reflect')
 
 provider = FORECASTERS[forecaster_index]
 Formatador.display "\n[bold][green]# Superforecaster[#{forecaster_index}: #{provider}]: Forecasting(#{post_id})…[/] "
 cache(post_id, "forecasts/forecast.#{forecaster_index}.json") do
   llm_args = { system: SUPERFORECASTER_SYSTEM_PROMPT, temperature: 0.9 }
-  llm = case provider
-        when :anthropic
-          Anthropic.new(**llm_args)
-        when :deepseek
-          DeepSeek.new(**llm_args)
-        when :perplexity
-          Perplexity.new(**llm_args)
-        end
+  llm = Provider.new(provider, **llm_args)
   forecast_prompt = prompt_with_type(llm, question, SHARED_FORECAST_PROMPT_TEMPLATE)
   cache_write(post_id, "inputs/forecast.#{forecaster_index}.md", forecast_prompt)
   forecast = llm.eval({ 'role': 'user', 'content': forecast_prompt })

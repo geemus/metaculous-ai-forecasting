@@ -9,19 +9,13 @@ require 'excon'
 require 'fileutils'
 require 'json'
 
-require './lib/anthropic'
-require './lib/deepseek'
+require './lib/provider'
+require './lib/response'
 require './lib/metaculus'
-require './lib/openai'
-require './lib/perplexity'
 require './lib/prompts'
 require './lib/utility'
 
-FORECASTERS = %i[
-  anthropic
-  perplexity
-  deepseek
-].freeze
+FORECASTERS = Provider::FORECASTERS
 
 # metaculus test questions: (binary: 578, numeric: 14333, multiple-choice: 22427, discrete: 38880)
 post_id = ARGV[0] || raise('post id argv[0] is required')
@@ -34,14 +28,7 @@ question = Metaculus::Question.new(data: JSON.parse(post_json))
 
 forecast_json = cache_read!(post_id, "forecasts/#{type}.#{forecaster_index}.json")
 provider = FORECASTERS[forecaster_index]
-@forecast = case provider
-            when :anthropic
-              Anthropic::Response.new(json: forecast_json)
-            when :deepseek
-              DeepSeek::Response.new(json: forecast_json)
-            when :perplexity
-              Perplexity::Response.new(json: forecast_json)
-            end
+@forecast = Response.new(provider, json: forecast_json)
 
 case question.type
 when 'binary'
