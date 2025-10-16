@@ -19,6 +19,7 @@ require './lib/utility'
 FORECASTERS = %i[
   anthropic
   perplexity
+  deepseek
 ].freeze
 
 # metaculus test questions: (binary: 578, numeric: 14333, multiple-choice: 22427, discrete: 38880)
