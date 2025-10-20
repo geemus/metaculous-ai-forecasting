@@ -403,6 +403,10 @@ class Metaculus
 
         json = background.split("\n").last[1...-1]
         data = JSON.parse(json)
+
+        # synced aggregates confuses forecasts about community prediction movement
+        return nil if data.dig('info', 'last_cp')
+
         data.dig('info', 'post_id')
       rescue JSON::ParserError
         nil
