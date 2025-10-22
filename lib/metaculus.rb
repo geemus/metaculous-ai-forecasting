@@ -54,6 +54,32 @@ class Metaculus
     exit(1)
   end
 
+  def self.list_resolved_tournament_questions(tournament_id)
+    new.list_resolved_tournament_questions(tournament_id)
+  end
+
+  def list_resolved_tournament_questions(tournament_id)
+    excon_response = connection.get(
+      path: '/api/posts/',
+      query: {
+        forecast_type: %w[binary discrete multiple_choice numeric].join(','),
+        forecaster_id: ENV['METACULUS_BOT_ID'],
+        include_description: true,
+        limit: 100,
+        statuses: 'resolved',
+        tournaments: [tournament_id],
+        with_cp: true
+      }
+    )
+    data = JSON.parse(excon_response.body)
+    questions = data['results'].map { |datum| Question.new(data: datum) }
+    questions.reject! { |question| question.data['status'] == 'closed' }
+    questions
+  rescue Excon::Error => e
+    puts e.response.inspect
+    exit(1)
+  end
+
   def post_comment(data)
     Formatador.display_line "\n[bold][green]# Metaculus: Submitting Comment…[/] "
     body = data.to_json
@@ -308,6 +334,10 @@ class Metaculus
 
     def post_id
       @post_id ||= data['id']
+    end
+
+    def spot_peer_score
+      @spot_peer_score ||= question.dig('my_forecasts', 'score_data', 'spot_peer_score')
     end
 
     def submit(response)
