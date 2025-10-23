@@ -46,7 +46,7 @@ jobs:
         with:
           ruby-version: '3.4'
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-      - run: ./research.rb ${{ inputs.post_id }}
+      - run: ./news.rb ${{ inputs.post_id }}
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           ASKNEWS_API_KEY: ${{ secrets.ASKNEWS_API_KEY }}
@@ -73,6 +73,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+      - uses: actions/cache/restore@v4
+        with:
+          key:  tmp/${{ inputs.post_id }}/output/news.md
+          path: tmp/${{ inputs.post_id }}/output/news.md
       - uses: actions/cache/restore@v4
         with:
           key:  tmp/${{ inputs.post_id }}/research.json
