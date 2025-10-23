@@ -18,6 +18,7 @@ if post_id.nil? || post_id.empty?
   exit
 end
 
+system "./news.rb #{post_id}"
 system "./research.rb #{post_id}"
 system "echo $(cat tmp/#{post_id}/post.json | jq -r '.title')"
 system "echo $(cat tmp/#{post_id}/post.json | jq -r '.question.description')"

@@ -13,6 +13,8 @@ exit if should_skip_forecast?(question, post_id)
 
 cache_write(post_id, 'inputs/system.researcher.md', RESEARCHER_SYSTEM_PROMPT)
 
+@news_output = load_cached_news(post_id)
+
 Formatador.display "\n[bold][green]# Researcher: Drafting Research(#{post_id})…[/] "
 cache(post_id, 'research.json') do
   perplexity = Perplexity.new(model: 'sonar-pro')

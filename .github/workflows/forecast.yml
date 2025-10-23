@@ -10,6 +10,8 @@ on:
     secrets:
       ANTHROPIC_API_KEY:
         required: true
+      ASKNEWS_API_KEY:
+        required: true
       DEEPSEEK_API_KEY:
         required: true
       METACULUS_BOT_API_TOKEN:
@@ -31,7 +33,43 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  news:
+    if: ${{ inputs.post_id }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/cache/restore@v4
+        with:
+          key:  tmp/${{ inputs.post_id }}/outputs/news.md
+          path: tmp/${{ inputs.post_id }}/outputs/news.md
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+      - run: ./research.rb ${{ inputs.post_id }}
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ASKNEWS_API_KEY: ${{ secrets.ASKNEWS_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
+          METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+      - uses: actions/cache/save@v4
+        with:
+          key:  tmp/${{ inputs.post_id }}/outputs/news.md
+          path: tmp/${{ inputs.post_id }}/outputs/news.md
+      - run: |
+          echo '<details><summary>Filters</summary>' >> $GITHUB_STEP_SUMMARY
+          echo "$(cat tmp/${{ inputs.post_id }}/news_filters.json)" >> $GITHUB_STEP_SUMMARY
+          echo '</details>' >> $GITHUB_STEP_SUMMARY
+      - run: |
+          echo '<details><summary>Result</summary>' >> $GITHUB_STEP_SUMMARY
+          echo "$(cat tmp/${{ inputs.post_id }}/outputs/news.md)" >> $GITHUB_STEP_SUMMARY
+          echo '</details>' >> $GITHUB_STEP_SUMMARY
+
   research:
+    needs: news
+    if: ${{ inputs.post_id }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
