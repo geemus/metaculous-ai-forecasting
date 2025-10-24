@@ -11,10 +11,7 @@ require './lib/perplexity'
 post_id = ARGV[0] || raise('post id argument is required')
 
 question = fetch_question(post_id)
-if should_skip_forecast?(question, post_id)
-  # Commented out exit to allow news gathering for already-forecasted questions
-  # exit
-end
+exit if should_skip_forecast?(question, post_id)
 
 filter_prompt = ERB.new(<<~FILTER_PROMPT_TEMPLATE, trim_mode: '-').result(binding)
   You are an expert researcher preparing to research this forecast question and background:
@@ -30,7 +27,7 @@ filter_prompt = ERB.new(<<~FILTER_PROMPT_TEMPLATE, trim_mode: '-').result(bindin
   </background>
 
   - Before responding, show step-by-step reasoning in clear, logical order starting with `<<<<<< think` on the line before and ending with `>>>>>>` on the line after.
-  <%- unless ENV['REFLECT'] == 'true' -%>
+  <%- if ENV['REFLECT'] == 'true' -%>
   - After responding, provide actionable recommendations to improve the prompt's effectiveness with reasoning explanations starting with `<<<<<< reflect` on the line before and ending with `>>>>>>` on the line after.
   <%- end -%>
 
