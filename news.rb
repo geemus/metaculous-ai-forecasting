@@ -13,6 +13,23 @@ post_id = ARGV[0] || raise('post id argument is required')
 question = fetch_question(post_id)
 exit if should_skip_forecast?(question, post_id)
 
+CATEGORIES = %w[
+  Business
+  Climate
+  Crime
+  Culture
+  Entertainment
+  Environment
+  Finance
+  Health
+  Military
+  Politics
+  Science
+  Sports
+  Technology
+  World
+].freeze
+
 filter_prompt = ERB.new(<<~FILTER_PROMPT_TEMPLATE, trim_mode: '-').result(binding)
   You are an expert researcher preparing to research this forecast question and background:
 
@@ -32,7 +49,7 @@ filter_prompt = ERB.new(<<~FILTER_PROMPT_TEMPLATE, trim_mode: '-').result(bindin
   <%- end -%>
 
   - Provide a set of the most relevant searchable keywords for general news focusing on core concepts and omitting methodologies to find related information as a comma-separated list, starting with `<query>` on the line before and ending with `</query>` on the line after.
-  - Provide the three or fewer best matching categories among [Business, Crime, Politics, Science, Sports, Technology, Military, Health, Entertainment, Finance, Culture, Climate, Environment, World] as a comma-separated list, starting with `<categories>` on the line before and ending with `</categories>` on the line after.
+  - Provide the three or fewer best matching categories among [#{CATEGORIES.join(', ')}] as a comma-separated list, starting with `<categories>` on the line before and ending with `</categories>` on the line after.
 FILTER_PROMPT_TEMPLATE
 
 Formatador.display "\n[bold][green]# News: Generating Filters[deepseek](#{post_id})…[/] "
@@ -43,8 +60,10 @@ filters_json = cache(post_id, 'news_filters.json') do
   )
   filters = deepseek.eval({ 'role': 'user', 'content': filter_prompt })
   puts filters.content
+  categories = filters.extracted_content('categories').split(', ')
+  categories.select! { |category| CATEGORIES.include?(category) } # ignore category hallucinations
   {
-    categories: filters.extracted_content('categories').split(', '),
+    categories: categories,
     query: filters.extracted_content('query')
   }.to_json
 end
