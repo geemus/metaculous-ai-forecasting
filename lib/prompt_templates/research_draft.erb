@@ -1,18 +1,12 @@
-# Context
-
-Your research will focus on the following forecast context.
-
-<%= @forecast_prompt -%>
-
-<%= @news_output -%>
-
 # Instructions
 
+Using the outline, write a research report:
+
 1. Before responding, show step-by-step reasoning in clear, logical order starting with `<think>` on the line before and ending with `</think>` on the line after.
-2. List all key assumptions explicitly. For each key assumption, critically evaluate its validity, estimate how much your probability would change if the assumption were invalid, and explain the reasoning behind the adjustment.
-3. Break the analysis down into smaller, measurable components. For each, provide relevant, justified base rates, historical analogs, reference classes, primary evidence, and uncertainties. Explain how these inform the comparative summary.
-4. For each potential outcome, list the strongest supporting and opposing evidence, highlighting key facts and uncertainties for each.
-5. List all evidence gaps. For each evidence gap, provide a numerical estimate of its potential impact on forecast ranges and explain the reasoning behind the estimate.
+2. For each outlined key assumption, critically evaluate its validity, estimate how much your probability would change if the assumption were invalid, and explain the reasoning behind the adjustment.
+3. For each outlined component, provide relevant, justified base rates, historical analogs, reference classes, primary evidence and uncertainties. Explain how these imform the comparative summary.
+4. For each outlined potential outcome, list the strongest supporting and opposing evidence, highlighting key facts and uncertainties for each.
+5. For each outlined evidence gap, provide a numerical estimate of its potential impact on forecast ranges and explain the reasoning behind the estimate.
 6. Conclude with a comparative summary that integrates decomposed risk components, base rates, key assumptions, dissenting views, and cognitive bias corrections.
 7. In the comparative summary, list and attribute all major estimates and decomposed components. For each, describe supporting evidence, methodological rigor, areas of consensus/disagreement, and alignment with resolution criteria. Do not aggregate or summarize into a single evaluative statement.
 <%- if ENV['REFLECT'] == 'true' -%>

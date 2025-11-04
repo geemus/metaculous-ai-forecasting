@@ -1,0 +1,20 @@
+# Context
+
+Your research will focus on the following forecast context.
+
+<%= @forecast_prompt -%>
+
+<%= @news_output -%>
+
+# Instructions
+
+Start by creating an outline for your research:
+
+1. Before responding, show step-by-step reasoning in clear, logical order starting with `<think>` on the line before and ending with `</think>` on the line after.
+2. Outline all key assumptions.
+3. Break the analysis down into smaller, measurable components and outline them.
+4. Outline each potential outcome.
+5. Outline all evidence gaps.
+<%- if ENV['REFLECT'] == 'true' -%>
+6. After responding, provide actionable recommendations to improve the prompt's effectiveness with reasoning explanations starting with `<reflect>` on the line before and ending with `</reflect>` on the line after.
+<%- end -%>

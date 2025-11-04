@@ -48,6 +48,9 @@ FORECAST_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/forecast.er
 
 RESEARCH_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/research.erb'), trim_mode: '-')
 
+RESEARCH_OUTLINE_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/research_outline.erb'), trim_mode: '-')
+RESEARCH_DRAFT_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/research_draft.erb'), trim_mode: '-')
+
 SHARED_FORECAST_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/shared_forecast.erb'), trim_mode: '-')
 
 BINARY_FORECAST_PROMPT = <<~BINARY_FORECAST_PROMPT
