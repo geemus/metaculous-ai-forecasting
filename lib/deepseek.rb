@@ -3,16 +3,18 @@
 require './lib/response'
 
 class DeepSeek
-  attr_accessor :model, :system, :temperature
+  attr_accessor :model, :system, :temperature, :tools
 
   def initialize(
     model: 'deepseek-reasoner',
     system: SUPERFORECASTER_SYSTEM_PROMPT,
-    temperature: 0.1
+    temperature: 0.1,
+    tools: []
   )
     @model = model
     @system = system
     @temperature = temperature
+    @tools = tools
   end
 
   # https://api-docs.deepseek.com/api/create-chat-completion
@@ -28,18 +30,50 @@ class DeepSeek
             'content': system
           }
         ].concat(messages),
-        temperature: temperature
+        temperature: temperature,
+        tools: tools
       }.to_json
     )
+    data = JSON.parse(excon_response.body)
+    content = data['choices'].map { |choice| choice['message']['content'] }.join("\n")
+    tool_calls = data['choices'].map { |choice| choice['message']['tool_calls'] }.flatten.compact
+    messages << {
+      'role' => 'assistant',
+      'content' => content
+    }
     response = Response.new(
       :deepseek,
       duration: Time.now - start_time,
       json: excon_response.body
     )
-    response.display_meta
-    response
+    if tool_calls.empty?
+      response.display_meta
+      response
+    else
+      messages.last['tool_calls'] = tool_calls
+      tool_calls.each do |tool_call|
+        arguments = JSON.parse(tool_call.dig('function', 'arguments'))
+        prompt = arguments['prompt']
+        Formatador.display "\n[bold][green]# Researcher: Searching([faint]#{prompt}[/])…[/] "
+
+        llm = Perplexity.new(system: '')
+        search_results = llm.eval(
+          { 'role': 'user', 'content': prompt }
+        )
+
+        messages << {
+          'content' => search_results.content,
+          'role' => 'tool',
+          'tool_call_id' => tool_call['id']
+        }
+      end
+
+      self.eval(*messages)
+    end
   rescue Excon::Error => e
     puts e
+    puts e.request[:body]
+    puts e.response.body
     exit(1)
   end
 
