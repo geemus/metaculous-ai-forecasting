@@ -33,6 +33,11 @@ def cache_concat(question_id, path, data)
   File.write(tmp_path, [cached, data].compact.join("\n"))
 end
 
+def cache_delete(question_id, path)
+  tmp_path = "./tmp/#{question_id}/#{path}"
+  File.delete(tmp_path) if File.exist?(tmp_path)
+end
+
 def cache_read!(question_id, path)
   tmp_path = "./tmp/#{question_id}/#{path}"
   raise "Cache Not Found: `#{tmp_path}`" unless File.exist?(tmp_path)
