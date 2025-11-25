@@ -88,6 +88,7 @@ class DeepSeek
         'authorization': "Bearer #{ENV['DEEPSEEK_API_KEY']}",
         'content-type': 'application/json'
       },
+      idempotent: true,
       read_timeout: 600
     )
   end
