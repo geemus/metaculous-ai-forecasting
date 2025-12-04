@@ -43,6 +43,8 @@ class Perplexity
     response
   rescue Excon::Error => e
     puts e
+    puts e.request[:body]
+    puts e.response.body
     exit(1)
   end
 
@@ -57,6 +59,7 @@ class Perplexity
         'authorization': "Bearer #{ENV['PERPLEXITY_API_KEY']}",
         'content-type': 'application/json'
       },
+      idempotent: true,
       read_timeout: 600
     )
   end
