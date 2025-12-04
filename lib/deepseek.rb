@@ -56,7 +56,13 @@ class DeepSeek
         prompt = arguments['prompt']
         Formatador.display "\n[bold][green]# Researcher: Searching([faint]#{prompt}[/])…[/] "
 
-        llm = Perplexity.new(system: '')
+        llm = Perplexity.new(system: <<~SYSTEM)
+          You are an experienced research assistant for a superforecaster.
+
+          # Guidance
+          - Prioritize clarity and conciseness.
+          - Generate research summaries that are concise while retaining necessary detail.
+        SYSTEM
         search_results = llm.eval(
           { 'role': 'user', 'content': prompt }
         )
