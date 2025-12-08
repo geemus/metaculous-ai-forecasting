@@ -26,6 +26,7 @@ jobs:
     if: ${{ needs.query.outputs.post_ids != '' && needs.query.outputs.post_ids != '[]' }}
     needs: query
     strategy:
+      fail-fast: false
       matrix:
         post_id: ${{ fromJSON(needs.query.outputs.post_ids) }}
     concurrency:
