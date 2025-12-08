@@ -27,9 +27,9 @@ on:
         required: true
         type: string
 
-# prevent parallel runs
+# prevent parallel runs for same post_id
 concurrency:
-  group: ${{ github.workflow }}
+  group: ${{ github.workflow + '+' + inputs.post_id }}
   cancel-in-progress: false
 
 jobs:
