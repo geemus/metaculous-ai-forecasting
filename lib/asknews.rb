@@ -57,7 +57,8 @@ class AskNews
         'authorization': "Bearer #{ENV['ASKNEWS_API_KEY']}",
         'content-type': 'application/json'
       },
-      idempotent: true
+      idempotent: true,
+      retry_interval: 30
     )
   end
 
