@@ -2,9 +2,6 @@
 # frozen_string_literal: true
 
 require_relative 'lib/script_helpers'
-require './lib/anthropic'
-require './lib/openai'
-require './lib/perplexity'
 
 post_id = ARGV[0] || raise('post id argument is required')
 
@@ -14,24 +11,6 @@ exit if should_skip_forecast?(question, post_id)
 cache_write(post_id, 'inputs/system.researcher.md', RESEARCHER_SYSTEM_PROMPT)
 
 @news_output = load_cached_news(post_id)
-
-SEARCH_TOOL = {
-  type: 'function',
-  function: {
-    name: 'search',
-    description: 'Search the web for the latest information.',
-    parameters: {
-      type: 'object',
-      properties: {
-        'prompt': {
-          type: 'string',
-          description: 'Full sentences or paragraphs to prompt web search with context and instructions.'
-        }
-      }
-    },
-    required: ['prompt']
-  }
-}.freeze
 
 cache(post_id, 'research.json') do
   Formatador.display "\n[bold][green]# Researcher: Researching(#{post_id})…[/] "

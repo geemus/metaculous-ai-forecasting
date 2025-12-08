@@ -2,6 +2,24 @@
 
 require './lib/response'
 
+SEARCH_TOOL = {
+  type: 'function',
+  function: {
+    name: 'search',
+    description: 'Search the web for the latest information.',
+    parameters: {
+      type: 'object',
+      properties: {
+        'prompt': {
+          type: 'string',
+          description: 'Full sentences or paragraphs to prompt web search with context and instructions.'
+        }
+      }
+    },
+    required: ['prompt']
+  }
+}.freeze
+
 class DeepSeek
   attr_accessor :model, :system, :temperature, :tools
 
@@ -53,22 +71,16 @@ class DeepSeek
       messages.last['tool_calls'] = tool_calls
       tool_calls.each do |tool_call|
         arguments = JSON.parse(tool_call.dig('function', 'arguments'))
-        prompt = arguments['prompt']
-        Formatador.display "\n[bold][green]# Researcher: Searching([faint]#{prompt}[/])…[/] "
-
-        llm = Perplexity.new(system: <<~SYSTEM)
-          You are an experienced research assistant for a superforecaster.
-
-          # Guidance
-          - Prioritize clarity and conciseness.
-          - Generate research summaries that are concise while retaining necessary detail.
-        SYSTEM
-        search_results = llm.eval(
-          { 'role': 'user', 'content': prompt }
-        )
+        tool = tool_call.dig('function', 'name')
+        result = case tool
+                 when 'search'
+                   tool_search(arguments)
+                 else
+                   raise "Unknown Tool Requested: `#{tool}`"
+                 end
 
         messages << {
-          'content' => search_results.content,
+          'content' => result.content,
           'role' => 'tool',
           'tool_call_id' => tool_call['id']
         }
@@ -96,6 +108,22 @@ class DeepSeek
       },
       idempotent: true,
       read_timeout: 600
+    )
+  end
+
+  def tool_search(arguments)
+    prompt = arguments['prompt']
+    Formatador.display "\n[bold][green]# Researcher: Searching([faint]#{prompt}[/])…[/] "
+
+    llm = Perplexity.new(system: <<~SYSTEM)
+      You are an experienced research assistant for a superforecaster.
+
+      # Guidance
+      - Prioritize clarity and conciseness.
+      - Generate research summaries that are concise while retaining necessary detail.
+    SYSTEM
+    llm.eval(
+      { 'role': 'user', 'content': prompt }
     )
   end
 end
