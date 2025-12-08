@@ -23,7 +23,7 @@ jobs:
           METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
 
   enqueue:
-    if: ${{ needs.query.outputs.post_ids != '[]' }}
+    if: ${{ needs.query.outputs.post_ids != '' && needs.query.outputs.post_ids != '[]' }}
     needs: query
     strategy:
       matrix:
