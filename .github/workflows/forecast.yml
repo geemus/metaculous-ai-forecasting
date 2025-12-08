@@ -29,7 +29,7 @@ on:
 
 # prevent parallel runs for same post_id
 concurrency:
-  group: ${{ join([github.workflow, '+', inputs.post_id]) }}
+  group: ${{ format('{0}+{1}', github.workflow, inputs.post_id) }}
   cancel-in-progress: false
 
 jobs:
