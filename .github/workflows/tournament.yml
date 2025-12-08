@@ -29,7 +29,7 @@ jobs:
       matrix:
         post_id: ${{ fromJSON(needs.query.outputs.post_ids) }}
     concurrency:
-      group: scheduled-forecast-enqueue
+      group: ${{ github.workflow }}+enqueue+${{ matrix.post_id }}
       cancel-in-progress: false
     secrets:
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
