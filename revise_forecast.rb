@@ -22,7 +22,7 @@ cache(post_id, "forecasts/revision.#{forecaster_index}.json") do
   llm_args = { system: SUPERFORECASTER_SYSTEM_PROMPT, temperature: 0.1 }
   llm = Provider.new(provider, **llm_args)
   forecast_prompt = prompt_with_type(llm, question, SHARED_FORECAST_PROMPT_TEMPLATE)
-  forecast_delphi_prompt = prompt_with_type(llm, question, FORECAST_DELPHI_PROMPT_TEMPLATE)
+  forecast_delphi_prompt = FORECAST_DELPHI_PROMPT_TEMPLATE.result(binding)
   cache_write(post_id, "inputs/revision.#{forecaster_index}.md", forecast_delphi_prompt)
   revision = llm.eval(
     { 'role': 'user', 'content': forecast_prompt },
