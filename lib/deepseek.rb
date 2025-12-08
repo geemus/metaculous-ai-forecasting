@@ -6,7 +6,15 @@ SEARCH_TOOL = {
   type: 'function',
   function: {
     name: 'search',
-    description: 'Search the web for the latest information.',
+    description: <<~DESCRIPTION,
+      Search for public information related to a particular prompt.
+
+      # Usage
+      - Provides access to information that is newer than or missing from training data.
+
+      # Relevance
+      - Use for current events, recent developments, or missing information.
+    DESCRIPTION
     parameters: {
       type: 'object',
       properties: {
