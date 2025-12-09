@@ -18,7 +18,7 @@ SEARCH_TOOL = {
     parameters: {
       type: 'object',
       properties: {
-        'prompt': {
+        prompt: {
           type: 'string',
           description: 'Full sentences or paragraphs to prompt web search with context and instructions.'
         }
@@ -28,14 +28,39 @@ SEARCH_TOOL = {
   }
 }.freeze
 
+THINK_TOOL = {
+  type: 'function',
+  function: {
+    name: 'think',
+    description: <<~DESCRIPTION,
+      Think out loud, take notes, form plans.
+
+      # Usage
+      - Has no external effects.
+
+      # Relevance
+      - Skip for trivial single-step tasks.
+    DESCRIPTION
+    parameters: {
+      type: 'object',
+      properties: {
+        thoughts: {
+          type: 'string',
+          description: 'The thoughts, notes, or plans.'
+        }
+      }
+    }
+  }
+}.freeze
+
 class DeepSeek
   attr_accessor :model, :system, :temperature, :tools
 
   def initialize(
     model: 'deepseek-reasoner',
-    system: SUPERFORECASTER_SYSTEM_PROMPT,
+    system: SUPERFORECASTER_SYSTEM_PROMPT + TOOLS_SYSTEM_PROMPT,
     temperature: 0.1,
-    tools: []
+    tools: [THINK_TOOL]
   )
     @model = model
     @system = system
@@ -80,15 +105,17 @@ class DeepSeek
       tool_calls.each do |tool_call|
         arguments = JSON.parse(tool_call.dig('function', 'arguments'))
         tool = tool_call.dig('function', 'name')
-        result = case tool
-                 when 'search'
-                   tool_search(arguments)
-                 else
-                   raise "Unknown Tool Requested: `#{tool}`"
-                 end
+        content = case tool
+                  when 'search'
+                    tool_search(arguments).content
+                  when 'think'
+                    tool_think(arguments)
+                  else
+                    raise "Unknown Tool Requested: `#{tool}`"
+                  end
 
         messages << {
-          'content' => result.content,
+          'content' => content,
           'role' => 'tool',
           'tool_call_id' => tool_call['id']
         }
@@ -121,7 +148,7 @@ class DeepSeek
 
   def tool_search(arguments)
     prompt = arguments['prompt']
-    Formatador.display "\n[bold][green]# Researcher: Searching([faint]#{prompt}[/])…[/] "
+    Formatador.display "\n[bold][green]# Researcher: Searching[faint](#{prompt})[/]…[/] "
 
     llm = Perplexity.new(system: <<~SYSTEM)
       You are an experienced research assistant for a superforecaster.
@@ -133,5 +160,11 @@ class DeepSeek
     llm.eval(
       { 'role': 'user', 'content': prompt }
     )
+  end
+
+  def tool_think(arguments)
+    thoughts = arguments['thoughts']
+    Formatador.display_line "\n[bold][green]Thinking[faint](#{thoughts})[/]"
+    'Thought thoughts.'
   end
 end

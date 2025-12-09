@@ -16,8 +16,8 @@ cache(post_id, 'research.json') do
   Formatador.display "\n[bold][green]# Researcher: Researching(#{post_id})…[/] "
   llm = DeepSeek.new(
     model: 'deepseek-chat', # used by default with tools
-    system: RESEARCHER_SYSTEM_PROMPT,
-    tools: [SEARCH_TOOL]
+    system: RESEARCHER_SYSTEM_PROMPT + TOOLS_SYSTEM_PROMPT,
+    tools: [SEARCH_TOOL, THINK_TOOL]
   )
   @forecast_prompt = FORECAST_PROMPT_TEMPLATE.result(binding)
   @research_prompt = RESEARCH_PROMPT_TEMPLATE.result(binding)

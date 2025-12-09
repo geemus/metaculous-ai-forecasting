@@ -4,7 +4,7 @@ RESEARCHER_SYSTEM_PROMPT = ERB.new(<<~RESEARCHER_SYSTEM_PROMPT, trim_mode: '-').
   You are an experienced research assistant for a superforecaster.
 
   # Guidance
-
+  - Do not preamble.
   - Prioritize clarity and conciseness.
   - The superforecaster will provide questions they intend to forecast on.
   - Generate research summaries that are concise while retaining necessary detail.
@@ -23,6 +23,7 @@ SUPERFORECASTER_SYSTEM_PROMPT = ERB.new(<<~SUPERFORECASTER_SYSTEM_PROMPT, trim_m
 
   # Guidance
 
+  - Do not preamble.
   - Break the analysis down into smaller, measurable parts, estimate each separately, show how these adjust your synthesis, and justify the adjustments.
   - When evaluating complex uncertainties, consider what is certain, what is a well-supported estimate, and what remains unknown or uncertain.
   - Explicitly identify key assumptions, rigorously test their validity, and consider how changing them would affect your forecast.
@@ -47,6 +48,13 @@ SUPERFORECASTER_SHARED_INSTRUCTIONS = ERB.new(<<~SUPERFORECASTER_SHARED_INSTRUCT
   - After your forecast, provide actionable recommendations to improve the prompt's effectiveness with reasoning explanations starting with `<reflect>` on the line before and ending with `</reflect>` on the line after.
   <%- end -%>
 SUPERFORECASTER_SHARED_INSTRUCTIONS
+
+TOOLS_SYSTEM_PROMPT = <<~TOOLS_SYSTEM_PROMPT
+
+  # Tool Usage
+  - Before calling tools, think about which tools are most relevant to improve responses.
+  - Use relevant tools to improve responses.
+TOOLS_SYSTEM_PROMPT
 
 FORECAST_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/forecast.erb'), trim_mode: '-')
 
