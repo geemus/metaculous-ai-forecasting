@@ -55,7 +55,7 @@ FILTER_PROMPT_TEMPLATE
 Formatador.display "\n[bold][green]# News: Generating Filters[deepseek](#{post_id})…[/] "
 filters_json = cache(post_id, 'news_filters.json') do
   deepseek = DeepSeek.new(
-    model: 'deepseek-chat',
+    model: 'deepseek-reasoner',
     system: ''
   )
   filters = deepseek.eval({ 'role': 'user', 'content': filter_prompt })

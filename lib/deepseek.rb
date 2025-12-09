@@ -57,7 +57,7 @@ class DeepSeek
   attr_accessor :model, :system, :temperature, :tools
 
   def initialize(
-    model: 'deepseek-chat',
+    model: 'deepseek-reasoner',
     system: SUPERFORECASTER_SYSTEM_PROMPT + TOOLS_SYSTEM_PROMPT,
     temperature: 0.1,
     tools: [THINK_TOOL]
@@ -87,10 +87,12 @@ class DeepSeek
     )
     data = JSON.parse(excon_response.body)
     content = data['choices'].map { |choice| choice['message']['content'] }.join("\n")
+    reasoning_content = data['choices'].map { |choice| choice['message']['reasoning_content'] }.join("\n")
     tool_calls = data['choices'].map { |choice| choice['message']['tool_calls'] }.flatten.compact
     messages << {
       'role' => 'assistant',
-      'content' => content
+      'content' => content,
+      'reasoning_content' => reasoning_content
     }
     response = Response.new(
       :deepseek,
