@@ -57,7 +57,7 @@ class DeepSeek
   attr_accessor :model, :system, :temperature, :tools
 
   def initialize(
-    model: 'deepseek-reasoner',
+    model: 'deepseek-chat',
     system: SUPERFORECASTER_SYSTEM_PROMPT + TOOLS_SYSTEM_PROMPT,
     temperature: 0.1,
     tools: [THINK_TOOL]
