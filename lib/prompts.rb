@@ -73,8 +73,6 @@ BINARY_FORECAST_PROMPT = <<~BINARY_FORECAST_PROMPT
   <probability>
   X%
   </probability>
-
-  #{SUPERFORECASTER_SHARED_INSTRUCTIONS}
 BINARY_FORECAST_PROMPT
 
 NUMERIC_FORECAST_PROMPT = <<~NUMERIC_FORECAST_PROMPT
@@ -96,8 +94,6 @@ NUMERIC_FORECAST_PROMPT = <<~NUMERIC_FORECAST_PROMPT
   Percentile 90: J {unit}
   Percentile 95: K {unit}
   </percentiles>
-
-  #{SUPERFORECASTER_SHARED_INSTRUCTIONS}
 NUMERIC_FORECAST_PROMPT
 
 MULTIPLE_CHOICE_FORECAST_PROMPT = <<~MULTIPLE_CHOICE_FORECAST_PROMPT
@@ -111,9 +107,22 @@ MULTIPLE_CHOICE_FORECAST_PROMPT = <<~MULTIPLE_CHOICE_FORECAST_PROMPT
   ...
   Option "N": N%
   </probabilities>
-
-  #{SUPERFORECASTER_SHARED_INSTRUCTIONS}
 MULTIPLE_CHOICE_FORECAST_PROMPT
+
+def consensus_prompt_with_type(llm, question, prompt_template)
+  prompt = prompt_template.result(binding)
+  prompt += case question.type
+            when 'binary'
+              BINARY_FORECAST_PROMPT
+            when 'discrete', 'numeric'
+              NUMERIC_FORECAST_PROMPT
+            when 'multiple_choice'
+              MULTIPLE_CHOICE_FORECAST_PROMPT
+            else
+              raise "Missing template for type: #{question.type}"
+            end
+  prompt
+end
 
 def prompt_with_type(llm, question, prompt_template)
   prompt = prompt_template.result(binding)
@@ -127,7 +136,11 @@ def prompt_with_type(llm, question, prompt_template)
             else
               raise "Missing template for type: #{question.type}"
             end
-  prompt
+  <<~PROMPT
+    #{prompt}
+
+    #{SUPERFORECASTER_SHARED_INSTRUCTIONS}
+  PROMPT
 end
 
 FORECAST_DELPHI_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/forecast_delphi.erb'), trim_mode: '-')
