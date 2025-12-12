@@ -125,6 +125,8 @@ class DeepSeek
 
       self.eval(*messages)
     end
+  rescue JSON::ParserError
+    retry # retry on invalid/hallucinated tool_call output
   rescue Excon::Error => e
     puts e
     puts e.request[:body]
