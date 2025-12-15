@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/cache/restore@v4
+      - uses: actions/cache/restore@v5
         with:
           key:  tmp/${{ inputs.post_id }}/outputs/news.md
           path: tmp/${{ inputs.post_id }}/outputs/news.md
@@ -54,7 +54,7 @@ jobs:
           METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
           METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
-      - uses: actions/cache/save@v4
+      - uses: actions/cache/save@v5
         with:
           key:  tmp/${{ inputs.post_id }}/outputs/news.md
           path: tmp/${{ inputs.post_id }}/outputs/news.md
@@ -73,11 +73,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/cache/restore@v4
+      - uses: actions/cache/restore@v5
         with:
           key:  tmp/${{ inputs.post_id }}/outputs/news.md
           path: tmp/${{ inputs.post_id }}/outputs/news.md
-      - uses: actions/cache/restore@v4
+      - uses: actions/cache/restore@v5
         with:
           key:  tmp/${{ inputs.post_id }}/research.json
           path: tmp/${{ inputs.post_id }}/research.json
@@ -92,7 +92,7 @@ jobs:
           METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
           METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
-      - uses: actions/cache/save@v4
+      - uses: actions/cache/save@v5
         with:
           key:  tmp/${{ inputs.post_id }}/research.json
           path: tmp/${{ inputs.post_id }}/research.json
@@ -118,11 +118,11 @@ jobs:
         forecaster_index: [0, 1, 2]
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/cache/restore@v4
+      - uses: actions/cache/restore@v5
         with:
           key:  tmp/${{ inputs.post_id }}/research.json
           path: tmp/${{ inputs.post_id }}/research.json
-      - uses: actions/cache/restore@v4
+      - uses: actions/cache/restore@v5
         with:
           key:  tmp/${{ inputs.post_id }}/forecasts/forecast.${{ matrix.forecaster_index }}.json
           path: tmp/${{ inputs.post_id }}/forecasts/forecast.${{ matrix.forecaster_index }}.json
@@ -137,7 +137,7 @@ jobs:
           METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
           METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
-      - uses: actions/cache/save@v4
+      - uses: actions/cache/save@v5
         with:
           key:  tmp/${{ inputs.post_id }}/forecasts/forecast.${{ matrix.forecaster_index }}.json
           path: tmp/${{ inputs.post_id }}/forecasts/forecast.${{ matrix.forecaster_index }}.json
@@ -163,35 +163,35 @@ jobs:
         forecaster_index: [0, 1, 2]
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/cache/restore@v4
+      - uses: actions/cache/restore@v5
         with:
           key:  tmp/${{ inputs.post_id }}/research.json
           path: tmp/${{ inputs.post_id }}/research.json
-      - uses: actions/cache/restore@v4
+      - uses: actions/cache/restore@v5
         with:
           key:  tmp/${{ inputs.post_id }}/forecasts/forecast.0.json
           path: tmp/${{ inputs.post_id }}/forecasts/forecast.0.json
-      - uses: actions/cache/restore@v4
+      - uses: actions/cache/restore@v5
         with:
           key:  tmp/${{ inputs.post_id }}/forecasts/forecast.1.json
           path: tmp/${{ inputs.post_id }}/forecasts/forecast.1.json
-      - uses: actions/cache/restore@v4
+      - uses: actions/cache/restore@v5
         with:
           key:  tmp/${{ inputs.post_id }}/forecasts/forecast.2.json
           path: tmp/${{ inputs.post_id }}/forecasts/forecast.2.json
-      - uses: actions/cache/restore@v4
+      - uses: actions/cache/restore@v5
         with:
           key:  tmp/${{ inputs.post_id }}/forecasts/forecast.3.json
           path: tmp/${{ inputs.post_id }}/forecasts/forecast.3.json
-      - uses: actions/cache/restore@v4
+      - uses: actions/cache/restore@v5
         with:
           key:  tmp/${{ inputs.post_id }}/forecasts/forecast.4.json
           path: tmp/${{ inputs.post_id }}/forecasts/forecast.4.json
-      - uses: actions/cache/restore@v4
+      - uses: actions/cache/restore@v5
         with:
           key:  tmp/${{ inputs.post_id }}/forecasts/forecast.5.json
           path: tmp/${{ inputs.post_id }}/forecasts/forecast.5.json
-      - uses: actions/cache/restore@v4
+      - uses: actions/cache/restore@v5
         with:
           key:  tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.json
           path: tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.json
@@ -206,7 +206,7 @@ jobs:
           METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
           METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
-      - uses: actions/cache/save@v4
+      - uses: actions/cache/save@v5
         with:
           key:  tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.json
           path: tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.json
@@ -228,35 +228,35 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/cache/restore@v4
+      - uses: actions/cache/restore@v5
         with:
           key:  tmp/${{ inputs.post_id }}/research.json
           path: tmp/${{ inputs.post_id }}/research.json
-      - uses: actions/cache/restore@v4
+      - uses: actions/cache/restore@v5
         with:
           key:  tmp/${{ inputs.post_id }}/forecasts/revision.0.json
           path: tmp/${{ inputs.post_id }}/forecasts/revision.0.json
-      - uses: actions/cache/restore@v4
+      - uses: actions/cache/restore@v5
         with:
           key:  tmp/${{ inputs.post_id }}/forecasts/revision.1.json
           path: tmp/${{ inputs.post_id }}/forecasts/revision.1.json
-      - uses: actions/cache/restore@v4
+      - uses: actions/cache/restore@v5
         with:
           key:  tmp/${{ inputs.post_id }}/forecasts/revision.2.json
           path: tmp/${{ inputs.post_id }}/forecasts/revision.2.json
-      - uses: actions/cache/restore@v4
+      - uses: actions/cache/restore@v5
         with:
           key:  tmp/${{ inputs.post_id }}/forecasts/revision.3.json
           path: tmp/${{ inputs.post_id }}/forecasts/revision.3.json
-      - uses: actions/cache/restore@v4
+      - uses: actions/cache/restore@v5
         with:
           key:  tmp/${{ inputs.post_id }}/forecasts/revision.4.json
           path: tmp/${{ inputs.post_id }}/forecasts/revision.4.json
-      - uses: actions/cache/restore@v4
+      - uses: actions/cache/restore@v5
         with:
           key:  tmp/${{ inputs.post_id }}/forecasts/revision.5.json
           path: tmp/${{ inputs.post_id }}/forecasts/revision.5.json
-      - uses: actions/cache/restore@v4
+      - uses: actions/cache/restore@v5
         with:
           key:  tmp/${{ inputs.post_id }}/forecasts/consensus.json
           path: tmp/${{ inputs.post_id }}/forecasts/consensus.json
@@ -271,7 +271,7 @@ jobs:
           METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
           METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
-      - uses: actions/cache/save@v4
+      - uses: actions/cache/save@v5
         with:
           key:  tmp/${{ inputs.post_id }}/forecasts/consensus.json
           path: tmp/${{ inputs.post_id }}/forecasts/consensus.json
