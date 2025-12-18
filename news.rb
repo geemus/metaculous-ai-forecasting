@@ -59,13 +59,15 @@ filters_json = cache(post_id, 'news_filters.json') do
     system: ''
   )
   filters = deepseek.eval({ 'role': 'user', 'content': filter_prompt })
-  puts filters.content
   categories = filters.extracted_content('categories').split(', ')
   categories.select! { |category| CATEGORIES.include?(category) } # ignore category hallucinations
   {
     categories: categories,
     query: filters.extracted_content('query')
   }.to_json
+rescue StandardError => e
+  puts e
+  puts filters.data
 end
 filters = JSON.parse(filters_json)
 puts filters
