@@ -224,16 +224,12 @@ class Metaculus
 
       # set cdf values outside of range
       if scaling['open_lower_bound']
-        if scaling['range_min'] < data[data.keys.min]
-          data[0.01 * data.keys.min] = scaling['range_min']
-        end
+        data[0.01 * data.keys.min] = scaling['range_min'] if scaling['range_min'] < data[data.keys.min]
       else
         data[0.0] = scaling['range_min']
       end
       if scaling['open_upper_bound']
-        if scaling['range_max'] > data[data.keys.max]
-          data[100 - (0.01 * (100 - data.keys.max))] = scaling['range_max']
-        end
+        data[100 - (0.01 * (100 - data.keys.max))] = scaling['range_max'] if scaling['range_max'] > data[data.keys.max]
       else
         data[100.0] = scaling['range_max']
       end
