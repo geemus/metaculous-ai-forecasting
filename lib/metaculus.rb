@@ -280,18 +280,18 @@ class Metaculus
       y_values.each_with_index do |y, i|
         location = i / (y_values.length - 1)
         rescaled = (y - scale_lower_to) / rescaled_inbound_mass
-        y_values[i] = if scaling['open_lower_bound'] && scaling['open_upper_bound']
-                        0.988 * rescaled + 0.01 * location + 0.001
-                      elsif scaling['open_lower_bound']
-                        0.989 * rescaled + 0.01 * location + 0.001
-                      elsif scaling['open_upper_bound']
-                        0.989 * rescaled + 0.01 * location
-                      else
-                        0.99 * rescaled + 0.01 * location
-                      end
+        y_value = if scaling['open_lower_bound'] && scaling['open_upper_bound']
+                    0.988 * rescaled + 0.01 * location + 0.001
+                  elsif scaling['open_lower_bound']
+                    0.989 * rescaled + 0.01 * location + 0.001
+                  elsif scaling['open_upper_bound']
+                    0.989 * rescaled + 0.01 * location
+                  else
+                    0.99 * rescaled + 0.01 * location
+                  end
+        # round to avoid floating point errors
+        y_values[i] = y_value.round(10)
       end
-      # round to avoid floating point errors
-      y_values.map! { |y| y.round(10) }
 
       y_values
     end
