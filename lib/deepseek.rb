@@ -60,7 +60,7 @@ class DeepSeek
     model: 'deepseek-reasoner',
     system: SUPERFORECASTER_SYSTEM_PROMPT + TOOLS_SYSTEM_PROMPT,
     temperature: 0.1,
-    tools: [THINK_TOOL]
+    tools: []
   )
     @model = model
     @system = system
