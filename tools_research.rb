@@ -17,7 +17,7 @@ cache(post_id, 'research.json') do
   llm = DeepSeek.new(
     model: 'deepseek-reasoner',
     system: RESEARCHER_SYSTEM_PROMPT + TOOLS_SYSTEM_PROMPT,
-    tools: [SEARCH_TOOL, THINK_TOOL]
+    tools: [SEARCH_TOOL]
   )
   @forecast_prompt = FORECAST_PROMPT_TEMPLATE.result(binding)
   @research_prompt = RESEARCH_PROMPT_TEMPLATE.result(binding)
