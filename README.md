@@ -1,1 +1,1 @@
-# metaculous-ai-forecasting
+# metaculus-ai-forecasting
