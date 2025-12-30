@@ -28,13 +28,17 @@ provider = :deepseek
 llm = Provider.new(provider, system: '')
 
 retro_prompt = <<~RETRO_PROMPT
-  I am participating in a forecasting tournament. Below are the titles of some of my recent forecasts and my score, where higher is better.
+I am participating in a forecasting tournament. Below are the titles of some of my recent forecasts and my score, where higher is better.
 
   <forecasts>
   #{data.join.strip}
   </forecasts>
 
-  Review this data, identify commonalities among the lower scores, and suggest possible improvements.
+  Review this data, then:
+    - identify commonalities among the lowest and highest scores
+    - identify distinctions between highest and lowest scores
+    - recommend how lower scores could be improved upon (skipping questions is NOT an option)
+    - recommend how to improve this prompt to better analyze results and provide recommendations
 RETRO_PROMPT
 
 retro = llm.eval({ 'role': 'user', 'content': retro_prompt })

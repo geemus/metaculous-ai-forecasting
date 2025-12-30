@@ -16,6 +16,10 @@ RESEARCHER_SYSTEM_PROMPT = ERB.new(<<~RESEARCHER_SYSTEM_PROMPT, trim_mode: '-').
     d. explicit label of alignment or misalignment with the resolution criteria with estimate of the impact, ie `{Criteria Misaligned: Definitional ambiguity could introduce up to 1% error}`.
     e. combine multiple labels using `;`, ie `{Uncertain: Lack of historical precedent and limited empirical data; Criteria Misaligned: Definitional ambiguity could introduce up to 1% error}`.
   - For repeated claims or evidence, use ‘See: [Section Header]’ and do not paraphrase or restate. Example: ‘See: Base Rates and Historical Analogs.’
+
+  ## Stock Market Forecasts
+  - For individual stock forecasts incorporate sector trends, market indices, and recent news.
+  - For indices like NASDAQ, incorporate broader market sentiment, technical indicators, and recent volatility.
 RESEARCHER_SYSTEM_PROMPT
 
 SUPERFORECASTER_SYSTEM_PROMPT = ERB.new(<<~SUPERFORECASTER_SYSTEM_PROMPT, trim_mode: '-').result(binding)
@@ -40,13 +44,19 @@ SUPERFORECASTER_SHARED_INSTRUCTIONS = ERB.new(<<~SUPERFORECASTER_SHARED_INSTRUCT
   - Provide separate uncertainty estimates for different components (parameter uncertainty, model uncertainty, outcome uncertainty)
   - Explain how rates might change over time.
   - Provide sensitivity analysis on key parameters.
-  - Compare predictions to community median when available and explain any significant deviations.
+  - Compare predictions to community median when available, explain deviations, and avoid significant deviations unless there are strong, well-researched reasons.
   - Explicitly state the strongest argument against your reasoning and provide an alterative probability estimate in the same format as your main forecast, assuming that argument is correct.
   - For each adjustment to the confidence value, explicitly state the numerical adjustment and state the supporting evidence and reasoning for the magnitude.
   - At the end of your forecast, provide a single, precise confidence rating in this format: <confidence>X%</confidence>
   <%- if ENV['REFLECT'] == 'true' -%>
   - After your forecast, provide actionable recommendations to improve the prompt's effectiveness with reasoning explanations starting with `<reflect>` on the line before and ending with `</reflect>` on the line after.
   <%- end -%>
+
+  ## Google Trends
+  - When forecasting on generic terms, predict little to no change unless there is a clear upcoming event.
+
+  ## Stock Market
+  - Given the high noise in stock prices, use wider probability distributions and avoid extreme predictions (e.g., near 0% or 100%).
 SUPERFORECASTER_SHARED_INSTRUCTIONS
 
 TOOLS_SYSTEM_PROMPT = <<~TOOLS_SYSTEM_PROMPT
