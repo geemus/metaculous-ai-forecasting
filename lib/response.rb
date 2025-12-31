@@ -34,13 +34,33 @@ class Response
     @content ||= case provider
                  when :anthropic
                    anthropic_content
-                 when :perplexity, :deepseek
-                   openai_compatible_content
-                 when :openai
+                 when :deepseek, :perplexity, :openai
                    openai_compatible_content
                  else
                    raise "Unknown provider: #{provider}"
                  end
+  end
+
+  def reasoning_content
+    @reasoning_content ||= case provider
+                           when :anthropic
+                             anthropic_reasoning_content
+                           when :deepseek, :perplexity, :openai
+                             openai_compatible_reasoning_content
+                           else
+                             raise "Unknown provider: #{provider}"
+                           end
+  end
+
+  def tool_calls
+    @tool_calls ||= case provider
+                    when :anthropic
+                      anthropic_tool_calls
+                    when :deepseek, :perplexity, :openai
+                      openai_compatible_tool_calls
+                    else
+                      raise "Unknown provider: #{provider}"
+                    end
   end
 
   def cost
@@ -126,9 +146,28 @@ class Response
     data.dig('usage', 'input_tokens') || 0
   end
 
+  def anthropic_reasoning_content
+    data['content'].select { |content| content['type'] == 'thinking' }
+  end
+
+  def anthropic_tool_calls
+    data['content'].select { |content| content['type'] == 'tool_use' }
+  end
+
   # OpenAI-compatible content (used by Perplexity, DeepSeek, OpenAI)
   def openai_compatible_content
     data['choices'].map { |choice| choice['message']['content'] }.join("\n")
+  end
+
+  # OpenAI-compatible reasoning content (used by Perplexity, DeepSeek, OpenAI)
+  def openai_compatible_reasoning_content
+    reasoning_content = data['choices'].map { |choice| choice['message']['content'] }
+    reasoning_content.join("\n")
+  end
+
+  # OpenAI-compatible tool_calls (used by Perplexity, DeepSeek, OpenAI)
+  def openai_compatible_tool_calls
+    data['choices'].map { |choice| choice['message']['tool_calls'] }.flatten.compact
   end
 
   # Perplexity-specific methods

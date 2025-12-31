@@ -35,33 +35,29 @@ class DeepSeek
         tools: tools
       }.to_json
     )
-    data = JSON.parse(excon_response.body)
-    content = data['choices'].map { |choice| choice['message']['content'] }.join("\n")
-    reasoning_content = data['choices'].map { |choice| choice['message']['reasoning_content'] }.join("\n")
-    tool_calls = data['choices'].map { |choice| choice['message']['tool_calls'] }.flatten.compact
-    messages << {
-      'role' => 'assistant',
-      'content' => content,
-      'reasoning_content' => reasoning_content
-    }
     response = Response.new(
       :deepseek,
       duration: Time.now - start_time,
       json: excon_response.body
     )
-    if tool_calls.empty?
+    messages << {
+      'role' => 'assistant',
+      'content' => response.content,
+      'reasoning_content' => response.reasoning_content
+    }
+    if response.tool_calls.empty?
       response.display_meta
       response
     else
-      messages.last['tool_calls'] = tool_calls
-      tool_calls.each do |tool_call|
+      messages.last['tool_calls'] = response.tool_calls
+      response.tool_calls.each do |tool_call|
         arguments = JSON.parse(tool_call.dig('function', 'arguments'))
         tool = tool_call.dig('function', 'name')
         content = case tool
                   when 'search'
-                    tool_search(arguments).content
+                    Tools.search(arguments).content
                   when 'think'
-                    tool_think(arguments)
+                    Tools.think(arguments)
                   else
                     raise "Unknown Tool Requested: `#{tool}`"
                   end
@@ -98,27 +94,5 @@ class DeepSeek
       idempotent: true,
       read_timeout: 600
     )
-  end
-
-  def tool_search(arguments)
-    prompt = arguments['prompt']
-    Formatador.display "\n[bold][green]# Researcher: Searching[faint](#{prompt})[/]…[/] "
-
-    llm = Perplexity.new(system: <<~SYSTEM)
-      You are an experienced research assistant for a superforecaster.
-
-      # Guidance
-      - Prioritize clarity and conciseness.
-      - Generate research summaries that are concise while retaining necessary detail.
-    SYSTEM
-    llm.eval(
-      { 'role': 'user', 'content': prompt }
-    )
-  end
-
-  def tool_think(arguments)
-    thoughts = arguments['thoughts']
-    Formatador.display_line "\n[bold][green]Thinking[faint](#{thoughts})[/]"
-    'Thought thoughts.'
   end
 end

@@ -16,7 +16,7 @@ class Anthropic
     @model = model
     @system = system
     @temperature = temperature
-    @tools = tools
+    @tools = tools.map { |tool| translate_tool_definition(tool) }
   end
 
   # https://docs.anthropic.com/en/api/messages
@@ -39,8 +39,43 @@ class Anthropic
       duration: Time.now - start_time,
       json: excon_response.body
     )
-    response.display_meta
-    response
+    messages << {
+      'role' => 'assistant',
+      'content' => [
+        response.data['content'].select { |content| content['type'] == 'text' },
+        response.data['content'].select { |content| content['type'] == 'thinking' },
+        response.data['content'].select { |content| content['type'] == 'tool_use' }
+      ].flatten.compact
+    }
+    if response.tool_calls.empty?
+      response.display_meta
+      response
+    else
+      content = []
+      response.tool_calls.each do |tool_call|
+        arguments = tool_call['input']
+        tool = tool_call['name']
+        tool_content = case tool
+                       when 'search'
+                         Tools.search(arguments).content
+                       else
+                         raise "Unknown Tool Requested: `#{tool}`"
+                       end
+        content << {
+          'content' => tool_content,
+          'tool_use_id' => tool_call['id'],
+          'type' => 'tool_result'
+        }
+      end
+      messages << {
+        'content' => content,
+        'role' => 'user'
+      }
+
+      self.eval(*messages)
+    end
+  rescue JSON::ParserError
+    retry # retry on invalid/hallucinated tool_call output
   rescue Excon::Error => e
     puts e
     puts e.response.body
@@ -61,5 +96,13 @@ class Anthropic
       },
       read_timeout: 360
     )
+  end
+
+  def translate_tool_definition(tool_definition)
+    {
+      name: tool_definition.dig(:function, :name),
+      description: tool_definition.dig(:function, :description),
+      input_schema: tool_definition.dig(:function, :parameters)
+    }
   end
 end
