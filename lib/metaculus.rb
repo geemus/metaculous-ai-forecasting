@@ -375,6 +375,25 @@ class Metaculus
       @title ||= question['title']
     end
 
+    def trend
+      historical_data = data.dig('question', 'aggregations', 'recency_weighted', 'history') # || synced_question&.trend
+      points = historical_data.map do |datum|
+        [
+          datum['start_time'] + ((datum['start_time'] + datum['end_time']) / 2), # mid-point
+          datum['centers'].first
+        ]
+      end
+      n = points.count
+      return 0 if n.between?(0, 1)
+
+      summation_xy = points.map { |x, y| x * y }.sum
+      summation_x = points.map { |x, _| x }.sum
+      summation_y = points.map { |_, y| y }.sum
+      summation_x2 = points.map { |x, _| x**2 }.sum
+
+      (n * summation_xy - summation_x * summation_y) / (n * summation_x2 - summation_x**2).to_f
+    end
+
     def type
       @type ||= question['type']
     end
