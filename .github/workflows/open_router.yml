@@ -1,0 +1,17 @@
+name: Open Router Credit Check
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "5/30 * * * *" # run every 30 minutes, starting at 5 past the hour
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - id: check
+        run: |
+          echo "limit_remaining=$(curl "https://openrouter.ai/api/v1/key" -H "Authorization: Bearer $OPEN_ROUTER_API_KEY" | jq -c '.data.limit_remaining')" >> $GITHUB_OUTPUT
+      - id: summary
+        run: |
+          echo ${{ steps.check.outputs.limit_remaining }} >> $GITHUB_STEP_SUMMARY
