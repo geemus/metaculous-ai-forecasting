@@ -14,8 +14,8 @@ cache_write(post_id, 'inputs/system.researcher.md', RESEARCHER_SYSTEM_PROMPT)
 
 cache(post_id, 'research.json') do
   Formatador.display "\n[bold][green]# Researcher: Researching(#{post_id})…[/] "
-  llm = DeepSeek.new(
-    model: 'deepseek-reasoner',
+  llm = OpenRouter.new(
+    model: 'anthropic/claude-opus-4.5',
     system: RESEARCHER_SYSTEM_PROMPT + TOOLS_SYSTEM_PROMPT,
     tools: [SEARCH_TOOL]
   )
