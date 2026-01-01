@@ -18,6 +18,8 @@ on:
         required: true
       METACULUS_BOT_ID:
         required: true
+      OPEN_ROUTER_API_KEY:
+        required: true
       PERPLEXITY_API_KEY:
         required: true
   workflow_dispatch:
@@ -53,6 +55,7 @@ jobs:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
           METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
+          OPEN_ROUTER_API_KEY: ${{ secrets.OPEN_ROUTER_API_KEY }}
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
       - uses: actions/cache/save@v5
         with:
@@ -91,6 +94,7 @@ jobs:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
           METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
+          OPEN_ROUTER_API_KEY: ${{ secrets.OPEN_ROUTER_API_KEY }}
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
       - uses: actions/cache/save@v5
         with:
@@ -136,6 +140,7 @@ jobs:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
           METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
+          OPEN_ROUTER_API_KEY: ${{ secrets.OPEN_ROUTER_API_KEY }}
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
       - uses: actions/cache/save@v5
         with:
@@ -205,6 +210,7 @@ jobs:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
           METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
+          OPEN_ROUTER_API_KEY: ${{ secrets.OPEN_ROUTER_API_KEY }}
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
       - uses: actions/cache/save@v5
         with:
@@ -270,6 +276,7 @@ jobs:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
           METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
+          OPEN_ROUTER_API_KEY: ${{ secrets.OPEN_ROUTER_API_KEY }}
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
       - uses: actions/cache/save@v5
         with:
