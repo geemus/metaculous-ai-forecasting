@@ -1,12 +1,8 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+require_relative 'lib/asknews'
 require_relative 'lib/script_helpers'
-require './lib/anthropic'
-require './lib/asknews'
-require './lib/deepseek'
-require './lib/openai'
-require './lib/perplexity'
 
 post_id = ARGV[0] || raise('post id argument is required')
 
@@ -52,13 +48,14 @@ filter_prompt = ERB.new(<<~FILTER_PROMPT_TEMPLATE, trim_mode: '-').result(bindin
   - Provide the three or fewer best matching categories among [#{CATEGORIES.join(', ')}] as a comma-separated list, starting with `<categories>` on the line before and ending with `</categories>` on the line after.
 FILTER_PROMPT_TEMPLATE
 
-Formatador.display "\n[bold][green]# News: Generating Filters[deepseek](#{post_id})…[/] "
+Formatador.display "\n[bold][green]# News: Generating Filters[anthropic/claude-haiku-4-5](#{post_id})…[/] "
 filters_json = cache(post_id, 'news_filters.json') do
-  deepseek = DeepSeek.new(
-    model: 'deepseek-reasoner',
-    system: ''
+  llm = OpenRouter.new(
+    model: 'anthropic/claude-haiku-4.5',
+    system: '',
+    tools: []
   )
-  filters = deepseek.eval({ 'role': 'user', 'content': filter_prompt })
+  filters = llm.eval({ 'role': 'user', 'content': filter_prompt })
   puts filters.content
   categories = filters.extracted_content('categories').split(', ')
   categories.select! { |category| CATEGORIES.include?(category) } # ignore category hallucinations
