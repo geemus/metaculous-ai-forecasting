@@ -11,7 +11,5 @@ jobs:
     steps:
       - id: check
         run: |
-          echo "limit_remaining=$(curl "https://openrouter.ai/api/v1/key" -H "Authorization: Bearer $OPEN_ROUTER_API_KEY" | jq -c '.data.limit_remaining')" >> $GITHUB_OUTPUT
-      - id: summary
-        run: |
-          echo ${{ steps.check.outputs.limit_remaining }} >> $GITHUB_STEP_SUMMARY
+          echo "LIMIT_REMAINING=$(curl "https://openrouter.ai/api/v1/key" -H "Authorization: Bearer $OPEN_ROUTER_API_KEY" | jq -c '.data.limit_remaining')" >> $GITHUB_ENV
+          echo "${{ env.LIMIT_REMAINING }}" >> $GITHUB_STEP_SUMMARY
