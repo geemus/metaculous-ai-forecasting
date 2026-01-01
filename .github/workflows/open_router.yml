@@ -14,8 +14,8 @@ jobs:
           OPEN_ROUTER_API_KEY: ${{ secrets.OPEN_ROUTER_API_KEY }}
         run: |
           echo "LIMIT_REMAINING=$(curl "https://openrouter.ai/api/v1/key" -H "Authorization: Bearer $OPEN_ROUTER_API_KEY" | jq -c '.data.limit_remaining')" >> $GITHUB_ENV
-          echo "${{ env.LIMIT_REMAINING }}" >> $GITHUB_STEP_SUMMARY
+          echo "\$$LIMIT_REMAINING" >> $GITHUB_STEP_SUMMARY
       - id: alert
         if: ${{ fromJSON(env.LIMIT_REMAINING) < 100.0 }}
         run: |
-          echo "::error::Low credit remaining! $${{ env.LIMIT_REMAINING }}"
+          echo "::error::Low credit remaining! \$${{ env.LIMIT_REMAINING }}"
