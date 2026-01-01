@@ -9,13 +9,16 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - id: check
+      - id: get_limit_remaining
         env:
           OPEN_ROUTER_API_KEY: ${{ secrets.OPEN_ROUTER_API_KEY }}
         run: |
           echo "LIMIT_REMAINING=$(curl "https://openrouter.ai/api/v1/key" -H "Authorization: Bearer $OPEN_ROUTER_API_KEY" | jq -c '.data.limit_remaining')" >> $GITHUB_ENV
-          echo "\$$LIMIT_REMAINING" >> $GITHUB_STEP_SUMMARY
-      - id: alert
-        if: ${{ fromJSON(env.LIMIT_REMAINING) < 100.0 }}
+      - id: set_summary
         run: |
-          echo "::error::Low credit remaining! \$${{ env.LIMIT_REMAINING }}"
+          echo "\$${{ env.LIMIT_REMAINING }}" >> $GITHUB_STEP_SUMMARY
+      - id: low_credit_alert
+        if: ${{ fromJSON(env.LIMIT_REMAINING) < 30.0 }}
+        run: |
+          echo "::error Low credit remaining! \$${{ env.LIMIT_REMAINING }}"
+          exit 1
