@@ -4,15 +4,17 @@ require './lib/response'
 require './lib/tools'
 
 class OpenRouter
-  attr_accessor :model, :system, :temperature, :tools
+  attr_accessor :model, :reasoning, :system, :temperature, :tools
 
   def initialize(
     model: 'anthropic/claude-sonnet-4.5',
+    reasoning: {},
     system: SUPERFORECASTER_SYSTEM_PROMPT + TOOLS_SYSTEM_PROMPT,
     temperature: 0.1,
     tools: [SEARCH_TOOL]
   )
     @model = model
+    @reasoning = reasoning
     @system = system
     @temperature = temperature
     @tools = tools
@@ -31,6 +33,7 @@ class OpenRouter
             'content': system
           }
         ].concat(messages),
+        reasoning: reasoning,
         temperature: temperature,
         tools: tools,
         usage: { include: true }

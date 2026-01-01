@@ -16,9 +16,11 @@ cache(post_id, 'research.json') do
   Formatador.display "\n[bold][green]# Researcher: Researching(#{post_id})…[/] "
   llm = OpenRouter.new(
     model: 'anthropic/claude-opus-4.5',
+    reasoning: { effort: 'medium' },
     system: RESEARCHER_SYSTEM_PROMPT + TOOLS_SYSTEM_PROMPT,
     tools: [SEARCH_TOOL]
   )
+  @think = false
   @forecast_prompt = FORECAST_PROMPT_TEMPLATE.result(binding)
   @research_prompt = RESEARCH_PROMPT_TEMPLATE.result(binding)
   cache_write(post_id, 'inputs/research.md', @research_prompt)
