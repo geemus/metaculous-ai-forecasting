@@ -34,7 +34,7 @@ class Response
     @content ||= case provider
                  when :anthropic
                    anthropic_content
-                 when :deepseek, :perplexity, :openai
+                 when :deepseek, :perplexity, :openai, :open_router
                    openai_compatible_content
                  else
                    raise "Unknown provider: #{provider}"
@@ -45,7 +45,7 @@ class Response
     @reasoning_content ||= case provider
                            when :anthropic
                              anthropic_reasoning_content
-                           when :deepseek, :perplexity, :openai
+                           when :deepseek, :perplexity, :openai, :open_router
                              openai_compatible_reasoning_content
                            else
                              raise "Unknown provider: #{provider}"
@@ -56,7 +56,7 @@ class Response
     @tool_calls ||= case provider
                     when :anthropic
                       anthropic_tool_calls
-                    when :deepseek, :perplexity, :openai
+                    when :deepseek, :perplexity, :openai, :open_router
                       openai_compatible_tool_calls
                     else
                       raise "Unknown provider: #{provider}"
@@ -67,10 +67,12 @@ class Response
     @cost ||= case provider
               when :anthropic
                 anthropic_cost
-              when :perplexity
-                perplexity_cost
               when :deepseek
                 deepseek_cost
+              when :perplexity
+                perplexity_cost
+              when :open_router
+                open_router_cost
               when :openai
                 openai_cost
               else
@@ -82,7 +84,7 @@ class Response
     @input_tokens ||= case provider
                       when :anthropic
                         anthropic_input_tokens
-                      when :perplexity, :deepseek, :openai
+                      when :perplexity, :deepseek, :openai, :open_router
                         data.dig('usage', 'prompt_tokens') || 0
                       else
                         0
@@ -95,7 +97,7 @@ class Response
                          data.dig('usage', 'output_tokens') || 0
                        when :perplexity
                          perplexity_output_tokens
-                       when :deepseek, :openai
+                       when :deepseek, :openai, :open_router
                          data.dig('usage', 'completion_tokens') || 0
                        else
                          0
@@ -106,7 +108,7 @@ class Response
     @total_tokens ||= case provider
                       when :anthropic
                         input_tokens + output_tokens
-                      when :perplexity, :deepseek, :openai
+                      when :perplexity, :deepseek, :openai, :open_router
                         data.dig('usage', 'total_tokens') || (input_tokens + output_tokens)
                       else
                         0
@@ -154,6 +156,10 @@ class Response
     data['content'].select { |content| content['type'] == 'tool_use' }
   end
 
+  def open_router_cost
+    (data.dig('usage', 'cost') || 0) + (data.dig('usage', 'cost_details')&.values&.sum || 0)
+  end
+
   # OpenAI-compatible content (used by Perplexity, DeepSeek, OpenAI)
   def openai_compatible_content
     data['choices'].map { |choice| choice['message']['content'] }.join("\n")
@@ -170,6 +176,15 @@ class Response
     data['choices'].map { |choice| choice['message']['tool_calls'] }.flatten.compact
   end
 
+  # DeepSeek-specific methods
+  def deepseek_cost
+    cost = 0
+    cost += (data.dig('usage', 'prompt_cache_hit_tokens') || 0) / 1_000_000.0 * 0.028  # $0.028/MTok
+    cost += (data.dig('usage', 'prompt_cache_miss_tokens') || 0) / 1_000_000.0 * 0.28  # $0.28/MTok
+    cost += (output_tokens / 1_000_000.0) * 0.42 # $0.42/MTok
+    cost.round(2)
+  end
+
   # Perplexity-specific methods
   def perplexity_cost
     data.dig('usage', 'cost', 'total_cost') || 0.0
@@ -179,15 +194,6 @@ class Response
     total = data.dig('usage', 'total_tokens') || 0
     prompt = data.dig('usage', 'prompt_tokens') || 0
     total - prompt
-  end
-
-  # DeepSeek-specific methods
-  def deepseek_cost
-    cost = 0
-    cost += (data.dig('usage', 'prompt_cache_hit_tokens') || 0) / 1_000_000.0 * 0.028  # $0.028/MTok
-    cost += (data.dig('usage', 'prompt_cache_miss_tokens') || 0) / 1_000_000.0 * 0.28  # $0.28/MTok
-    cost += (output_tokens / 1_000_000.0) * 0.42 # $0.42/MTok
-    cost.round(2)
   end
 
   # OpenAI-specific methods (placeholder)

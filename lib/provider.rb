@@ -2,6 +2,7 @@
 
 require './lib/anthropic'
 require './lib/deepseek'
+require './lib/open_router'
 require './lib/openai'
 require './lib/perplexity'
 
