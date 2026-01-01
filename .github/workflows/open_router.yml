@@ -6,7 +6,7 @@ on:
     - cron: "5/30 * * * *" # run every 30 minutes, starting at 5 past the hour
 
 jobs:
-  check:
+  credit:
     runs-on: ubuntu-latest
     steps:
       - id: get_limit_remaining
@@ -18,7 +18,7 @@ jobs:
         run: |
           echo "\$${{ env.LIMIT_REMAINING }}" >> $GITHUB_STEP_SUMMARY
       - id: low_credit_alert
-        if: ${{ fromJSON(env.LIMIT_REMAINING) < 30.0 }}
+        if: ${{ fromJSON(env.LIMIT_REMAINING) < 100.0 }}
         run: |
           echo "::error Low credit remaining! \$${{ env.LIMIT_REMAINING }}"
           exit 1
