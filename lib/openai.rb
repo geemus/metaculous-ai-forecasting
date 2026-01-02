@@ -3,33 +3,37 @@
 require './lib/helpers/response'
 
 class OpenAI
-  attr_accessor :model, :system, :temperature
+  attr_accessor :model, :options, :system, :temperature, :token, :url
 
   def initialize(
     model: 'gpt-5-nano',
+    options: {},
     system: SUPERFORECASTER_SYSTEM_PROMPT,
-    temperature: 1.0 # only supported value with gpt-5-mini
+    temperature: 1.0, # only supported value with gpt-5-mini/gpt-5-nano
+    token: ENV['OPENAI_API_KEY'],
+    url: 'https://api.openai.com/v1/chat/completions'
   )
     @model = model
+    @options = options
     @system = system
     @temperature = temperature
+    @token = token
+    @url = url
   end
 
   # https://docs.perplexity.ai/api-reference/chat-completions-post
   def eval(*messages)
+    messages = { role: 'system', content: @system }.concat(messages) unless @system.nil? || @system.empty?
     start_time = Time.now
     excon_response = connection.post(
-      body: {
-        # max_completion_tokens: 2048,
-        model: model,
-        messages: [
-          {
-            'role': 'system',
-            'content': system
-          }
-        ].concat(messages),
-        temperature: temperature
-      }.to_json
+      body: @options.merge(
+        {
+          # max_completion_tokens: 2048,
+          messages: messages,
+          model: model,
+          temperature: temperature
+        }
+      ).to_json
     )
     response = Response.new(
       duration: Time.now - start_time,
@@ -47,11 +51,11 @@ class OpenAI
 
   def connection
     Excon.new(
-      'https://api.openai.com/v1/chat/completions',
+      @url,
       expects: 200,
       headers: {
         'accept': 'application/json',
-        'authorization': "Bearer #{ENV['OPENAI_API_KEY']}",
+        'authorization': "Bearer #{@token}",
         'content-type': 'application/json'
       },
       read_timeout: 600
