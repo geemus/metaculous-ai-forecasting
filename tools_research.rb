@@ -16,6 +16,7 @@ cache(post_id, 'research.json') do
   Formatador.display "\n[bold][green]# Researcher: Researching(#{post_id})…[/] "
   llm = OpenRouter.new(
     model: 'openai/gpt-5.2',
+    reasoning: { effort: 'high' },
     system: RESEARCHER_SYSTEM_PROMPT + TOOLS_SYSTEM_PROMPT,
     tools: [SEARCH_TOOL]
   )
