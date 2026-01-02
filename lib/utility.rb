@@ -151,7 +151,7 @@ end
 # Load research and optionally extract stripped content
 def load_research(post_id, strip_tags: nil)
   research_json = cache_read!(post_id, 'research.json')
-  research = Response.new(:deepseek, json: research_json)
+  research = Response.new(:open_router, json: research_json)
 
   if strip_tags
     tags = strip_tags.is_a?(Array) ? strip_tags : [strip_tags]
