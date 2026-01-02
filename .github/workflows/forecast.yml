@@ -35,20 +35,20 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  news:
+  deepnews:
     if: ${{ inputs.post_id }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - uses: actions/cache/restore@v5
         with:
-          key:  tmp/${{ inputs.post_id }}/outputs/news.md
-          path: tmp/${{ inputs.post_id }}/outputs/news.md
+          key:  tmp/${{ inputs.post_id }}/outputs/deepnews.md
+          path: tmp/${{ inputs.post_id }}/outputs/deepnews.md
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4'
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-      - run: ./news.rb ${{ inputs.post_id }}
+      - run: ./deepnews.rb ${{ inputs.post_id }}
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           ASKNEWS_API_KEY: ${{ secrets.ASKNEWS_API_KEY }}
@@ -59,27 +59,27 @@ jobs:
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
       - uses: actions/cache/save@v5
         with:
-          key:  tmp/${{ inputs.post_id }}/outputs/news.md
-          path: tmp/${{ inputs.post_id }}/outputs/news.md
+          key:  tmp/${{ inputs.post_id }}/outputs/deepnews.md
+          path: tmp/${{ inputs.post_id }}/outputs/deepnews.md
       - run: |
-          echo '<details><summary>Filters</summary>' >> $GITHUB_STEP_SUMMARY
-          echo "$(cat tmp/${{ inputs.post_id }}/news_filters.json)" >> $GITHUB_STEP_SUMMARY
+          echo '<details><summary>Prompt</summary>' >> $GITHUB_STEP_SUMMARY
+          echo "$(cat tmp/${{ inputs.post_id }}/inputs/deepnews.md)" >> $GITHUB_STEP_SUMMARY
           echo '</details>' >> $GITHUB_STEP_SUMMARY
       - run: |
           echo '<details><summary>Result</summary>' >> $GITHUB_STEP_SUMMARY
-          echo "$(cat tmp/${{ inputs.post_id }}/outputs/news.md)" >> $GITHUB_STEP_SUMMARY
+          echo "$(cat tmp/${{ inputs.post_id }}/outputs/deepnews.md)" >> $GITHUB_STEP_SUMMARY
           echo '</details>' >> $GITHUB_STEP_SUMMARY
 
   research:
-    needs: news
+    needs: deepnews
     if: ${{ inputs.post_id }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - uses: actions/cache/restore@v5
         with:
-          key:  tmp/${{ inputs.post_id }}/outputs/news.md
-          path: tmp/${{ inputs.post_id }}/outputs/news.md
+          key:  tmp/${{ inputs.post_id }}/outputs/deepnews.md
+          path: tmp/${{ inputs.post_id }}/outputs/deepnews.md
       - uses: actions/cache/restore@v5
         with:
           key:  tmp/${{ inputs.post_id }}/research.json

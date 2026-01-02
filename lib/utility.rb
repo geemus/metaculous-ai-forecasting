@@ -118,6 +118,11 @@ def load_question(post_id, fetch: true)
   Metaculus::Question.new(data: JSON.parse(post_json))
 end
 
+# Load cached deepnews
+def load_cached_deepnews(post_id)
+  cache_read!(post_id, 'outputs/deepnews.md')
+end
+
 # Load cached news
 def load_cached_news(post_id)
   cache_read!(post_id, 'outputs/news.md')

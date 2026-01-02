@@ -24,6 +24,7 @@ deepnews_prompt = ERB.new(<<~DEEPNEWS_PROMPT_TEMPLATE, trim_mode: '-').result(bi
 
   Provide detailed news content for the superforecaster to use in an upcoming forecast.
 DEEPNEWS_PROMPT_TEMPLATE
+cache_write(post_id, 'inputs/deepnews.md', deepnews_prompt)
 
 Formatador.display "\n[bold][green]# AskNews: DeepNews(#{post_id})…[/] "
 deepnews_json = cache(post_id, 'deepnews.json') do
@@ -45,6 +46,6 @@ deepnews_json = cache(post_id, 'deepnews.json') do
 end
 
 deepnews_data = JSON.parse(deepnews_json)
-deepnews_md = extract_xml(deepnews_data['choices'].first.dig('message', 'content'), 'final_answer')
+deepnews_md = extract_xml(deepnews_data['choices'].first.dig('message', 'content'), 'final_answer').join("\n") + "\n"
 cache_write(post_id, 'outputs/deepnews.md', deepnews_md)
 puts deepnews_md
