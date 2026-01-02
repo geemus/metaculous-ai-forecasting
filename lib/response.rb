@@ -32,9 +32,9 @@ class Response
 
   def content
     @content ||= case provider
-                 when :anthropic
-                   anthropic_content
-                 when :deepseek, :perplexity, :openai, :open_router
+                 # when :anthropic
+                 #   anthropic_content
+                 when :deepseek, :perplexity, :openai, :open_router, :anthropic
                    openai_compatible_content
                  else
                    raise "Unknown provider: #{provider}"
@@ -43,9 +43,9 @@ class Response
 
   def reasoning_content
     @reasoning_content ||= case provider
-                           when :anthropic
-                             anthropic_reasoning_content
-                           when :deepseek, :perplexity, :openai, :open_router
+                           # when :anthropic
+                           #   anthropic_reasoning_content
+                           when :deepseek, :perplexity, :openai, :open_router, :anthropic
                              openai_compatible_reasoning_content
                            else
                              raise "Unknown provider: #{provider}"
@@ -54,9 +54,9 @@ class Response
 
   def tool_calls
     @tool_calls ||= case provider
-                    when :anthropic
-                      anthropic_tool_calls
-                    when :deepseek, :perplexity, :openai, :open_router
+                    # when :anthropic
+                    #   anthropic_tool_calls
+                    when :deepseek, :perplexity, :openai, :open_router, :anthropic
                       openai_compatible_tool_calls
                     else
                       raise "Unknown provider: #{provider}"
@@ -65,16 +65,16 @@ class Response
 
   def cost
     @cost ||= case provider
-              when :anthropic
-                anthropic_cost
+              # when :anthropic
+                # anthropic_cost
               when :deepseek
                 deepseek_cost
               when :perplexity
                 perplexity_cost
-              when :open_router
+              when :open_router, :anthropic, :openai
                 open_router_cost
-              when :openai
-                openai_cost
+              # when :openai
+              #   openai_cost
               else
                 0.0
               end
@@ -82,9 +82,9 @@ class Response
 
   def input_tokens
     @input_tokens ||= case provider
-                      when :anthropic
-                        anthropic_input_tokens
-                      when :perplexity, :deepseek, :openai, :open_router
+                      # when :anthropic
+                        # anthropic_input_tokens
+                      when :perplexity, :deepseek, :openai, :open_router, :anthropic
                         data.dig('usage', 'prompt_tokens') || 0
                       else
                         0
@@ -93,11 +93,11 @@ class Response
 
   def output_tokens
     @output_tokens ||= case provider
-                       when :anthropic
-                         data.dig('usage', 'output_tokens') || 0
+                       # when :anthropic
+                       #   data.dig('usage', 'output_tokens') || 0
                        when :perplexity
                          perplexity_output_tokens
-                       when :deepseek, :openai, :open_router
+                       when :deepseek, :openai, :open_router, :anthropic
                          data.dig('usage', 'completion_tokens') || 0
                        else
                          0
@@ -106,9 +106,9 @@ class Response
 
   def total_tokens
     @total_tokens ||= case provider
-                      when :anthropic
-                        input_tokens + output_tokens
-                      when :perplexity, :deepseek, :openai, :open_router
+                      # when :anthropic
+                      #   input_tokens + output_tokens
+                      when :perplexity, :deepseek, :openai, :open_router, :anthropic
                         data.dig('usage', 'total_tokens') || (input_tokens + output_tokens)
                       else
                         0
@@ -126,7 +126,8 @@ class Response
   end
 
   def token_exhaustion?
-    provider == :anthropic && output_tokens >= 8192
+    # provider == :anthropic && output_tokens >= 8192
+    false
   end
 
   # Anthropic-specific methods
