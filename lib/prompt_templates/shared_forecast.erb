@@ -13,9 +13,6 @@ Today is <%= Time.now.strftime('%B %d, %Y') %>.
 
 # Instructions
 
-<%- unless @think == false || %w[deepseek-reasoner sonar-reasoning sonar-reasoning-pro sonar-deep-research].include?(llm.model) -%>
-- Before responding, show step-by-step reasoning in clear, logical order starting with `<think>` on the line before and ending with `</think>` on the line after.
-<%- end -%>
 - Before your forecast, write:
   - The time remaining before the outcome of the question will become known.
   - The status quo outcome if nothing changed.

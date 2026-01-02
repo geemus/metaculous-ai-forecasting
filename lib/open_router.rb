@@ -8,7 +8,7 @@ class OpenRouter
 
   def initialize(
     model: 'anthropic/claude-sonnet-4.5',
-    reasoning: {},
+    reasoning: { effort: 'medium' },
     system: SUPERFORECASTER_SYSTEM_PROMPT + TOOLS_SYSTEM_PROMPT,
     temperature: 0.1,
     tools: [SEARCH_TOOL]
