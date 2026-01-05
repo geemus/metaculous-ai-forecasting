@@ -10,7 +10,7 @@ exit if should_skip_forecast?(question, post_id)
 
 cache_write(post_id, 'inputs/system.researcher.md', RESEARCHER_SYSTEM_PROMPT)
 
-@deepnews_output = load_cached_deepnews(post_id)
+@news_output = load_cached_news(post_id)
 
 cache(post_id, 'research.json') do
   Formatador.display "\n[bold][green]# Researcher: Researching(#{post_id})…[/] "
