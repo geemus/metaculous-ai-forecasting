@@ -158,7 +158,7 @@ class Response
   end
 
   def open_router_cost
-    (data.dig('usage', 'cost') || 0) + (data.dig('usage', 'cost_details')&.values&.sum || 0)
+    (data.dig('usage', 'cost') || 0) + (data.dig('usage', 'cost_details')&.values&.compact&.sum || 0)
   end
 
   # OpenAI-compatible content (used by Perplexity, DeepSeek, OpenAI)
