@@ -18,6 +18,6 @@ jobs:
         run: |
           echo "\$${{ env.LIMIT_REMAINING }}" >> $GITHUB_STEP_SUMMARY
       - id: low_credit_alert
-        if: ${{ !fromJSON(env.LIMIT_REMAINING) || fromJSON(env.LIMIT_REMAINING) < 30.0 }}
+        if: ${{ !env.LIMIT_REMAINING }} or ${{ fromJSON(env.LIMIT_REMAINING) < 30.0 }}
         run: |
           exit 1
