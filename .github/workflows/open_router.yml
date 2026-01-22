@@ -13,11 +13,11 @@ jobs:
         env:
           OPEN_ROUTER_API_KEY: ${{ secrets.OPEN_ROUTER_API_KEY }}
         run: |
-          echo "LIMIT_REMAINING=$(curl "https://openrouter.ai/api/v1/key" -H "Authorization: Bearer $OPEN_ROUTER_API_KEY" | jq -c '.data.limit_remaining // 31.4159')" >> $GITHUB_ENV
+          echo "LIMIT_REMAINING=$(curl "https://openrouter.ai/api/v1/key" -H "Authorization: Bearer $OPEN_ROUTER_API_KEY" | jq -c '.data.limit_remaining')" >> $GITHUB_ENV
       - id: set_summary
         run: |
           echo "\$${{ env.LIMIT_REMAINING }}" >> $GITHUB_STEP_SUMMARY
       - id: low_credit_alert
-        if: ${{ fromJSON(env.LIMIT_REMAINING) < 30.0 }}
+        if: ${{ env.LIMIT_REMAINING != '' && fromJSON(env.LIMIT_REMAINING) < 30.0 }}
         run: |
           exit 1
