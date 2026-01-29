@@ -43,3 +43,15 @@ jobs:
     uses: ./.github/workflows/forecast.yml
     with:
       post_id: ${{ matrix.post_id }}
+
+  cleanup:
+    if: ${{ needs.query.outputs.post_ids == '' || needs.query.outputs.post_ids == '[]' }}
+    needs:
+      - query
+      - enqueue
+    permissions:
+      actions: write
+    steps:
+      run: gh run delete ${{ github.run_id }}
+      env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
