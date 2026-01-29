@@ -12,6 +12,7 @@ jobs:
       cancel-in-progress: false
     permissions:
       actions: write
+      contents: read
     outputs:
       post_ids: ${{ steps.post_ids.outputs.post_ids }}
     runs-on: ubuntu-latest
