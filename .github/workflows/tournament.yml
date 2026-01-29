@@ -10,6 +10,8 @@ jobs:
     concurrency:
       group: scheduled-forecast-query
       cancel-in-progress: false
+    permissions:
+      actions: write
     outputs:
       post_ids: ${{ steps.post_ids.outputs.post_ids }}
     runs-on: ubuntu-latest
@@ -21,6 +23,10 @@ jobs:
         env:
           METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
           METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
+      - if: steps.post_ids.outputs.post_ids == '' || steps.post_ids.outputs.post_ids == '[]'
+        run: gh run delete ${{ github.run_id }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   enqueue:
     if: ${{ needs.query.outputs.post_ids != '' && needs.query.outputs.post_ids != '[]' }}
@@ -43,16 +49,3 @@ jobs:
     uses: ./.github/workflows/forecast.yml
     with:
       post_id: ${{ matrix.post_id }}
-
-  cleanup:
-    if: ${{ needs.query.outputs.post_ids == '' || needs.query.outputs.post_ids == '[]' }}
-    needs:
-      - query
-      - enqueue
-    permissions:
-      actions: write
-    runs-on: ubuntu-latest
-    steps:
-      - run: gh run delete ${{ github.run_id }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
