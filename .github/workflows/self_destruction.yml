@@ -6,6 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       actions: write
+      workflow: write
     steps:
       - run: |
           gh run delete --repo ${{ github.repository }} ${{ github.run_id }}
