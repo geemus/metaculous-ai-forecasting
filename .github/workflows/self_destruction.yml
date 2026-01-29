@@ -4,9 +4,6 @@ on:
 jobs:
   self-destruction:
     runs-on: ubuntu-latest
-    permissions:
-      actions: write
-      workflows: write
     steps:
       - run: |
           gh run delete --repo ${{ github.repository }} ${{ github.run_id }}
