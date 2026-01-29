@@ -51,6 +51,7 @@ jobs:
       - enqueue
     permissions:
       actions: write
+    runs-on: ubuntu-latest
     steps:
       run: gh run delete ${{ github.run_id }}
       env:
