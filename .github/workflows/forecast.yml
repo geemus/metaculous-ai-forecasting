@@ -190,14 +190,6 @@ jobs:
           path: tmp/${{ inputs.post_id }}/forecasts/forecast.3.json
       - uses: actions/cache/restore@v5
         with:
-          key:  tmp/${{ inputs.post_id }}/forecasts/forecast.4.json
-          path: tmp/${{ inputs.post_id }}/forecasts/forecast.4.json
-      - uses: actions/cache/restore@v5
-        with:
-          key:  tmp/${{ inputs.post_id }}/forecasts/forecast.5.json
-          path: tmp/${{ inputs.post_id }}/forecasts/forecast.5.json
-      - uses: actions/cache/restore@v5
-        with:
           key:  tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.json
           path: tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.json
       - uses: ruby/setup-ruby@v1
@@ -254,14 +246,6 @@ jobs:
         with:
           key:  tmp/${{ inputs.post_id }}/forecasts/revision.3.json
           path: tmp/${{ inputs.post_id }}/forecasts/revision.3.json
-      - uses: actions/cache/restore@v5
-        with:
-          key:  tmp/${{ inputs.post_id }}/forecasts/revision.4.json
-          path: tmp/${{ inputs.post_id }}/forecasts/revision.4.json
-      - uses: actions/cache/restore@v5
-        with:
-          key:  tmp/${{ inputs.post_id }}/forecasts/revision.5.json
-          path: tmp/${{ inputs.post_id }}/forecasts/revision.5.json
       - uses: actions/cache/restore@v5
         with:
           key:  tmp/${{ inputs.post_id }}/forecasts/consensus.json
