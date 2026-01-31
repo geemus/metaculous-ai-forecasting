@@ -8,4 +8,4 @@ jobs:
       - run: |
           gh run delete --repo ${{ github.repository }} ${{ github.run_id }}
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_ACTIONS_TOKEN }}
