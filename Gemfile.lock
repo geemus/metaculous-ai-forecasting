@@ -10,6 +10,7 @@ GEM
     logger (1.7.0)
     reline (0.6.3)
       io-console (~> 0.5)
+    rubyzip (3.2.2)
 
 PLATFORMS
   ruby
@@ -19,6 +20,7 @@ DEPENDENCIES
   erb
   excon
   formatador
+  rubyzip
 
 BUNDLED WITH
    2.6.9
