@@ -32,7 +32,7 @@ module Provider
 
       case provider_symbol
       when :anthropic
-        args[:model] ||= 'anthropic/claude-opus-4.5'
+        args[:model] ||= 'anthropic/claude-opus-4.6'
       when :openai
         args[:model] ||= 'openai/gpt-5.2'
       end
