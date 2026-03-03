@@ -100,7 +100,7 @@ jobs:
         with:
           key:  tmp/${{ inputs.post_id }}/research.json
           path: tmp/${{ inputs.post_id }}/research.json
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ inputs.post_id }}.research.json
           path: tmp/${{ inputs.post_id }}/research.json
@@ -150,7 +150,7 @@ jobs:
         with:
           key:  tmp/${{ inputs.post_id }}/forecasts/forecast.${{ matrix.forecaster_index }}.json
           path: tmp/${{ inputs.post_id }}/forecasts/forecast.${{ matrix.forecaster_index }}.json
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ inputs.post_id }}.forecast.${{ matrix.forecaster_index }}.json
           path: tmp/${{ inputs.post_id }}/forecasts/forecast.${{ matrix.forecaster_index }}.json
@@ -216,7 +216,7 @@ jobs:
         with:
           key:  tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.json
           path: tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.json
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ inputs.post_id }}.revised_forecast.${{ matrix.forecaster_index }}.json
           path: tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.json
@@ -278,7 +278,7 @@ jobs:
         with:
           key:  tmp/${{ inputs.post_id }}/forecasts/consensus.json
           path: tmp/${{ inputs.post_id }}/forecasts/consensus.json
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ inputs.post_id }}.consensus.json
           path: tmp/${{ inputs.post_id }}/forecasts/consensus.json
