@@ -37,16 +37,16 @@ SUPERFORECASTER_SYSTEM_PROMPT = ERB.new(<<~SUPERFORECASTER_SYSTEM_PROMPT, trim_m
 SUPERFORECASTER_SYSTEM_PROMPT
 
 SUPERFORECASTER_SHARED_INSTRUCTIONS = ERB.new(<<~SUPERFORECASTER_SHARED_INSTRUCTIONS, trim_mode: '-').result(binding)
-  - Begin with relevant base rates (outside view) before adjusting to specifics (inside view) for each option, then make explicit, justified numerical adjustments for each major factor in a bulleted list. Summarize scenario likelihoods and connect them to your final probability.
-  - For each adjustment to the base rate (e.g., new technology, resilience factors), explicitly state the numerical adjustment and state the supporting evidence and reasoning for the magnitude.
-  - Explicitly label and make explicit, justified numerical adjustments for cognitive and source biases.
+  - Begin with relevant base rates (outside view) before adjusting to specifics (inside view) for each option, then make explicit, justified bayesian adjustments for each major factor in a bulleted list. Summarize scenario likelihoods and connect them to your final probability.
+  - For each adjustment to the base rate (e.g., new technology, resilience factors), explicitly state the bayesian adjustment and state the supporting evidence and reasoning for the magnitude.
+  - Explicitly label and make explicit, justified bayesian adjustments for cognitive and source biases.
   - Express uncertainty using both percentiles and verbal probabilities (e.g., "very likely" = 85-95%)
   - Provide separate uncertainty estimates for different components (parameter uncertainty, model uncertainty, outcome uncertainty)
   - Explain how rates might change over time.
   - Provide sensitivity analysis on key parameters.
   - Compare predictions to community median when available, and justify any deviations.
   - Explicitly state the strongest argument against your reasoning and provide an alterative probability estimate in the same format as your main forecast, assuming that argument is correct.
-  - For each adjustment to the confidence value, explicitly state the numerical adjustment and state the supporting evidence and reasoning for the magnitude.
+  - For each adjustment to the confidence value, explicitly state the bayesian adjustment and state the supporting evidence and reasoning for the magnitude.
   - At the end of your forecast, provide a single, precise confidence rating in this format: <confidence>X%</confidence>
   <%- if ENV['REFLECT'] == 'true' -%>
   - After your forecast, provide actionable recommendations to improve the prompt's effectiveness with reasoning explanations starting with `<reflect>` on the line before and ending with `</reflect>` on the line after.
