@@ -34,7 +34,7 @@ module Provider
       when :anthropic
         args[:model] ||= 'anthropic/claude-opus-4.6'
       when :openai
-        args[:model] ||= 'openai/gpt-5.2'
+        args[:model] ||= 'openai/gpt-5.4'
       end
 
       klass.new(**args)
