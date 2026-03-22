@@ -46,7 +46,7 @@ news.rb → tools_research.rb → forecast.rb (×4 forecasters) → revise_forec
 
 ### Key Files
 
-- **`lib/provider.rb`** - Multi-provider LLM factory. `Provider::FORECASTERS = [:anthropic, :openai, :perplexity, :deepseek]`. Most providers route through OpenRouter; Anthropic uses direct API with extended thinking.
+- **`lib/provider.rb`** - Multi-provider LLM factory. `Provider::FORECASTERS = [:anthropic, :openai, :perplexity, :deepseek]`. Both `:anthropic` and `:openai` route through OpenRouter; `:perplexity` and `:deepseek` use their own clients.
 - **`lib/metaculus.rb`** - Metaculus API client. `Question` class wraps question data; handles all 4 question types (binary, numeric, discrete, multiple_choice).
 - **`lib/prompts.rb`** - System prompts and ERB templates. `SUPERFORECASTER_SYSTEM_PROMPT` encodes the Bayesian methodology (base rates, explicit adjustments, uncertainty calibration).
 - **`lib/response.rb`** - Parses LLM responses across providers. Extracts XML-tagged forecast values (`<probability>`, `<percentiles>`, `<probabilities>`).
