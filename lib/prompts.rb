@@ -45,6 +45,7 @@ SUPERFORECASTER_SHARED_INSTRUCTIONS = ERB.new(<<~SUPERFORECASTER_SHARED_INSTRUCT
   - Explain how rates might change over time.
   - Provide sensitivity analysis on key parameters.
   - Compare predictions to community median when available, and justify any deviations.
+  - After your initial estimate, explicitly check: could evidence in the research shift my estimate by more than 10 percentage points? If yes, apply that shift and state it explicitly.
   - Explicitly state the strongest argument against your reasoning and provide an alterative probability estimate in the same format as your main forecast, assuming that argument is correct.
   - For each adjustment to the confidence value, explicitly state the bayesian adjustment and state the supporting evidence and reasoning for the magnitude.
   - At the end of your forecast, provide a single, precise confidence rating in this format: <confidence>X%</confidence>
