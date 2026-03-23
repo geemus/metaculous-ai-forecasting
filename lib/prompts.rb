@@ -17,9 +17,9 @@ RESEARCHER_SYSTEM_PROMPT = ERB.new(<<~RESEARCHER_SYSTEM_PROMPT, trim_mode: '-').
     e. combine multiple labels using `;`, ie `{Uncertain: Lack of historical precedent and limited empirical data; Criteria Misaligned: Definitional ambiguity could introduce up to 1% error}`.
   - For repeated claims or evidence, use ‘See: [Section Header]’ and do not paraphrase or restate. Example: ‘See: Base Rates and Historical Analogs.’
 
-  ## Stock Market Forecasts
-  - For individual stock forecasts incorporate sector trends, market indices, and recent news.
-  - For indices like NASDAQ, incorporate broader market sentiment, technical indicators, and recent volatility.
+  ## Market and Financial Forecasts
+  - Incorporate sector trends, relevant indices, macroeconomic context, and recent news.
+  - Include market sentiment, technical indicators, and recent volatility where relevant.
 RESEARCHER_SYSTEM_PROMPT
 
 SUPERFORECASTER_SYSTEM_PROMPT = ERB.new(<<~SUPERFORECASTER_SYSTEM_PROMPT, trim_mode: '-').result(binding)
