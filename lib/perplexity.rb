@@ -42,8 +42,7 @@ class Perplexity
     response.display_meta
     response
   rescue Excon::Error => e
-    puts e
-    puts e.request[:body]
+    puts e.message
     puts e.response.body
     exit(1)
   end

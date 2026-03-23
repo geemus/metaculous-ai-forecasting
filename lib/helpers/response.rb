@@ -5,6 +5,8 @@ module ResponseHelpers
     extract_xml(content, *tags).last
   end
 
+  EXPECTED_PERCENTILE_KEYS = [5, 10, 20, 25, 30, 40, 50, 60, 70, 75, 80, 90, 95].freeze
+
   def percentiles
     @percentiles ||= begin
       percentiles = {}
@@ -15,6 +17,15 @@ module ResponseHelpers
         value.gsub!(',', '')
         percentiles[key.to_i] = value.to_f
       end
+
+      missing = EXPECTED_PERCENTILE_KEYS - percentiles.keys
+      warn "WARNING: missing percentiles #{missing}" unless missing.empty?
+
+      sorted_values = percentiles.sort_by { |k, _| k }.map { |_, v| v }
+      unless sorted_values == sorted_values.sort
+        warn "WARNING: percentile values are not monotonically increasing: #{percentiles.inspect}"
+      end
+
       percentiles
     end
   end
@@ -36,9 +47,9 @@ module ResponseHelpers
     @probability ||= begin
       probability = extracted_content('probability')
       probability = probability.include?('%') ? probability.to_f / 100.0 : probability.to_f
-      probability = [probability, 0.001].max # probability_yes must be >= 0.001
-      probability = [probability, 0.999].min # probability_yes must be <= 0.999
-      probability
+      clamped = probability.clamp(0.001, 0.999)
+      warn "WARNING: probability #{probability} clamped to #{clamped}" if clamped != probability
+      clamped
     end
   end
 

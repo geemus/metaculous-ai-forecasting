@@ -71,10 +71,11 @@ def strip_xml(text, *tags)
 end
 
 def stddev(values)
-  average = values.sum / values.count
+  return 0.0 if values.empty?
+
+  average = values.sum / values.count.to_f
   deviation_squares = values.map { |v| (v - average) * (v - average) }
-  deviation_squares_average = deviation_squares.sum / deviation_squares.count
-  Math.sqrt(deviation_squares_average)
+  Math.sqrt(deviation_squares.sum / deviation_squares.count)
 end
 
 # Metaculus test question IDs for development/testing
