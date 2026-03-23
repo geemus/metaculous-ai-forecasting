@@ -2,7 +2,7 @@ GEM
   remote: https://rubygems.org/
   specs:
     erb (6.0.2)
-    excon (1.4.0)
+    excon (1.4.2)
       logger
     formatador (1.2.3)
       reline
