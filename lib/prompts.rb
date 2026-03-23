@@ -127,6 +127,10 @@ def consensus_prompt_with_type(llm, question, prompt_template)
   prompt
 end
 
+FORMAT_REINFORCEMENT = <<~FORMAT_REINFORCEMENT
+  IMPORTANT: You must use the exact XML tags specified above for your final answer. Do not substitute JSON, markdown, or any other format.
+FORMAT_REINFORCEMENT
+
 def prompt_with_type(llm, question, prompt_template)
   prompt = prompt_template.result(binding)
   prompt += case question.type
@@ -139,6 +143,7 @@ def prompt_with_type(llm, question, prompt_template)
             else
               raise "Missing template for type: #{question.type}"
             end
+  prompt += "\n#{FORMAT_REINFORCEMENT}"
   <<~PROMPT
     #{prompt}
 
