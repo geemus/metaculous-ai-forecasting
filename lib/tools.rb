@@ -9,9 +9,14 @@ SEARCH_TOOL = {
 
       # Usage
       - Provides access to information that is newer than or missing from training data.
+      - Decompose complex questions into focused sub-queries for better results.
+      - Prefer specific, targeted queries over broad ones.
+      - Include date context (e.g. "as of 2025") for time-sensitive topics.
 
       # Relevance
       - Use for current events, recent developments, or missing information.
+      - Use when base rates or historical frequencies are unknown.
+      - Use to verify claims or check for contradicting evidence.
     DESCRIPTION
     parameters: {
       type: 'object',
