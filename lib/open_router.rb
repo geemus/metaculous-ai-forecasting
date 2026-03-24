@@ -76,10 +76,11 @@ class OpenRouter
       self.eval(*messages)
     end
   rescue JSON::ParserError
-    retry # retry on invalid/hallucinated tool_call output
+    retries = defined?(retries) ? retries + 1 : 1
+    retry if retries <= 3
+    raise
   rescue Excon::Error => e
-    puts e
-    puts e.request[:body]
+    puts e.message
     puts e.response.body
     exit(1)
   end
