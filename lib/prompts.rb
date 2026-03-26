@@ -50,9 +50,6 @@ SUPERFORECASTER_SHARED_INSTRUCTIONS = ERB.new(<<~SUPERFORECASTER_SHARED_INSTRUCT
   - Explicitly state the strongest argument against your reasoning and provide an alterative probability estimate in the same format as your main forecast, assuming that argument is correct.
   - For each adjustment to the confidence value, explicitly state the bayesian adjustment and state the supporting evidence and reasoning for the magnitude.
   - At the end of your forecast, provide a single, precise confidence rating in this format: <confidence>X%</confidence>
-  <%- if ENV['REFLECT'] == 'true' -%>
-  - After your forecast, provide actionable recommendations to improve the prompt's effectiveness with reasoning explanations starting with `<reflect>` on the line before and ending with `</reflect>` on the line after.
-  <%- end -%>
 SUPERFORECASTER_SHARED_INSTRUCTIONS
 
 TOOLS_SYSTEM_PROMPT = <<~TOOLS_SYSTEM_PROMPT
