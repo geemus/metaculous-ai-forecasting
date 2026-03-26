@@ -52,13 +52,6 @@ SUPERFORECASTER_SHARED_INSTRUCTIONS = ERB.new(<<~SUPERFORECASTER_SHARED_INSTRUCT
   - At the end of your forecast, provide a single, precise confidence rating in this format: <confidence>X%</confidence>
 SUPERFORECASTER_SHARED_INSTRUCTIONS
 
-TOOLS_SYSTEM_PROMPT = <<~TOOLS_SYSTEM_PROMPT
-
-  # Tool Usage
-  - Before calling tools, think about which tools are most relevant to improve responses.
-  - Use relevant tools to improve responses.
-TOOLS_SYSTEM_PROMPT
-
 FORECAST_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/forecast.erb'), trim_mode: '-')
 
 RESEARCH_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/research.erb'), trim_mode: '-')

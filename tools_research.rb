@@ -17,7 +17,7 @@ cache(post_id, 'research.json') do
   llm = OpenRouter.new(
     model: 'anthropic/claude-opus-4.6',
     reasoning: { effort: 'high' },
-    system: RESEARCHER_SYSTEM_PROMPT + TOOLS_SYSTEM_PROMPT,
+    system: RESEARCHER_SYSTEM_PROMPT,
     tools: [SEARCH_TOOL]
   )
   @think = false
