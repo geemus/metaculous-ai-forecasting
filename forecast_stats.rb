@@ -18,27 +18,22 @@ unless question.aggregate_content.empty?
   end
 end
 
+count = @forecasts.count
 case question.type
 when 'binary'
-  count = @forecasts.count
   values = @forecasts.map(&:probability).map { |p| p.round(10) }
   sorted = values.sort
-  mid = (sorted.count - 1) / 2.0
-  median = (sorted[mid.floor] + sorted[mid.ceil]) / 2.0
-  median = median.round(3)
-  standard_deviation = stddev(values).round(6)
-  Formatador.display "\n[bold][green]# #{type} Stats #{values}: count: #{count}, median: #{median}, stddev: #{standard_deviation}[/]\n"
+  Formatador.display "\n[bold][green]# #{type} Stats #{values}: count: #{count}, median: #{sorted_median(sorted)}, stddev: #{stddev(values).round(6)}[/]\n"
+when 'numeric', 'discrete'
+  values = @forecasts.map { |f| f.percentiles[50] }
+  sorted = values.sort
+  Formatador.display "\n[bold][green]# #{type} Stats P50 #{values}: count: #{count}, median: #{sorted_median(sorted)}[/]\n"
 when 'multiple_choice'
-  count = @forecasts.count
   probabilities = @forecasts.map(&:probabilities)
   probabilities.first.each_key do |key|
-    values = probabilities.map { |forecast_probabilities| forecast_probabilities[key].round(10) }
+    values = probabilities.map { |fp| fp[key].round(10) }
     sorted = values.sort
-    mid = (sorted.count - 1) / 2.0
-    median = (sorted[mid.floor] + sorted[mid.ceil]) / 2.0
-    median = median.round(3)
-    standard_deviation = stddev(values).round(6)
-    Formatador.display "\n[bold][green]# #{type} Stats `#{key}` = #{values}: count: #{count}, median: #{median}, stddev: #{standard_deviation}[/]"
+    Formatador.display "\n[bold][green]# #{type} Stats `#{key}` = #{values}: count: #{count}, median: #{sorted_median(sorted)}, stddev: #{stddev(values).round(6)}[/]"
   end
   puts
 end

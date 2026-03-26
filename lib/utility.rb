@@ -78,6 +78,36 @@ def stddev(values)
   Math.sqrt(deviation_squares.sum / deviation_squares.count)
 end
 
+def sorted_median(sorted_values)
+  return nil if sorted_values.empty?
+
+  mid = (sorted_values.count - 1) / 2.0
+  ((sorted_values[mid.floor] + sorted_values[mid.ceil]) / 2.0).round(3)
+end
+
+def forecast_peer_summary(question, forecasts, own_forecast)
+  peers = forecasts.reject { |f| f == own_forecast }
+  case question.type
+  when 'binary'
+    peer_values = peers.map { |f| (f.probability * 100).round(1) }.sort
+    own_value = "#{(own_forecast.probability * 100).round(1)}%"
+    "Your estimate: #{own_value} | Peers — min: #{peer_values.first}%, median: #{sorted_median(peer_values)}%, max: #{peer_values.last}%"
+  when 'numeric', 'discrete'
+    peer_values = peers.map { |f| f.percentiles[50] }.sort
+    own_value = own_forecast.percentiles[50]
+    "Your P50: #{own_value} | Peers P50 — min: #{peer_values.first}, median: #{sorted_median(peer_values)}, max: #{peer_values.last}"
+  when 'multiple_choice'
+    lines = own_forecast.probabilities.keys.map do |key|
+      peer_values = peers.map { |f| (f.probabilities[key] * 100).round(1) }.sort
+      own_pct = "#{(own_forecast.probabilities[key] * 100).round(1)}%"
+      "  #{key}: #{own_pct} | Peers — min: #{peer_values.first}%, median: #{sorted_median(peer_values)}%, max: #{peer_values.last}%"
+    end
+    "Your estimates vs. peers:\n#{lines.join("\n")}"
+  end
+rescue StandardError
+  nil
+end
+
 # Metaculus test question IDs for development/testing
 module TestQuestions
   BINARY = '578'

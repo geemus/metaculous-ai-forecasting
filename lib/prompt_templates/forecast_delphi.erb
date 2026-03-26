@@ -6,6 +6,13 @@ Before reviewing peer forecasts, briefly consider: if your initial forecast turn
 
 Update your forecast based after reviewing these forecasts from other superforecasters.
 
+<%- summary = forecast_peer_summary(question, @forecasts, @forecast) -%>
+<%- if summary -%>
+# Forecast Summary
+
+<%= summary %>
+
+<%- end -%>
 <forecasts>
 <%- @forecasts.each do |f| -%>
 <%- next if f == @forecast -%>
