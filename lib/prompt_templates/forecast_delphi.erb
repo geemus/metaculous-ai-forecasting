@@ -2,6 +2,27 @@
 
 Update your forecast based after reviewing these forecasts from other superforecasters.
 
+<%- peer_forecasts = @forecasts.reject { |f| f == @forecast } -%>
+<%- begin -%>
+  <%- case question.type -%>
+  <%- when 'binary' -%>
+    <%- peer_values = peer_forecasts.map { |f| (f.probability * 100).round(1) }.sort -%>
+    <%- own_value = "#{(@forecast.probability * 100).round(1)}%" -%>
+    <%- summary = "Your estimate: #{own_value} | Peers — min: #{peer_values.first}%, median: #{peer_values[peer_values.size / 2]}%, max: #{peer_values.last}%" -%>
+  <%- when 'numeric', 'discrete' -%>
+    <%- peer_values = peer_forecasts.map { |f| f.percentiles[50] }.sort -%>
+    <%- own_value = @forecast.percentiles[50] -%>
+    <%- summary = "Your P50: #{own_value} | Peers P50 — min: #{peer_values.first}, median: #{peer_values[peer_values.size / 2]}, max: #{peer_values.last}" -%>
+  <%- end -%>
+<%- rescue StandardError -%>
+  <%- summary = nil -%>
+<%- end -%>
+<%- if summary -%>
+# Forecast Summary
+
+<%= summary %>
+
+<%- end -%>
 <forecasts>
 <%- @forecasts.each do |f| -%>
 <%- next if f == @forecast -%>
