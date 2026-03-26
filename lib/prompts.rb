@@ -52,10 +52,10 @@ SUPERFORECASTER_SHARED_INSTRUCTIONS = ERB.new(<<~SUPERFORECASTER_SHARED_INSTRUCT
   - At the end of your forecast, provide a single, precise confidence rating in this format: <confidence>X%</confidence>
   <%- if ENV['REFLECT'] == 'true' -%>
   - After your forecast, reflect on your reasoning. Write your reflection between `<reflect>` and `</reflect>` tags, addressing each item on its own line:
-    1. Base rate: What reference class did you use and is it the right one?
-    2. Counter-argument: What is the most compelling case for a substantially different estimate?
-    3. Key uncertainty: What single piece of information would most change your forecast?
-    4. Potential bias: What cognitive bias is most likely affecting your estimate?
+    1. Reference class: What reference class anchored your base rate, and is there a broader or more inclusive class that yields a meaningfully different probability?
+    2. Pre-mortem: Assume this forecast turns out to be significantly wrong. What is the single most likely mechanism of failure?
+    3. Update trigger: What single piece of information would most change this forecast, and if that information came in unfavorably, what would your revised probability be?
+    4. Bias mechanism: How might a specific cognitive bias be distorting the particular evidence or adjustment that most influenced your estimate — identify the structural mechanism, not just the bias name.
   <%- end -%>
 SUPERFORECASTER_SHARED_INSTRUCTIONS
 
