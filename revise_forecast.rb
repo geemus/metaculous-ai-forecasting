@@ -31,7 +31,5 @@ cache(post_id, "forecasts/revision.#{forecaster_index}.json") do
   )
   puts revision.content
   cache_write(post_id, "outputs/revision.#{forecaster_index}.md", revision.content)
-  cache_concat(post_id, 'reflects.md',
-               "# Revision {#{forecaster_index}: #{provider}}\n#{revision.extracted_content('reflect')}\n\n")
   revision.to_json
 end
