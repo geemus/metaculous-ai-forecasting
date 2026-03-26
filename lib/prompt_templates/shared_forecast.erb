@@ -13,7 +13,17 @@ Today is <%= Time.now.strftime('%B %d, %Y') %>.
 
 # Instructions
 
-- Before any inside-view analysis, state your outside-view base rate: what is the historical frequency of this type of outcome? Anchor on this base rate before considering question-specific evidence.
+## Pre-Forecast Decomposition
+
+Before forming your probability estimate, complete each of these four steps explicitly:
+
+1. **Reference class and base rate**: Identify the most relevant reference class for this question. Cite specific historical analogs or base rate data and commit to an outside-view probability before reading any question-specific evidence.
+2. **Distinguishing structural factors**: What features of this specific case differ from the reference class? For each factor, state the direction (increases or decreases probability) and your estimated magnitude of adjustment from the base rate.
+3. **Resolution criteria precision**: What exactly must happen for this question to resolve in each direction? Identify any ambiguities in the resolution criteria that could affect your forecast.
+4. **Primary evidence update**: What is the single most important piece of evidence from the research that should shift the base rate? State the direction and magnitude of that adjustment.
+
+## Forecast
+
 - Form your own probability estimate from the research before consulting the community aggregates. State this independent estimate explicitly, then note whether the aggregates cause you to revise it and why.
 - Before your forecast, write:
   - The time remaining before the outcome of the question will become known.
