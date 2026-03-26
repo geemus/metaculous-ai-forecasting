@@ -78,7 +78,7 @@ BINARY_FORECAST_PROMPT
 NUMERIC_FORECAST_PROMPT = <<~NUMERIC_FORECAST_PROMPT
     - The outcome if the current trend continued.
     - A plausible scenario resulting in a low outcome. Provide a brief narrative and estimate its likelihood, explaining how it contributes to your overall probability. For the 2-3 most critical assumption, estimate how much your probability distribution would change if it were false, and provide the revised probabilities.
-    - A plausible scenario resulting in a high outcome. Provide a brief narrative and estimate its likelihood, explaining how it contributes to your overall probability. For the 2-3 assumption, estimate how much your probability distribution would change if it were false, and provide the revised probabilities.
+    - A plausible scenario resulting in a high outcome. Provide a brief narrative and estimate its likelihood, explaining how it contributes to your overall probability. For the 2-3 most critical assumptions, estimate how much your probability distribution would change if it were false, and provide the revised probabilities.
   - At the end of your forecast, provide precise, percentile final predictions of values in the given units and range, only include the values and units, do not use ranges of values.
     - Write your final predictions in this format:
   <percentiles>
