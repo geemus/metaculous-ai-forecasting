@@ -12,7 +12,7 @@ question = fetch_question(post_id)
 exit if should_skip_forecast?(question, post_id)
 
 cache_write(post_id, 'inputs/system.superforecaster.md', SUPERFORECASTER_SYSTEM_PROMPT)
-@research_output = load_research(post_id, strip_tags: 'reflect')
+@research_output = load_research(post_id)
 
 provider = FORECASTERS[forecaster_index]
 Formatador.display "\n[bold][green]# Superforecaster[#{forecaster_index}: #{provider}]: Forecasting(#{post_id})…[/] "

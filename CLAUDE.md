@@ -83,5 +83,4 @@ PERPLEXITY_API_KEY
 ASKNEWS_API_KEY
 METACULUS_BOT_API_TOKEN
 METACULUS_BOT_ID
-REFLECT=true          # Optional: enables reflection prompts
 ```

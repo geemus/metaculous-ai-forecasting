@@ -359,7 +359,7 @@ class Metaculus
       metaculus = Metaculus.new
       metaculus.post_forecasts(forecast_data)
       cache_write(post_id, 'consensus/forecast.json', forecast_data.to_json)
-      comment_text = response.stripped_content('think', 'reflect')
+      comment_text = response.stripped_content('think')
       comment_data = {
         text: comment_text,
         parent: nil,
