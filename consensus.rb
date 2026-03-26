@@ -10,7 +10,7 @@ post_id = ARGV[0] || raise('post id argument is required')
 question = fetch_question(post_id)
 exit if should_skip_forecast?(question, post_id)
 
-@research_output = load_research(post_id, strip_tags: 'reflect')
+@research_output = load_research(post_id)
 @revised_forecasts = load_forecasts(post_id, type: 'revision')
 
 retries_remaining = 3

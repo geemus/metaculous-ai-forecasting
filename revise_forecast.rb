@@ -11,7 +11,7 @@ forecaster_index = ARGV[1]&.to_i || raise('forecaster index argv[1] is required'
 question = fetch_question(post_id)
 exit if should_skip_forecast?(question, post_id)
 
-@research_output = load_research(post_id, strip_tags: 'reflect')
+@research_output = load_research(post_id)
 @forecasts = load_forecasts(post_id, type: 'forecast')
 
 provider = FORECASTERS[forecaster_index]
