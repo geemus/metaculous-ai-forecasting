@@ -51,7 +51,11 @@ SUPERFORECASTER_SHARED_INSTRUCTIONS = ERB.new(<<~SUPERFORECASTER_SHARED_INSTRUCT
   - For each adjustment to the confidence value, explicitly state the bayesian adjustment and state the supporting evidence and reasoning for the magnitude.
   - At the end of your forecast, provide a single, precise confidence rating in this format: <confidence>X%</confidence>
   <%- if ENV['REFLECT'] == 'true' -%>
-  - After your forecast, provide actionable recommendations to improve the prompt's effectiveness with reasoning explanations starting with `<reflect>` on the line before and ending with `</reflect>` on the line after.
+  - After your forecast, reflect on your reasoning. Write your reflection between `<reflect>` and `</reflect>` tags, addressing each item on its own line:
+    1. Base rate: What reference class did you use and is it the right one?
+    2. Counter-argument: What is the most compelling case for a substantially different estimate?
+    3. Key uncertainty: What single piece of information would most change your forecast?
+    4. Potential bias: What cognitive bias is most likely affecting your estimate?
   <%- end -%>
 SUPERFORECASTER_SHARED_INSTRUCTIONS
 
