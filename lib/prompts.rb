@@ -46,6 +46,7 @@ SUPERFORECASTER_SHARED_INSTRUCTIONS = ERB.new(<<~SUPERFORECASTER_SHARED_INSTRUCT
 SUPERFORECASTER_SHARED_INSTRUCTIONS
 
 FORECAST_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/forecast.erb'), trim_mode: '-')
+SITUATION_SNAPSHOT = File.read('./lib/prompt_templates/_situation_snapshot.erb')
 
 RESEARCH_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/research.erb'), trim_mode: '-')
 
@@ -116,6 +117,7 @@ FORMAT_REINFORCEMENT = <<~FORMAT_REINFORCEMENT
 FORMAT_REINFORCEMENT
 
 def prompt_with_type(llm, question, prompt_template)
+  forecast_context = FORECAST_PROMPT_TEMPLATE.result(binding)
   prompt = prompt_template.result(binding)
   prompt += case question.type
             when 'binary'
