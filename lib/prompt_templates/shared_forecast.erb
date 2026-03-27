@@ -27,6 +27,4 @@ Before forming your probability estimate, complete each of these five steps expl
 
 - Form your own probability estimate from the research before consulting the community aggregates. State this independent estimate explicitly, then note whether the aggregates cause you to revise it and why.
 - Before your forecast, write:
-  - The time remaining before the outcome of the question will become known.
-  - The status quo outcome if nothing changed.
-  - The expectations of experts and markets.
+<%= ERB.new(File.read('./lib/prompt_templates/_situation_snapshot.erb'), trim_mode: '-').result(binding) -%>
