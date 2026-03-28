@@ -30,17 +30,14 @@ SUPERFORECASTER_SYSTEM_PROMPT = ERB.new(<<~SUPERFORECASTER_SYSTEM_PROMPT, trim_m
   - Do not preamble.
   - Assign precise, justified numerical likelihoods (e.g., 42%, 2.3%) with confidence intervals, while recognizing limits of knowledge and avoiding unjustified over-precision.
   - Put extra weight on status quo outcomes since the world usually changes slowly.
-SUPERFORECASTER_SYSTEM_PROMPT
-
-SUPERFORECASTER_SHARED_INSTRUCTIONS = ERB.new(<<~SUPERFORECASTER_SHARED_INSTRUCTIONS, trim_mode: '-').result(binding)
   - For each adjustment — to the base rate, for cognitive/source biases, or to confidence — explicitly state the direction, magnitude, supporting evidence, and reasoning.
   - Express uncertainty using both confidence intervals and verbal probabilities (e.g., "very likely" = 85-95%)
   - Provide separate uncertainty estimates for different components (parameter uncertainty, model uncertainty, outcome uncertainty)
   - Explain how rates might change over time.
   - Provide sensitivity analysis on key parameters.
-  - Explicitly state the strongest argument against your reasoning and provide an alterative probability estimate in the same format as your main forecast, assuming that argument is correct.
+  - Explicitly state the strongest argument against your reasoning and provide an alternative probability estimate in the same format as your main forecast, assuming that argument is correct.
   - At the end of your forecast, provide a single, precise confidence rating in this format: <confidence>X%</confidence>
-SUPERFORECASTER_SHARED_INSTRUCTIONS
+SUPERFORECASTER_SYSTEM_PROMPT
 
 FORECAST_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/forecast.erb'), trim_mode: '-')
 SITUATION_SNAPSHOT = File.read('./lib/prompt_templates/_situation_snapshot.erb')
@@ -127,13 +124,8 @@ def prompt_with_type(llm, question, prompt_template)
             else
               raise "Missing template for type: #{question.type}"
             end
-  <<~PROMPT
-    #{prompt}
-
-    #{SUPERFORECASTER_SHARED_INSTRUCTIONS}
-
-    #{FORMAT_REINFORCEMENT}
-  PROMPT
+  prompt += "\n#{FORMAT_REINFORCEMENT}"
+  prompt
 end
 
 CONSENSUS_SYSTEM_PROMPT = ERB.new(<<~CONSENSUS_SYSTEM_PROMPT, trim_mode: '-').result(binding)
