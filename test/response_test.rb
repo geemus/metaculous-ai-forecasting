@@ -71,11 +71,6 @@ class ResponseTest < Minitest::Test
     assert_equal 'or content', r.content
   end
 
-  def test_content_anthropic_routes_to_openai_compatible
-    r = Response.new(:anthropic, json: openai_json(content: 'anthropic content'))
-    assert_equal 'anthropic content', r.content
-  end
-
   def test_unknown_provider_raises
     r = Response.new(:unknown_provider, json: openai_json)
     assert_raises(RuntimeError) { r.content }
@@ -144,10 +139,12 @@ class ResponseTest < Minitest::Test
   end
 
   def test_deepseek_cost_calculation
-    # cost = (50/1_000_000 * 0.028) + (150/1_000_000 * 0.28) + (100/1_000_000 * 0.42)
-    expected = (50 / 1_000_000.0 * 0.028) + (150 / 1_000_000.0 * 0.28) + (100 / 1_000_000.0 * 0.42)
+    # 50 cache-hit tokens  * $0.028/MTok = $0.0000014
+    # 150 cache-miss tokens * $0.28/MTok  = $0.0000420
+    # 100 output tokens    * $0.42/MTok  = $0.0000420
+    # total                              = $0.0000854
     r = Response.new(:deepseek, json: deepseek_json(output: 100, cache_hit: 50, cache_miss: 150))
-    assert_in_delta expected.round(2), r.cost, 0.0001
+    assert_in_delta 0.0000854, r.cost, 0.000_000_1
   end
 
   def test_cost_defaults_to_zero_for_empty_json

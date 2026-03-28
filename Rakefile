@@ -2,7 +2,7 @@
 
 desc 'Run all tests'
 task :test do
-  sh 'ruby test/run_tests.rb'
+  sh 'bundle exec ruby test/run_tests.rb'
 end
 
 task default: :test

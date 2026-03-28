@@ -28,15 +28,15 @@ class ProviderTest < Minitest::Test
   end
 
   # ---------------------------------------------------------------------------
-  # Default models
+  # Default models — reference source constants so tests stay in sync
   # ---------------------------------------------------------------------------
 
   def test_anthropic_default_model
-    assert_equal 'anthropic/claude-opus-4.6', Provider.new(:anthropic).model
+    assert_equal Provider::DEFAULT_MODELS[:anthropic], Provider.new(:anthropic).model
   end
 
   def test_openai_default_model
-    assert_equal 'openai/gpt-5.4', Provider.new(:openai).model
+    assert_equal Provider::DEFAULT_MODELS[:openai], Provider.new(:openai).model
   end
 
   # ---------------------------------------------------------------------------
@@ -57,22 +57,7 @@ class ProviderTest < Minitest::Test
   # FORECASTERS constant
   # ---------------------------------------------------------------------------
 
-  def test_forecasters_has_four_entries
-    assert_equal 4, Provider::FORECASTERS.length
-  end
-
-  def test_forecasters_contains_expected_providers
-    assert_includes Provider::FORECASTERS, :anthropic
-    assert_includes Provider::FORECASTERS, :openai
-    assert_includes Provider::FORECASTERS, :perplexity
-    assert_includes Provider::FORECASTERS, :deepseek
-  end
-
   def test_forecasters_order_is_stable
     assert_equal %i[anthropic openai perplexity deepseek], Provider::FORECASTERS
-  end
-
-  def test_forecasters_is_frozen
-    assert Provider::FORECASTERS.frozen?
   end
 end

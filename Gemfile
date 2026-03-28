@@ -5,8 +5,5 @@ source 'https://rubygems.org'
 gem 'erb'
 gem 'excon'
 gem 'formatador'
+gem 'minitest'
 gem 'rubyzip'
-
-group :test do
-  gem 'minitest'
-end

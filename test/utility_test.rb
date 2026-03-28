@@ -155,13 +155,17 @@ class UtilityTest < Minitest::Test
   # ---------------------------------------------------------------------------
 
   TEST_POST_ID = 'test_utility_cache'
+  REPO_ROOT = File.expand_path('..', __dir__)
 
   def setup
+    @orig_dir = Dir.pwd
+    Dir.chdir(REPO_ROOT)
     init_cache(TEST_POST_ID)
   end
 
   def teardown
-    FileUtils.rm_rf("./tmp/#{TEST_POST_ID}")
+    FileUtils.rm_rf("#{REPO_ROOT}/tmp/#{TEST_POST_ID}")
+    Dir.chdir(@orig_dir)
   end
 
   def test_cache_miss_calls_block_and_writes_file

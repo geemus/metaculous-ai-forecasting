@@ -23,6 +23,11 @@ module Provider
     openai: OpenRouter
   }.freeze
 
+  DEFAULT_MODELS = {
+    anthropic: 'anthropic/claude-opus-4.6',
+    openai: 'openai/gpt-5.4'
+  }.freeze
+
   class << self
     # Factory method to instantiate a provider
     # Usage: Provider.new(:anthropic, **args)
@@ -30,12 +35,7 @@ module Provider
       klass = PROVIDER_CLASSES[provider_symbol]
       raise ArgumentError, "Unknown provider: #{provider_symbol}" unless klass
 
-      case provider_symbol
-      when :anthropic
-        args[:model] ||= 'anthropic/claude-opus-4.6'
-      when :openai
-        args[:model] ||= 'openai/gpt-5.4'
-      end
+      args[:model] ||= DEFAULT_MODELS[provider_symbol] if DEFAULT_MODELS.key?(provider_symbol)
 
       klass.new(**args)
     end

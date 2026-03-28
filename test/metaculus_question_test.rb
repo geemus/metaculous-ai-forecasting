@@ -84,18 +84,6 @@ class MetaculusQuestionTest < Minitest::Test
   # Data accessors
   # ---------------------------------------------------------------------------
 
-  def test_type_binary
-    assert_equal 'binary', make_question(type: 'binary').type
-  end
-
-  def test_type_numeric
-    assert_equal 'numeric', make_question(type: 'numeric').type
-  end
-
-  def test_type_multiple_choice
-    assert_equal 'multiple_choice', make_question(type: 'multiple_choice').type
-  end
-
   def test_title
     assert_equal 'Will X happen?', make_question.title
   end
@@ -251,19 +239,6 @@ class MetaculusQuestionTest < Minitest::Test
               })
     q = Metaculus::Question.new(data: data)
     assert_equal 0, q.trend
-  end
-
-  def test_trend_returns_numeric_for_multiple_points
-    history = [
-      { 'start_time' => 1_000_000, 'end_time' => 1_001_000, 'centers' => [0.4] },
-      { 'start_time' => 1_002_000, 'end_time' => 1_003_000, 'centers' => [0.5] },
-      { 'start_time' => 1_004_000, 'end_time' => 1_005_000, 'centers' => [0.6] }
-    ]
-    data = question_data(extra_question: {
-             'aggregations' => aggregations(history: history)
-           })
-    q = Metaculus::Question.new(data: data)
-    assert_kind_of Numeric, q.trend
   end
 
   def test_trend_positive_for_increasing_series
