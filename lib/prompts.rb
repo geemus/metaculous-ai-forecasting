@@ -130,11 +130,12 @@ def prompt_with_type(llm, question, prompt_template)
             else
               raise "Missing template for type: #{question.type}"
             end
-  prompt += "\n#{FORMAT_REINFORCEMENT}"
   <<~PROMPT
     #{prompt}
 
     #{SUPERFORECASTER_SHARED_INSTRUCTIONS}
+
+    #{FORMAT_REINFORCEMENT}
   PROMPT
 end
 
