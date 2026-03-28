@@ -9,6 +9,8 @@ GEM
     io-console (0.8.1)
     logger (1.7.0)
     minitest (5.20.0)
+    mutex_m (0.2.0)
+    ostruct (0.6.0)
     rake (13.1.0)
     reline (0.6.3)
       io-console (~> 0.5)
@@ -23,6 +25,8 @@ DEPENDENCIES
   excon
   formatador
   minitest
+  mutex_m
+  ostruct
   rake
   rubyzip
 
