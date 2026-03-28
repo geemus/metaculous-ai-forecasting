@@ -139,12 +139,12 @@ class ResponseTest < Minitest::Test
   end
 
   def test_deepseek_cost_calculation
-    # 50 cache-hit tokens  * $0.028/MTok = $0.0000014
-    # 150 cache-miss tokens * $0.28/MTok  = $0.0000420
-    # 100 output tokens    * $0.42/MTok  = $0.0000420
-    # total                              = $0.0000854
-    r = Response.new(:deepseek, json: deepseek_json(output: 100, cache_hit: 50, cache_miss: 150))
-    assert_in_delta 0.0000854, r.cost, 0.000_000_1
+    # 0 cache-hit tokens
+    # 1_000_000 cache-miss tokens * $0.28/MTok = $0.28
+    # 1_000_000 output tokens     * $0.42/MTok = $0.42
+    # total                                    = $0.70 (rounds to 0.70 at 2dp)
+    r = Response.new(:deepseek, json: deepseek_json(output: 1_000_000, cache_hit: 0, cache_miss: 1_000_000))
+    assert_in_delta 0.70, r.cost, 0.001
   end
 
   def test_cost_defaults_to_zero_for_empty_json
