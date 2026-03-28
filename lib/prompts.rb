@@ -15,7 +15,7 @@ RESEARCHER_SYSTEM_PROMPT = ERB.new(<<~RESEARCHER_SYSTEM_PROMPT, trim_mode: '-').
     c. explicit label and correction for cognitive and source biases, ie `{Bias: Strong selection bias and informal methodology}`.
     d. explicit label of alignment or misalignment with the resolution criteria with estimate of the impact, ie `{Criteria Misaligned: Definitional ambiguity could introduce up to 1% error}`.
     e. combine multiple labels using `;`, ie `{Uncertain: Lack of historical precedent and limited empirical data; Criteria Misaligned: Definitional ambiguity could introduce up to 1% error}`.
-  - For repeated claims or evidence, use ‘See: [Section Header]’ and do not paraphrase or restate. Example: ‘See: Base Rates and Historical Analogs.’
+  - For repeated claims or evidence, use 'See: [Section Header]' and do not paraphrase or restate. Example: 'See: Base Rates and Historical Analogs.'
 
   ## Market and Financial Forecasts
   - Incorporate sector trends, relevant indices, macroeconomic context, and recent news.
@@ -129,11 +129,12 @@ def prompt_with_type(llm, question, prompt_template)
             else
               raise "Missing template for type: #{question.type}"
             end
-  prompt += "\n#{FORMAT_REINFORCEMENT}"
   <<~PROMPT
     #{prompt}
 
     #{SUPERFORECASTER_SHARED_INSTRUCTIONS}
+
+    #{FORMAT_REINFORCEMENT}
   PROMPT
 end
 
