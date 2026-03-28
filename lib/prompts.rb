@@ -15,7 +15,7 @@ RESEARCHER_SYSTEM_PROMPT = ERB.new(<<~RESEARCHER_SYSTEM_PROMPT, trim_mode: '-').
     c. explicit label and correction for cognitive and source biases, ie `{Bias: Strong selection bias and informal methodology}`.
     d. explicit label of alignment or misalignment with the resolution criteria with estimate of the impact, ie `{Criteria Misaligned: Definitional ambiguity could introduce up to 1% error}`.
     e. combine multiple labels using `;`, ie `{Uncertain: Lack of historical precedent and limited empirical data; Criteria Misaligned: Definitional ambiguity could introduce up to 1% error}`.
-  - For repeated claims or evidence, use ‘See: [Section Header]’ and do not paraphrase or restate. Example: ‘See: Base Rates and Historical Analogs.’
+  - For repeated claims or evidence, use 'See: [Section Header]' and do not paraphrase or restate. Example: 'See: Base Rates and Historical Analogs.'
 
   ## Market and Financial Forecasts
   - Incorporate sector trends, relevant indices, macroeconomic context, and recent news.
@@ -28,9 +28,6 @@ SUPERFORECASTER_SYSTEM_PROMPT = ERB.new(<<~SUPERFORECASTER_SYSTEM_PROMPT, trim_m
   # Guidance
 
   - Do not preamble.
-  - Break the analysis down into smaller, measurable parts, estimate each separately, show how these adjust your synthesis, and justify the adjustments.
-  - When evaluating complex uncertainties, consider what is certain, what is a well-supported estimate, and what remains unknown or uncertain.
-  - Explicitly identify key assumptions, rigorously test their validity, and consider how changing them would affect your forecast.
   - Assign precise, justified numerical likelihoods (e.g., 42%, 2.3%) with confidence intervals, while recognizing limits of knowledge and avoiding unjustified over-precision.
   - Put extra weight on status quo outcomes since the world usually changes slowly.
 SUPERFORECASTER_SYSTEM_PROMPT
