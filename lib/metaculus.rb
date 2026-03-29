@@ -332,6 +332,14 @@ class Metaculus
       @post_id ||= data['id']
     end
 
+    def resolution
+      @resolution ||= data['resolution'] || question['resolution']
+    end
+
+    def resolve_time
+      @resolve_time ||= data['resolve_time'] || question['resolve_time']
+    end
+
     def spot_peer_score
       @spot_peer_score ||= question.dig('my_forecasts', 'score_data', 'spot_peer_score')
     end
