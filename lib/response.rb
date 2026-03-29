@@ -30,90 +30,36 @@ class Response
     Formatador.display_line('[red]! TOKEN EXHAUSTION ![/]') if token_exhaustion?
   end
 
-  def content
-    @content ||= case provider
-                 # when :anthropic
-                 #   anthropic_content
-                 when :deepseek, :perplexity, :openai, :open_router, :anthropic
-                   openai_compatible_content
-                 else
-                   raise "Unknown provider: #{provider}"
-                 end
-  end
+  def content = @content ||= openai_compatible_content
 
-  def reasoning_content
-    @reasoning_content ||= case provider
-                           # when :anthropic
-                           #   anthropic_reasoning_content
-                           when :deepseek, :perplexity, :openai, :open_router, :anthropic
-                             openai_compatible_reasoning_content
-                           else
-                             raise "Unknown provider: #{provider}"
-                           end
-  end
+  def reasoning_content = @reasoning_content ||= openai_compatible_reasoning_content
 
-  def tool_calls
-    @tool_calls ||= case provider
-                    # when :anthropic
-                    #   anthropic_tool_calls
-                    when :deepseek, :perplexity, :openai, :open_router, :anthropic
-                      openai_compatible_tool_calls
-                    else
-                      raise "Unknown provider: #{provider}"
-                    end
-  end
+  def tool_calls = @tool_calls ||= openai_compatible_tool_calls
 
   def cost
     @cost ||= case provider
-              # when :anthropic
-                # anthropic_cost
               when :deepseek
                 deepseek_cost
               when :perplexity
                 perplexity_cost
               when :open_router, :anthropic, :openai
                 open_router_cost
-              # when :openai
-              #   openai_cost
               else
                 0.0
               end
   end
 
-  def input_tokens
-    @input_tokens ||= case provider
-                      # when :anthropic
-                        # anthropic_input_tokens
-                      when :perplexity, :deepseek, :openai, :open_router, :anthropic
-                        data.dig('usage', 'prompt_tokens') || 0
-                      else
-                        0
-                      end
-  end
+  def input_tokens = @input_tokens ||= data.dig('usage', 'prompt_tokens') || 0
 
   def output_tokens
-    @output_tokens ||= case provider
-                       # when :anthropic
-                       #   data.dig('usage', 'output_tokens') || 0
-                       when :perplexity
+    @output_tokens ||= if provider == :perplexity
                          perplexity_output_tokens
-                       when :deepseek, :openai, :open_router, :anthropic
-                         data.dig('usage', 'completion_tokens') || 0
                        else
-                         0
+                         data.dig('usage', 'completion_tokens') || 0
                        end
   end
 
-  def total_tokens
-    @total_tokens ||= case provider
-                      # when :anthropic
-                      #   input_tokens + output_tokens
-                      when :perplexity, :deepseek, :openai, :open_router, :anthropic
-                        data.dig('usage', 'total_tokens') || (input_tokens + output_tokens)
-                      else
-                        0
-                      end
-  end
+  def total_tokens = @total_tokens ||= data.dig('usage', 'total_tokens') || (input_tokens + output_tokens)
 
   private
 
@@ -168,8 +114,7 @@ class Response
 
   # OpenAI-compatible reasoning content (used by Perplexity, DeepSeek, OpenAI)
   def openai_compatible_reasoning_content
-    reasoning_content = data['choices'].map { |choice| choice['message']['content'] }
-    reasoning_content.join("\n")
+    data['choices'].map { |choice| choice['message']['reasoning_content'] }.join("\n")
   end
 
   # OpenAI-compatible tool_calls (used by Perplexity, DeepSeek, OpenAI)
