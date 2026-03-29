@@ -27,7 +27,6 @@ class Response
         }
       )
     )
-    Formatador.display_line('[red]! TOKEN EXHAUSTION ![/]') if token_exhaustion?
   end
 
   def content = @content ||= openai_compatible_content
@@ -71,38 +70,6 @@ class Response
     duration ? duration % 60 : 0
   end
 
-  def token_exhaustion?
-    # provider == :anthropic && output_tokens >= 8192
-    false
-  end
-
-  # Anthropic-specific methods
-  def anthropic_content
-    text_array = data['content'].select { |content| content['type'] == 'text' }
-    text_array.map { |content| content['text'] }.join("\n")
-  end
-
-  def anthropic_cost
-    cost = 0
-    cost += (input_tokens / 1_000_000.0) * 3.0   # $3/MTok
-    cost += (output_tokens / 1_000_000.0) * 15.0 # $15/MTok
-    cost.round(2)
-  end
-
-  def anthropic_input_tokens
-    data['usage'].fetch_values('input_tokens', 'cache_creation_input_tokens', 'cache_read_input_tokens').sum
-  rescue
-    data.dig('usage', 'input_tokens') || 0
-  end
-
-  def anthropic_reasoning_content
-    data['content'].select { |content| content['type'] == 'thinking' }
-  end
-
-  def anthropic_tool_calls
-    data['content'].select { |content| content['type'] == 'tool_use' }
-  end
-
   def open_router_cost
     (data.dig('usage', 'cost') || 0) + (data.dig('usage', 'cost_details')&.values&.compact&.sum || 0)
   end
@@ -140,11 +107,5 @@ class Response
     total = data.dig('usage', 'total_tokens') || 0
     prompt = data.dig('usage', 'prompt_tokens') || 0
     total - prompt
-  end
-
-  # OpenAI-specific methods (placeholder)
-  def openai_cost
-    # TODO: Implement OpenAI cost calculation
-    0.0
   end
 end

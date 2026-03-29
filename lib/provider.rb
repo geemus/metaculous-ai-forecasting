@@ -1,9 +1,7 @@
 # frozen_string_literal: true
 
-require './lib/anthropic'
 require './lib/deepseek'
 require './lib/open_router'
-require './lib/openai'
 require './lib/perplexity'
 
 module Provider
