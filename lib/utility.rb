@@ -16,8 +16,12 @@ def init_cache(post_id)
   end
 end
 
+def cache_path(id, path)
+  "./tmp/#{id}/#{path}"
+end
+
 def cache(post_id, path, &block)
-  tmp_path = "./tmp/#{post_id}/#{path}"
+  tmp_path = cache_path(post_id, path)
   if File.exist?(tmp_path)
     File.read(tmp_path)
   else
@@ -28,26 +32,25 @@ def cache(post_id, path, &block)
 end
 
 def cache_concat(question_id, path, data)
-  tmp_path = "./tmp/#{question_id}/#{path}"
+  tmp_path = cache_path(question_id, path)
   cached = File.read(tmp_path) if File.exist?(tmp_path)
   File.write(tmp_path, [cached, data].compact.join("\n"))
 end
 
 def cache_delete(question_id, path)
-  tmp_path = "./tmp/#{question_id}/#{path}"
+  tmp_path = cache_path(question_id, path)
   File.delete(tmp_path) if File.exist?(tmp_path)
 end
 
 def cache_read!(question_id, path)
-  tmp_path = "./tmp/#{question_id}/#{path}"
+  tmp_path = cache_path(question_id, path)
   raise "Cache Not Found: `#{tmp_path}`" unless File.exist?(tmp_path)
 
   File.read(tmp_path)
 end
 
 def cache_write(question_id, path, data)
-  tmp_path = "./tmp/#{question_id}/#{path}"
-  File.write(tmp_path, data)
+  File.write(cache_path(question_id, path), data)
 end
 
 # https://github.com/anthropics/anthropic-cookbook/blob/main/patterns/agents/util.py
