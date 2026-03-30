@@ -298,3 +298,69 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "$(cat tmp/${{ inputs.post_id }}/consensus/comment.json | jq -r '.text')" >> $GITHUB_STEP_SUMMARY
+
+  persist:
+    needs: consensus
+    if: ${{ inputs.post_id }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/cache/restore@v5
+        with:
+          key:  tmp/${{ inputs.post_id }}/forecasts/forecast.0.json
+          path: tmp/${{ inputs.post_id }}/forecasts/forecast.0.json
+      - uses: actions/cache/restore@v5
+        with:
+          key:  tmp/${{ inputs.post_id }}/forecasts/forecast.1.json
+          path: tmp/${{ inputs.post_id }}/forecasts/forecast.1.json
+      - uses: actions/cache/restore@v5
+        with:
+          key:  tmp/${{ inputs.post_id }}/forecasts/forecast.2.json
+          path: tmp/${{ inputs.post_id }}/forecasts/forecast.2.json
+      - uses: actions/cache/restore@v5
+        with:
+          key:  tmp/${{ inputs.post_id }}/forecasts/forecast.3.json
+          path: tmp/${{ inputs.post_id }}/forecasts/forecast.3.json
+      - uses: actions/cache/restore@v5
+        with:
+          key:  tmp/${{ inputs.post_id }}/forecasts/revision.0.json
+          path: tmp/${{ inputs.post_id }}/forecasts/revision.0.json
+      - uses: actions/cache/restore@v5
+        with:
+          key:  tmp/${{ inputs.post_id }}/forecasts/revision.1.json
+          path: tmp/${{ inputs.post_id }}/forecasts/revision.1.json
+      - uses: actions/cache/restore@v5
+        with:
+          key:  tmp/${{ inputs.post_id }}/forecasts/revision.2.json
+          path: tmp/${{ inputs.post_id }}/forecasts/revision.2.json
+      - uses: actions/cache/restore@v5
+        with:
+          key:  tmp/${{ inputs.post_id }}/forecasts/revision.3.json
+          path: tmp/${{ inputs.post_id }}/forecasts/revision.3.json
+      - uses: actions/cache/restore@v5
+        with:
+          key:  tmp/${{ inputs.post_id }}/forecasts/consensus.json
+          path: tmp/${{ inputs.post_id }}/forecasts/consensus.json
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+          bundler-cache: true
+      - run: ./persist_forecast.rb ${{ inputs.post_id }}
+        env:
+          METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
+          METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
+      - name: Commit and push persisted record
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/unresolved/${{ inputs.post_id }}.json
+          git diff --cached --quiet && exit 0
+          git commit -m "persist forecast record for ${{ inputs.post_id }} [skip ci]"
+          n=0
+          until git push origin HEAD; do
+            n=$((n+1))
+            [ $n -ge 4 ] && exit 1
+            sleep $((2 ** n))
+            git fetch origin
+            git rebase origin/$(git rev-parse --abbrev-ref HEAD)
+          done

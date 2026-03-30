@@ -57,6 +57,10 @@ module ResponseHelpers
     strip_xml(content, *tags)
   end
 
+  def model
+    data['model']
+  end
+
   def to_json(*args)
     data.to_json(*args)
   end
