@@ -59,10 +59,10 @@ record = {
   consensus_forecast: forecast_value(consensus, question.type),
   individual_forecasts: {
     initial: initial_forecasts.each_with_index.map do |f, i|
-      { provider: forecasters[i].to_s }.merge(forecast_value(f, question.type))
+      { provider: forecasters[i].to_s, model: f.model }.merge(forecast_value(f, question.type))
     end,
     revised: revised_forecasts.each_with_index.map do |f, i|
-      { provider: forecasters[i].to_s }.merge(forecast_value(f, question.type))
+      { provider: forecasters[i].to_s, model: f.model }.merge(forecast_value(f, question.type))
     end
   }
 }
