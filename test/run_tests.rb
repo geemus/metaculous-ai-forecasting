@@ -3,3 +3,5 @@
 
 require_relative 'test_helper'
 require_relative 'utility_test'
+require_relative 'response_helpers_test'
+require_relative 'response_test'
