@@ -67,14 +67,16 @@ NUMERIC_FORECAST_PROMPT = <<~NUMERIC_FORECAST_PROMPT
   Percentile  5: A {unit}
   Percentile 10: B {unit}
   Percentile 20: C {unit}
-  Percentile 30: D {unit}
-  Percentile 40: E {unit}
-  Percentile 50: F {unit}
-  Percentile 60: G {unit}
-  Percentile 70: H {unit}
-  Percentile 80: I {unit}
-  Percentile 90: J {unit}
-  Percentile 95: K {unit}
+  Percentile 25: D {unit}
+  Percentile 30: E {unit}
+  Percentile 40: F {unit}
+  Percentile 50: G {unit}
+  Percentile 60: H {unit}
+  Percentile 70: I {unit}
+  Percentile 75: J {unit}
+  Percentile 80: K {unit}
+  Percentile 90: L {unit}
+  Percentile 95: M {unit}
   </percentiles>
 NUMERIC_FORECAST_PROMPT
 

@@ -200,7 +200,7 @@ class Metaculus
                          when 'multiple_choice'
                            # handled in aggregate_content
                          else
-                           (latest_aggregations['centers'].first * upper_bound).round(2)
+                           (lower_bound + latest_aggregations['centers'].first * (upper_bound - lower_bound)).round(2)
                          end
     end
 
@@ -229,7 +229,7 @@ class Metaculus
         data[0.0] = scaling['range_min']
       end
       if scaling['open_upper_bound']
-        data[100 - (0.01 * (100 - data.keys.max))] = scaling['range_max'] if scaling['range_max'] > data[data.keys.max]
+        data[99.9] = scaling['range_max'] if scaling['range_max'] > data[data.keys.max]
       else
         data[100.0] = scaling['range_max']
       end

@@ -21,9 +21,16 @@ module ResponseHelpers
       missing = EXPECTED_PERCENTILE_KEYS - percentiles.keys
       warn "WARNING: missing percentiles #{missing}" unless missing.empty?
 
-      sorted_values = percentiles.sort_by { |k, _| k }.map { |_, v| v }
+      sorted_pairs = percentiles.sort_by { |k, _| k }
+      sorted_values = sorted_pairs.map { |_, v| v }
       unless sorted_values == sorted_values.sort
         warn "WARNING: percentile values are not monotonically increasing: #{percentiles.inspect}"
+        # Enforce monotonicity by clamping each value to be at least the previous
+        enforced = sorted_values.each_with_object([]) do |v, acc|
+          acc << (acc.empty? ? v : [v, acc.last].max)
+        end
+        percentiles = sorted_pairs.map { |k, _| k }.zip(enforced).to_h
+        warn "WARNING: enforced monotonic percentiles: #{percentiles.inspect}"
       end
 
       percentiles
