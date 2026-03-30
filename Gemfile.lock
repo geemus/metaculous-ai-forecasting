@@ -8,6 +8,7 @@ GEM
       reline
     io-console (0.8.1)
     logger (1.7.0)
+    minitest (5.20.0)
     reline (0.6.3)
       io-console (~> 0.5)
     rubyzip (3.2.2)
@@ -20,6 +21,7 @@ DEPENDENCIES
   erb
   excon
   formatador
+  minitest (= 5.20.0)
   rubyzip
 
 BUNDLED WITH

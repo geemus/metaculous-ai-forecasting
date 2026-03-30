@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require 'bundler'
-Bundler.setup
-
 require 'formatador'
 
 Thread.current[:formatador] = Formatador.new

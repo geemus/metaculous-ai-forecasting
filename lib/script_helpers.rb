@@ -1,9 +1,6 @@
 # frozen_string_literal: true
 
 # Common requires for all scripts
-require 'bundler'
-Bundler.setup
-
 require 'erb'
 require 'excon'
 require 'fileutils'

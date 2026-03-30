@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require 'bundler'
-Bundler.setup
-
 require 'excon'
 require 'formatador'
 require 'json'
