@@ -48,7 +48,7 @@ jobs:
         with:
           ruby-version: '3.4'
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-      - run: ./news.rb ${{ inputs.post_id }}
+      - run: bundle exec ruby news.rb ${{ inputs.post_id }}
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           ASKNEWS_API_KEY: ${{ secrets.ASKNEWS_API_KEY }}
@@ -88,7 +88,7 @@ jobs:
         with:
           ruby-version: '3.4'
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-      - run: ./tools_research.rb ${{ inputs.post_id }}
+      - run: bundle exec ruby tools_research.rb ${{ inputs.post_id }}
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
@@ -138,7 +138,7 @@ jobs:
         with:
           ruby-version: '3.4'
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-      - run: ./forecast.rb ${{ inputs.post_id }} ${{ matrix.forecaster_index }}
+      - run: bundle exec ruby forecast.rb ${{ inputs.post_id }} ${{ matrix.forecaster_index }}
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
@@ -155,7 +155,7 @@ jobs:
           name: ${{ inputs.post_id }}.forecast.${{ matrix.forecaster_index }}.json
           path: tmp/${{ inputs.post_id }}/forecasts/forecast.${{ matrix.forecaster_index }}.json
       - run: |
-          ./forecast_result.rb ${{ inputs.post_id }} ${{ matrix.forecaster_index }} forecast >> $GITHUB_STEP_SUMMARY
+          bundle exec ruby forecast_result.rb ${{ inputs.post_id }} ${{ matrix.forecaster_index }} forecast >> $GITHUB_STEP_SUMMARY
         continue-on-error: true
       - run: |
           echo '<details><summary>Prompt</summary>' >> $GITHUB_STEP_SUMMARY
@@ -204,7 +204,7 @@ jobs:
         with:
           ruby-version: '3.4'
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-      - run: ./revise_forecast.rb ${{ inputs.post_id }} ${{ matrix.forecaster_index }}
+      - run: bundle exec ruby revise_forecast.rb ${{ inputs.post_id }} ${{ matrix.forecaster_index }}
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
@@ -221,7 +221,7 @@ jobs:
           name: ${{ inputs.post_id }}.revised_forecast.${{ matrix.forecaster_index }}.json
           path: tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.json
       - run: |
-          ./forecast_result.rb ${{ inputs.post_id }} ${{ matrix.forecaster_index }} revision >> $GITHUB_STEP_SUMMARY
+          bundle exec ruby forecast_result.rb ${{ inputs.post_id }} ${{ matrix.forecaster_index }} revision >> $GITHUB_STEP_SUMMARY
         continue-on-error: true
       - run: |
           echo '<details><summary>Prompt</summary>' >> $GITHUB_STEP_SUMMARY
@@ -266,7 +266,7 @@ jobs:
         with:
           ruby-version: '3.4'
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-      - run: ./consensus.rb ${{ inputs.post_id }}
+      - run: bundle exec ruby consensus.rb ${{ inputs.post_id }}
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
