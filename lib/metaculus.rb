@@ -272,7 +272,6 @@ class Metaculus
       # - no mass outside closed bounds (scaling accordingly)
       # - at least minimum amount of mass outside open bounds
       # - increasing by at least minimum amount (0.01 / 200 = 0.0005)
-      # - TODO: add smoothing for spiky CDFs (exceed change of 0.59)
       scale_lower_to = scaling['open_lower_bound'] ? 0.0 : y_values.first
       scale_upper_to = scaling['open_upper_bound'] ? 1.0 : y_values.last
       rescaled_inbound_mass = scale_upper_to - scale_lower_to
@@ -291,6 +290,23 @@ class Metaculus
                   end
         # round to avoid floating point errors
         y_values[i] = y_value.round(10)
+      end
+
+      # Cap PMF to prevent spiky CDFs: max probability mass per step is 0.2
+      # (matches Metaculus template: 0.2 * DEFAULT_INBOUND_OUTCOME_COUNT / cdf_size)
+      # Use 0.95 wiggle room factor as in the reference implementation.
+      cap = 0.2 * 200.0 / (y_values.length - 1) * 0.95
+
+      pmf = y_values.each_cons(2).map { |a, b| b - a }
+      if pmf.any? { |v| v > cap }
+        capped = pmf.map { |v| [v, cap].min }
+        # Renormalize so total mass equals the original span
+        total_mass = pmf.sum
+        capped_mass = capped.sum
+        capped.map! { |v| (v * total_mass / capped_mass).round(10) } if capped_mass > 0
+        # Rebuild CDF starting from the original first value
+        cumulative = y_values.first
+        y_values = [cumulative] + capped.map { |v| (cumulative += v).round(10) }
       end
 
       y_values
