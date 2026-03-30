@@ -29,8 +29,10 @@ module ResponseHelpers
         enforced = sorted_values.each_with_object([]) do |v, acc|
           acc << (acc.empty? ? v : [v, acc.last].max)
         end
-        percentiles = sorted_pairs.map { |k, _| k }.zip(enforced).to_h
-        warn "WARNING: enforced monotonic percentiles: #{percentiles.inspect}"
+        if enforced != sorted_values
+          percentiles = sorted_pairs.map { |k, _| k }.zip(enforced).to_h
+          warn "WARNING: enforced monotonic percentiles: #{percentiles.inspect}"
+        end
       end
 
       percentiles
