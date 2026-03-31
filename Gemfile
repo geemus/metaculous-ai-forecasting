@@ -9,4 +9,5 @@ gem 'rubyzip'
 
 group :test do
   gem 'minitest', '5.20.0'
+  gem 'rake'
 end
