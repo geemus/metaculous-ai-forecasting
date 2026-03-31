@@ -14,3 +14,9 @@ group :test do
   gem 'mutex_m'
   gem 'rake'
 end
+
+group :lint do
+  gem 'rubocop'
+  gem 'rubocop-minitest'
+  gem 'rubocop-rake'
+end

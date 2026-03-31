@@ -1,0 +1,23 @@
+require:
+  - rubocop-minitest
+  - rubocop-rake
+
+AllCops:
+  TargetRubyVersion: 3.4
+  NewCops: enable
+
+Layout/LineLength:
+  Max: 120
+  AllowedPatterns:
+    - '^\s*#'  # comments
+    - '^\s*[A-Z_]+ = '  # long string constants / heredocs
+
+Metrics/BlockLength:
+  Exclude:
+    - 'test/**/*'
+
+Metrics/MethodLength:
+  Max: 20
+
+Style/Documentation:
+  Enabled: false
