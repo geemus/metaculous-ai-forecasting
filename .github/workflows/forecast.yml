@@ -46,7 +46,7 @@ jobs:
           path: tmp/${{ inputs.post_id }}/outputs/news.md
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4'
+          ruby-version: '4.0'
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
       - run: bundle exec ruby news.rb ${{ inputs.post_id }}
         env:
@@ -86,7 +86,7 @@ jobs:
           path: tmp/${{ inputs.post_id }}/research.json
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4'
+          ruby-version: '4.0'
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
       - run: bundle exec ruby tools_research.rb ${{ inputs.post_id }}
         env:
@@ -136,7 +136,7 @@ jobs:
           path: tmp/${{ inputs.post_id }}/forecasts/forecast.${{ matrix.forecaster_index }}.json
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4'
+          ruby-version: '4.0'
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
       - run: bundle exec ruby forecast.rb ${{ inputs.post_id }} ${{ matrix.forecaster_index }}
         env:
@@ -202,7 +202,7 @@ jobs:
           path: tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.json
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4'
+          ruby-version: '4.0'
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
       - run: bundle exec ruby revise_forecast.rb ${{ inputs.post_id }} ${{ matrix.forecaster_index }}
         env:
@@ -264,7 +264,7 @@ jobs:
           path: tmp/${{ inputs.post_id }}/forecasts/consensus.json
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4'
+          ruby-version: '4.0'
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
       - run: bundle exec ruby consensus.rb ${{ inputs.post_id }}
         env:

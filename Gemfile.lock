@@ -1,6 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    drb (2.2.3)
     erb (6.0.2)
     excon (1.4.2)
       logger
@@ -8,8 +9,11 @@ GEM
       reline
     io-console (0.8.1)
     logger (1.7.0)
-    minitest (5.20.0)
+    minitest (6.0.2)
+      drb (~> 2.0)
+      prism (~> 1.5)
     mutex_m (0.3.0)
+    prism (1.9.0)
     rake (13.2.1)
     reline (0.6.3)
       io-console (~> 0.5)
@@ -23,10 +27,13 @@ DEPENDENCIES
   erb
   excon
   formatador
-  minitest (= 5.20.0)
+  minitest
   mutex_m
   rake
   rubyzip
+
+RUBY VERSION
+   ruby 4.0.1p0
 
 BUNDLED WITH
    2.6.9
