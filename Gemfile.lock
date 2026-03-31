@@ -1,6 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    docile (1.4.1)
     drb (2.2.3)
     erb (6.0.2)
     excon (1.4.2)
@@ -18,6 +19,12 @@ GEM
     reline (0.6.3)
       io-console (~> 0.5)
     rubyzip (3.2.2)
+    simplecov (0.22.0)
+      docile (~> 1.1)
+      simplecov-html (~> 0.11)
+      simplecov_json_formatter (~> 0.1)
+    simplecov-html (0.13.1)
+    simplecov_json_formatter (0.1.4)
 
 PLATFORMS
   ruby
@@ -31,6 +38,7 @@ DEPENDENCIES
   mutex_m
   rake
   rubyzip
+  simplecov
 
 RUBY VERSION
    ruby 4.0.1p0

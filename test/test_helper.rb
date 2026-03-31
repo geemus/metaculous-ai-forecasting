@@ -1,5 +1,13 @@
 # frozen_string_literal: true
 
+# SimpleCov must be started before any lib files are loaded.
+require 'simplecov'
+SimpleCov.start do
+  add_filter '/test/'
+  track_files 'lib/**/*.rb'
+  minimum_coverage 0
+end
+
 require 'minitest/autorun'
 require 'fileutils'
 require 'json'

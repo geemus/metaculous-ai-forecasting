@@ -13,4 +13,5 @@ group :test do
   gem 'minitest'
   gem 'mutex_m'
   gem 'rake'
+  gem 'simplecov', require: false
 end
