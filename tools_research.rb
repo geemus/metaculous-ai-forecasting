@@ -24,7 +24,7 @@ cache(post_id, 'research.json') do
   @forecast_prompt = FORECAST_PROMPT_TEMPLATE.result(binding)
   @research_prompt = RESEARCH_PROMPT_TEMPLATE.result(binding)
   cache_write(post_id, 'inputs/research.md', @research_prompt)
-  research = llm.eval({ 'role': 'user', 'content': @research_prompt })
+  research = llm.eval({ role: 'user', content: @research_prompt })
   cache_write(post_id, 'outputs/research.md', research.content)
   research.to_json
 end

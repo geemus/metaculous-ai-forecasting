@@ -22,7 +22,7 @@ begin
     llm = Provider.new(provider, system: CONSENSUS_SYSTEM_PROMPT, reasoning: { effort: 'high' })
     consensus_prompt = consensus_prompt_with_type(llm, question, FORECAST_CONSENSUS_PROMPT_TEMPLATE)
     cache_write(post_id, 'inputs/consensus.md', consensus_prompt)
-    consensus = llm.eval({ 'role': 'user', 'content': consensus_prompt })
+    consensus = llm.eval({ role: 'user', content: consensus_prompt })
     cache_write(post_id, 'outputs/consensus.md', consensus.content)
     consensus.to_json
   end
