@@ -19,4 +19,5 @@ group :lint do
   gem 'rubocop'
   gem 'rubocop-minitest'
   gem 'rubocop-rake'
+  gem 'rubocop-yard'
 end

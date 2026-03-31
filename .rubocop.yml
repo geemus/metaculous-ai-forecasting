@@ -1,6 +1,7 @@
 require:
   - rubocop-minitest
   - rubocop-rake
+  - rubocop-yard
 
 AllCops:
   TargetRubyVersion: 3.4
