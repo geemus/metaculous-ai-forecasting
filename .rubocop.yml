@@ -1,0 +1,276 @@
+# frozen_string_literal: true
+
+require:
+  - rubocop-minitest
+  - rubocop-performance
+  - rubocop-rake
+
+AllCops:
+  TargetRubyVersion: 3.3
+  NewCops: enable
+  Include:
+    - '**/*.rb'
+    - '**/Rakefile'
+    - '**/*.rake'
+  Exclude:
+    - 'tmp/**/*'
+    - 'vendor/**/*'
+
+# ─── Style ────────────────────────────────────────────────────────────────────
+
+Style/FrozenStringLiteralComment:
+  Enabled: true
+  EnforcedStyle: always
+
+Style/StringLiterals:
+  EnforcedStyle: single_quotes
+
+Style/Documentation:
+  Enabled: false
+
+# ─── Metrics ──────────────────────────────────────────────────────────────────
+
+Metrics/MethodLength:
+  Max: 20
+
+Metrics/ClassLength:
+  Max: 150
+
+Metrics/BlockLength:
+  Exclude:
+    - 'test/**/*.rb'
+
+# ─── Minitest cops (test/**/*.rb) ─────────────────────────────────────────────
+
+Minitest/AssertNil:
+  Enabled: true
+
+Minitest/AssertEmpty:
+  Enabled: true
+
+Minitest/AssertEqual:
+  Enabled: true
+
+Minitest/AssertInDelta:
+  Enabled: true
+
+Minitest/AssertIncludes:
+  Enabled: true
+
+Minitest/AssertInstanceOf:
+  Enabled: true
+
+Minitest/AssertKindOf:
+  Enabled: true
+
+Minitest/AssertMatch:
+  Enabled: true
+
+Minitest/AssertOperator:
+  Enabled: true
+
+Minitest/AssertPathExists:
+  Enabled: true
+
+Minitest/AssertRaisesCompoundBody:
+  Enabled: true
+
+Minitest/AssertRaisesWithRegexpArgument:
+  Enabled: true
+
+Minitest/AssertRespondTo:
+  Enabled: true
+
+Minitest/AssertSilent:
+  Enabled: true
+
+Minitest/AssertTruthy:
+  Enabled: true
+
+Minitest/AssertWithExpectedArgument:
+  Enabled: true
+
+Minitest/DuplicateTestRun:
+  Enabled: true
+
+Minitest/EmptyLineBeforeAssertionMethods:
+  Enabled: true
+
+Minitest/GlobalExpectations:
+  Enabled: true
+  EnforcedStyle: any
+
+Minitest/LifecycleHooksOrder:
+  Enabled: true
+
+Minitest/LiteralAsActualArgument:
+  Enabled: true
+
+Minitest/MultipleAssertions:
+  Enabled: false
+
+Minitest/NonExecutableTestMethod:
+  Enabled: true
+
+Minitest/NoAssertions:
+  Enabled: true
+
+Minitest/NoTestCases:
+  Enabled: true
+
+Minitest/RefuteEmpty:
+  Enabled: true
+
+Minitest/RefuteEqual:
+  Enabled: true
+
+Minitest/RefuteFalse:
+  Enabled: true
+
+Minitest/RefuteInDelta:
+  Enabled: true
+
+Minitest/RefuteIncludes:
+  Enabled: true
+
+Minitest/RefuteInstanceOf:
+  Enabled: true
+
+Minitest/RefuteKindOf:
+  Enabled: true
+
+Minitest/RefuteMatch:
+  Enabled: true
+
+Minitest/RefuteNil:
+  Enabled: true
+
+Minitest/RefuteOperator:
+  Enabled: true
+
+Minitest/RefutePathExists:
+  Enabled: true
+
+Minitest/RefuteRespondTo:
+  Enabled: true
+
+Minitest/ReturnInTestMethod:
+  Enabled: true
+
+Minitest/SkipWithoutReason:
+  Enabled: true
+
+Minitest/TestCaseOrder:
+  Enabled: false
+
+Minitest/TestFileName:
+  Enabled: false
+
+Minitest/TestMethodName:
+  Enabled: true
+
+Minitest/UnreachableAssertion:
+  Enabled: true
+
+Minitest/UnspecifiedException:
+  Enabled: true
+
+Minitest/UselessAssertion:
+  Enabled: true
+
+# ─── Rake cops (Rakefile, **/*.rake) ─────────────────────────────────────────
+
+Rake/Desc:
+  Enabled: true
+
+Rake/DuplicateNamespace:
+  Enabled: true
+
+Rake/DuplicateTask:
+  Enabled: true
+
+Rake/MethodDefinitionInTask:
+  Enabled: true
+
+Rake/MultipleBindings:
+  Enabled: true
+
+# ─── Performance cops ─────────────────────────────────────────────────────────
+
+Performance/ArraySemiInfiniteRangeSlice:
+  Enabled: true
+
+Performance/BigDecimalWithNumericArgument:
+  Enabled: true
+
+Performance/BlockGivenWithExplicitBlock:
+  Enabled: true
+
+Performance/CollectionLiteralInLoop:
+  Enabled: true
+
+Performance/ConcurrentMonotonicTime:
+  Enabled: true
+
+Performance/ConstantRegexp:
+  Enabled: true
+
+Performance/FlatMap:
+  Enabled: true
+
+Performance/MapCompact:
+  Enabled: true
+
+Performance/SelectMap:
+  Enabled: true
+
+Performance/RedundantMatch:
+  Enabled: true
+
+Performance/RedundantMerge:
+  Enabled: true
+
+Performance/RedundantSortBlock:
+  Enabled: true
+
+Performance/RedundantSplitRegexpArgument:
+  Enabled: true
+
+Performance/RedundantStringChars:
+  Enabled: true
+
+Performance/ReverseEach:
+  Enabled: true
+
+Performance/ReverseFirst:
+  Enabled: true
+
+Performance/SortReverse:
+  Enabled: true
+
+Performance/Squeeze:
+  Enabled: true
+
+Performance/StartWith:
+  Enabled: true
+
+Performance/StringIdentifierArgument:
+  Enabled: true
+
+Performance/StringInclude:
+  Enabled: true
+
+Performance/StringReplacement:
+  Enabled: true
+
+Performance/Sum:
+  Enabled: true
+
+Performance/TimesMap:
+  Enabled: true
+
+Performance/UnfreezeString:
+  Enabled: true
+
+Performance/UriDefaultParser:
+  Enabled: true
