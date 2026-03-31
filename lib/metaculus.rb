@@ -35,7 +35,7 @@ class Metaculus
       path: '/api/posts/',
       query: {
         forecast_type: %w[binary discrete multiple_choice numeric].join(','),
-        not_forecaster_id: ENV['METACULUS_BOT_ID'],
+        not_forecaster_id: ENV.fetch('METACULUS_BOT_ID', nil),
         include_description: true,
         offset: 0,
         statuses: 'open',
@@ -60,7 +60,7 @@ class Metaculus
       path: '/api/posts/',
       query: {
         forecast_type: %w[binary discrete multiple_choice numeric].join(','),
-        forecaster_id: ENV['METACULUS_BOT_ID'],
+        forecaster_id: ENV.fetch('METACULUS_BOT_ID', nil),
         include_description: true,
         limit: 100,
         statuses: 'resolved',
@@ -112,8 +112,8 @@ class Metaculus
       'https://www.metaculus.com',
       expects: 200,
       headers: {
-        'accept': 'application/json',
-        'authorization': "Token #{ENV['METACULUS_BOT_API_TOKEN']}",
+        accept: 'application/json',
+        authorization: "Token #{ENV.fetch('METACULUS_BOT_API_TOKEN', nil)}",
         'content-type': 'application/json'
       }
     )
@@ -137,7 +137,7 @@ class Metaculus
           options.each_with_index do |option, index|
             medians[option] = latest_aggregations['centers'][index] * 100
           end
-          content << "Medians: { #{medians.map { |k,v| format('"%s": %0.2f%%', k, v) }.join(', ')} }"
+          content << "Medians: { #{medians.map { |k, v| format('"%s": %0.2f%%', k, v) }.join(', ')} }"
         else
           units_string = units.empty? ? '' : " #{units}"
           if %w[discrete numeric].include?(type) && scaling['open_lower_bound']
@@ -197,7 +197,7 @@ class Metaculus
                          when 'multiple_choice'
                            # handled in aggregate_content
                          else
-                           (lower_bound + latest_aggregations['centers'].first * (upper_bound - lower_bound)).round(2)
+                           (lower_bound + (latest_aggregations['centers'].first * (upper_bound - lower_bound))).round(2)
                          end
     end
 
@@ -260,7 +260,7 @@ class Metaculus
           previous_y = data[previous_x]
           next_y = data[next_x]
 
-          y = previous_y + (x - previous_x) * (next_y - previous_y) / (next_x - previous_x)
+          y = previous_y + ((x - previous_x) * (next_y - previous_y) / (next_x - previous_x))
           y_values.append(y)
         end
       end
@@ -278,13 +278,13 @@ class Metaculus
         location = i / (y_values.length - 1)
         rescaled = (y - scale_lower_to) / rescaled_inbound_mass
         y_value = if scaling['open_lower_bound'] && scaling['open_upper_bound']
-                    0.988 * rescaled + 0.01 * location + 0.001
+                    (0.988 * rescaled) + (0.01 * location) + 0.001
                   elsif scaling['open_lower_bound']
-                    0.989 * rescaled + 0.01 * location + 0.001
+                    (0.989 * rescaled) + (0.01 * location) + 0.001
                   elsif scaling['open_upper_bound']
-                    0.989 * rescaled + 0.01 * location
+                    (0.989 * rescaled) + (0.01 * location)
                   else
-                    0.99 * rescaled + 0.01 * location
+                    (0.99 * rescaled) + (0.01 * location)
                   end
         # round to avoid floating point errors
         y_values[i] = y_value.round(10)
@@ -388,7 +388,7 @@ class Metaculus
       summation_y = points.map { |_, y| y }.sum
       summation_x2 = points.map { |x, _| x**2 }.sum
 
-      (n * summation_xy - summation_x * summation_y) / (n * summation_x2 - summation_x**2).to_f
+      ((n * summation_xy) - (summation_x * summation_y)) / ((n * summation_x2) - (summation_x**2)).to_f
     end
 
     def type
@@ -403,8 +403,8 @@ class Metaculus
       @upper_bound ||= scaling['nominal_max'] || scaling['range_max']
     end
 
-    def to_json(*args)
-      data.to_json(*args)
+    def to_json(*)
+      data.to_json(*)
     end
 
     private
@@ -414,9 +414,8 @@ class Metaculus
     end
 
     def latest_aggregations
-      @latest_aggregations ||= begin
-        data.dig('question', 'aggregations', 'recency_weighted', 'latest') || synced_question&.send(:latest_aggregations)
-      end
+      @latest_aggregations ||= data.dig('question', 'aggregations', 'recency_weighted',
+                                        'latest') || synced_question&.send(:latest_aggregations)
     end
 
     def question

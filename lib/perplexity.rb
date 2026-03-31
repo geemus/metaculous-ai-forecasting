@@ -24,8 +24,8 @@ class Perplexity
         model: model,
         messages: [
           {
-            'role': 'system',
-            'content': system
+            role: 'system',
+            content: system
           }
         ].concat(messages),
         temperature: temperature,
@@ -54,8 +54,8 @@ class Perplexity
       'https://api.perplexity.ai/chat/completions',
       expects: 200,
       headers: {
-        'accept': 'application/json',
-        'authorization': "Bearer #{ENV['PERPLEXITY_API_KEY']}",
+        accept: 'application/json',
+        authorization: "Bearer #{ENV.fetch('PERPLEXITY_API_KEY', nil)}",
         'content-type': 'application/json'
       },
       idempotent: true,

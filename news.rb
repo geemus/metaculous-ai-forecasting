@@ -51,7 +51,7 @@ filters_json = cache(post_id, 'news_filters.json') do
     system: '',
     tools: []
   )
-  filters = llm.eval({ 'role': 'user', 'content': filter_prompt })
+  filters = llm.eval({ role: 'user', content: filter_prompt })
   puts filters.content
   categories = filters.extracted_content('categories').split(', ')
   categories.select! { |category| CATEGORIES.include?(category) } # ignore category hallucinations

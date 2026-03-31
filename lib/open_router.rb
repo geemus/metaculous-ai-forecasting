@@ -29,8 +29,8 @@ class OpenRouter
         model: model,
         messages: [
           {
-            'role': 'system',
-            'content': system
+            role: 'system',
+            content: system
           }
         ].concat(messages),
         reasoning: reasoning,
@@ -92,8 +92,8 @@ class OpenRouter
       'https://openrouter.ai/api/v1/chat/completions',
       expects: 200,
       headers: {
-        'accept': 'application/json',
-        'authorization': "Bearer #{ENV['OPEN_ROUTER_API_KEY']}",
+        accept: 'application/json',
+        authorization: "Bearer #{ENV.fetch('OPEN_ROUTER_API_KEY', nil)}",
         'content-type': 'application/json'
       },
       idempotent: true,

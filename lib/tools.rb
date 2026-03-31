@@ -72,7 +72,7 @@ module Tools
           - Generate research summaries that are concise while retaining necessary detail.
         SYSTEM
       llm.eval(
-        { 'role': 'user', 'content': prompt }
+        { role: 'user', content: prompt }
       )
     end
 

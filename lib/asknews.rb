@@ -50,8 +50,8 @@ class AskNews
       'https://api.asknews.app',
       expects: 200,
       headers: {
-        'accept': 'application/json',
-        'authorization': "Bearer #{ENV['ASKNEWS_API_KEY']}",
+        accept: 'application/json',
+        authorization: "Bearer #{ENV.fetch('ASKNEWS_API_KEY', nil)}",
         'content-type': 'application/json'
       },
       idempotent: true,

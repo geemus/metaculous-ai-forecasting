@@ -25,9 +25,9 @@ cache(post_id, "forecasts/revision.#{forecaster_index}.json") do
   forecast_delphi_prompt = FORECAST_DELPHI_PROMPT_TEMPLATE.result(binding)
   cache_write(post_id, "inputs/revision.#{forecaster_index}.md", forecast_delphi_prompt)
   revision = llm.eval(
-    { 'role': 'user', 'content': forecast_prompt },
-    { 'role': 'assistant', 'content': @forecast.content },
-    { 'role': 'user', 'content': forecast_delphi_prompt }
+    { role: 'user', content: forecast_prompt },
+    { role: 'assistant', content: @forecast.content },
+    { role: 'user', content: forecast_delphi_prompt }
   )
   puts revision.content
   cache_write(post_id, "outputs/revision.#{forecaster_index}.md", revision.content)
