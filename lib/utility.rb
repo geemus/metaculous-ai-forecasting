@@ -177,6 +177,20 @@ def load_forecasts(post_id, type: 'forecast', forecasters: Provider::FORECASTERS
   end
 end
 
+# Extract the forecast value from a Response for the given question type
+def forecast_value(response, question_type)
+  case question_type
+  when 'binary'
+    { probability: response.probability }
+  when 'numeric', 'discrete'
+    { percentiles: response.percentiles }
+  when 'multiple_choice'
+    { probabilities: response.probabilities }
+  else
+    {}
+  end
+end
+
 # Load a single forecast for a specific forecaster
 def load_forecast(post_id, forecaster_index, type: 'forecast', forecasters: Provider::FORECASTERS)
   provider = forecasters[forecaster_index]
