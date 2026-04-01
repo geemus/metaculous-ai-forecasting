@@ -76,17 +76,20 @@ class Response
 
   # OpenAI-compatible content (used by Perplexity, DeepSeek, OpenAI)
   def openai_compatible_content
-    data['choices'].map { |choice| choice['message']['content'] }.join("\n")
+    choices = data['choices'] or raise "API error (no choices): #{data.inspect}"
+    choices.map { |choice| choice['message']['content'] }.join("\n")
   end
 
   # OpenAI-compatible reasoning content (used by Perplexity, DeepSeek, OpenAI)
   def openai_compatible_reasoning_content
-    data['choices'].map { |choice| choice['message']['reasoning_content'] }.join("\n")
+    choices = data['choices'] or raise "API error (no choices): #{data.inspect}"
+    choices.map { |choice| choice['message']['reasoning_content'] }.join("\n")
   end
 
   # OpenAI-compatible tool_calls (used by Perplexity, DeepSeek, OpenAI)
   def openai_compatible_tool_calls
-    data['choices'].map { |choice| choice['message']['tool_calls'] }.flatten.compact
+    choices = data['choices'] or raise "API error (no choices): #{data.inspect}"
+    choices.map { |choice| choice['message']['tool_calls'] }.flatten.compact
   end
 
   # DeepSeek-specific methods
