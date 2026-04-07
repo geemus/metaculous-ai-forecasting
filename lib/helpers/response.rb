@@ -43,8 +43,6 @@ module ResponseHelpers
     @probabilities ||= begin
       probabilities = {}
       extracted_content('probabilities').split("\n").each do |line|
-        line = line.gsub('Option ', '')
-        line = line.gsub('"', '')
         key, value = line.split(': ', 2)
         probabilities[key] = value.include?('%') ? value.to_f / 100.0 : value.to_f
       end

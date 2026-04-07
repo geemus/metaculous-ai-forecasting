@@ -80,18 +80,18 @@ NUMERIC_FORECAST_PROMPT = <<~NUMERIC_FORECAST_PROMPT
   </percentiles>
 NUMERIC_FORECAST_PROMPT
 
-MULTIPLE_CHOICE_FORECAST_PROMPT = <<~MULTIPLE_CHOICE_FORECAST_PROMPT
-    - A plausible scenario resulting in an unexpected outcome for each option. Provide a brief narrative and estimate its likelihood, explaining how it contributes to your overall probability. For the 2-3 most critical assumption, estimate how much your probability distribution would change if it were false, and provide the revised probabilities.
-  - At the end of your forecast, provide precise, probabilistic final predictions for each option, only include the probability itself.
-    - Predictions for each option must be between 0.1% and 99.9% and their sum must be 100%.
-    - Write your final predictions in this format:
-  <probabilities>
-  Option "A": A%
-  Option "B": B%
-  ...
-  Option "N": N%
-  </probabilities>
-MULTIPLE_CHOICE_FORECAST_PROMPT
+def multiple_choice_forecast_prompt(question)
+  options_format = question.options.map { |opt| "#{opt}: X%" }.join("\n  ")
+  <<~MULTIPLE_CHOICE_FORECAST_PROMPT
+      - A plausible scenario resulting in an unexpected outcome for each option. Provide a brief narrative and estimate its likelihood, explaining how it contributes to your overall probability. For the 2-3 most critical assumption, estimate how much your probability distribution would change if it were false, and provide the revised probabilities.
+    - At the end of your forecast, provide precise, probabilistic final predictions for each option, only include the probability itself.
+      - Predictions for each option must be between 0.1% and 99.9% and their sum must be 100%.
+      - Write your final predictions in this format:
+    <probabilities>
+    #{options_format}
+    </probabilities>
+  MULTIPLE_CHOICE_FORECAST_PROMPT
+end
 
 def consensus_prompt_with_type(llm, question, prompt_template)
   prompt = prompt_template.result(binding)
@@ -101,7 +101,7 @@ def consensus_prompt_with_type(llm, question, prompt_template)
             when 'discrete', 'numeric'
               NUMERIC_FORECAST_PROMPT
             when 'multiple_choice'
-              MULTIPLE_CHOICE_FORECAST_PROMPT
+              multiple_choice_forecast_prompt(question)
             else
               raise "Missing template for type: #{question.type}"
             end
@@ -122,7 +122,7 @@ def prompt_with_type(llm, question, prompt_template)
             when 'discrete', 'numeric'
               NUMERIC_FORECAST_PROMPT
             when 'multiple_choice'
-              MULTIPLE_CHOICE_FORECAST_PROMPT
+              multiple_choice_forecast_prompt(question)
             else
               raise "Missing template for type: #{question.type}"
             end
