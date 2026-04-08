@@ -2,3 +2,6 @@
 # Single entry point to run all tests. Usage: bundle exec ruby test/run_tests.rb
 
 require_relative 'test_helper'
+require_relative 'utility_test'
+require_relative 'response_helpers_test'
+require_relative 'response_test'

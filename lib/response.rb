@@ -29,7 +29,15 @@ class Response
     )
   end
 
-  def content = @content ||= openai_compatible_content
+  KNOWN_PROVIDERS = %i[openai deepseek perplexity open_router anthropic].freeze
+
+  def content
+    @content ||= begin
+      raise "Unknown provider: #{provider}" unless KNOWN_PROVIDERS.include?(provider)
+
+      openai_compatible_content
+    end
+  end
 
   def reasoning_content = @reasoning_content ||= openai_compatible_reasoning_content
 
