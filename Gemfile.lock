@@ -15,7 +15,7 @@ GEM
       prism (~> 1.5)
     mutex_m (0.3.0)
     prism (1.9.0)
-    rake (13.3.1)
+    rake (13.4.2)
     reline (0.6.3)
       io-console (~> 0.5)
     rubyzip (3.2.2)
