@@ -3,7 +3,7 @@ GEM
   specs:
     docile (1.4.1)
     drb (2.2.3)
-    erb (6.0.3)
+    erb (6.0.4)
     excon (1.4.2)
       logger
     formatador (1.2.3)
