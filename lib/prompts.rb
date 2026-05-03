@@ -51,7 +51,7 @@ BINARY_FORECAST_PROMPT = <<~BINARY_FORECAST_PROMPT
     - A plausible scenario resulting in a Yes outcome. Provide a brief narrative and estimate its likelihood, explaining how it contributes to your overall probability. For the 2-3 most critical assumption, estimate how much your probability distribution would change if it were false, and provide the revised probabilities.
   - At the end of your forecast, provide a single, precise final probability in the specified format.
     - Do not assign a probability below 5% or above 95% without extremely strong justification.
-    - Write your final prediction in this format:
+    - Write your final prediction in this format (the percent sign is required):
   <probability>
   X%
   </probability>
@@ -86,7 +86,7 @@ def multiple_choice_forecast_prompt(question)
       - A plausible scenario resulting in an unexpected outcome for each option. Provide a brief narrative and estimate its likelihood, explaining how it contributes to your overall probability. For the 2-3 most critical assumption, estimate how much your probability distribution would change if it were false, and provide the revised probabilities.
     - At the end of your forecast, provide precise, probabilistic final predictions for each option, only include the probability itself.
       - Predictions for each option must be between 0.1% and 99.9% and their sum must be 100%.
-      - Write your final predictions in this format:
+      - Write your final predictions in this format (the percent sign is required on every line):
     <probabilities>
     #{options_format}
     </probabilities>
