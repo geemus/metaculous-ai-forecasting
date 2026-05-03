@@ -44,7 +44,7 @@ module ResponseHelpers
       probabilities = {}
       extracted_content('probabilities').split("\n").each do |line|
         key, value = line.split(': ', 2)
-        probabilities[key] = value.include?('%') ? value.to_f / 100.0 : value.to_f
+        probabilities[key] = parse_probability(value)
       end
       probabilities
     end
@@ -52,12 +52,20 @@ module ResponseHelpers
 
   def probability
     @probability ||= begin
-      probability = extracted_content('probability')
-      probability = probability.include?('%') ? probability.to_f / 100.0 : probability.to_f
+      probability = parse_probability(extracted_content('probability'))
       clamped = probability.clamp(0.001, 0.999)
       warn "WARNING: probability #{probability} clamped to #{clamped}" if clamped != probability
       clamped
     end
+  end
+
+  # Parse a probability string that may be written as "45%", "45", or "0.45".
+  # A bare number greater than 1 is treated as a percentage so the model
+  # forgetting the % sign doesn't get clamped to 99.9%.
+  def parse_probability(text)
+    value = text.to_f
+    value /= 100.0 if text.include?('%') || value > 1.0
+    value
   end
 
   def stripped_content(*tags)
