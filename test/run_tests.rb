@@ -2,3 +2,4 @@
 # Single entry point to run all tests. Usage: bundle exec ruby test/run_tests.rb
 
 require_relative 'test_helper'
+require_relative 'test_continuous_cdf'
