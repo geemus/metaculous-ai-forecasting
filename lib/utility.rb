@@ -85,6 +85,27 @@ def sorted_median(sorted_values)
   ((sorted_values[mid.floor] + sorted_values[mid.ceil]) / 2.0).round(3)
 end
 
+def mechanical_baseline(question, forecasts)
+  case question.type
+  when 'binary'
+    pooled = Aggregation.pool_binary(forecasts.map(&:probability))
+    "Log-odds pool (extremization a=#{Aggregation.extremization_factor}): #{(pooled * 100).round(1)}%"
+  when 'multiple_choice'
+    pooled = Aggregation.pool_multiple_choice(forecasts.map(&:probabilities))
+    lines = pooled.map { |k, v| "  #{k}: #{(v * 100).round(1)}%" }
+    "Softmax-of-log pool (extremization a=#{Aggregation.extremization_factor}):\n#{lines.join("\n")}"
+  when 'numeric', 'discrete'
+    keys = forecasts.first.percentiles.keys.sort
+    arrays = forecasts.map { |f| keys.map { |k| f.percentiles[k] } }
+    pooled = Aggregation.pool_numeric(arrays)
+    lines = keys.zip(pooled).map { |k, v| "  Percentile #{k.to_s.rjust(2)}: #{v.round(3)}" }
+    "Quantile average:\n#{lines.join("\n")}"
+  end
+rescue StandardError => e
+  warn "WARNING: failed to build mechanical baseline: #{e.message}"
+  nil
+end
+
 def forecast_peer_summary(question, forecasts, own_forecast)
   peers = forecasts.reject { |f| f == own_forecast }
   case question.type
