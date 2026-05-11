@@ -128,6 +128,10 @@ class TestAggregation < Minitest::Test
     assert_raises(ArgumentError) { Aggregation.pool_numeric([]) }
   end
 
+  def test_pool_numeric_raises_on_mismatched_lengths
+    assert_raises(ArgumentError) { Aggregation.pool_numeric([[1.0, 2.0, 3.0], [4.0, 5.0]]) }
+  end
+
   # ─── extremization factor ENV override ──────────────────────────────────────
 
   def test_extremization_factor_defaults_to_one_point_five

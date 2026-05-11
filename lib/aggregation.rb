@@ -45,6 +45,9 @@ module Aggregation
 
     n = percentile_arrays.length.to_f
     length = percentile_arrays.first.length
+    unless percentile_arrays.all? { |a| a.length == length }
+      raise ArgumentError, 'all percentile arrays must be the same length'
+    end
     Array.new(length) do |i|
       percentile_arrays.sum { |arr| arr[i] } / n
     end
