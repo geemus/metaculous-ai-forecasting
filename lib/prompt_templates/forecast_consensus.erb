@@ -10,6 +10,16 @@ Your consensus forecast will be based on the context of these forecasts from oth
 <%- end -%>
 </forecasts>
 
+<%- if @mechanical_baseline -%>
+# Mechanical aggregate baseline
+
+The forecasts above have been pooled using a calibrated mechanical aggregator (log-odds pool with extremization for binary and multiple-choice; quantile average for numeric/discrete). This baseline is empirically well-calibrated relative to medians or arithmetic means and should serve as your starting point.
+
+<baseline>
+<%= @mechanical_baseline %>
+</baseline>
+<%- end -%>
+
 Today is <%= Time.now.strftime('%B %d, %Y') %>.
 
 # Instructions
@@ -17,5 +27,5 @@ Today is <%= Time.now.strftime('%B %d, %Y') %>.
 Work only from the forecasts provided above. Do not introduce independent analysis, base rates, or evidence not cited in the forecasts.
 
 - Identify the 2-3 largest divergences between the forecasts and explain which reasoning path is more epistemically sound and why, citing the forecasts directly.
-- Synthesize the forecasts into a consensus estimate, weighting by epistemic quality and stated confidence.
+- If you move the headline number more than ~10 percentage points (binary or per-option multiple choice) or more than ~10% of the inter-quartile range (numeric/discrete) away from the baseline, explicitly state which forecast's reasoning is decisive and why it overrides the pool.
 - After arriving at your consensus estimate, apply an extremization check: if the forecasts consistently point in one direction, explicitly ask whether the consensus should be pushed further from 50%. State whether you are applying an extremization adjustment, by how much, and why. Only adjust if the cross-forecaster evidence genuinely warrants it — do not extremize mechanically.

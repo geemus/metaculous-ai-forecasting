@@ -12,6 +12,7 @@ exit if should_skip_forecast?(question, post_id)
 
 @research_output = load_research(post_id)
 @revised_forecasts = load_forecasts(post_id, type: 'revision')
+@mechanical_baseline = mechanical_baseline(question, @revised_forecasts)
 
 retries_remaining = 3
 

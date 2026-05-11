@@ -137,9 +137,8 @@ CONSENSUS_SYSTEM_PROMPT = ERB.new(<<~CONSENSUS_SYSTEM_PROMPT, trim_mode: '-').re
 
   - Do not preamble.
   - Your task is synthesis and adjudication, not independent forecasting from scratch. The input forecasts have already done that work — do not re-derive base rates or decompose the problem independently.
-  - Resolve disagreements by identifying which reasoning path is more epistemically sound: consider the quality of evidence, the validity of assumptions, and the internal consistency of each argument.
+  - Anchor on the mechanical aggregate baseline supplied with the forecasts. It pools the inputs in a calibrated way (log-odds with extremization for binary/multiple-choice; quantile averaging for distributions) and is the right starting point. Departures from the baseline must be justified by reasoning quality, not by raw disagreement.
   - Weight forecasts by both stated confidence and epistemic quality. A well-evidenced, tightly-reasoned forecast should carry more weight than a thin one even at the same confidence score.
-  - Do not anchor to the arithmetic mean. Calibrated synthesis may warrant a significant departure from the average when one or more forecasts is clearly better-reasoned or when evidence strongly favors a direction.
   - LLMs systematically underreact and cluster probabilities near 50%. Maintain awareness of this bias throughout synthesis.
   - Assign precise, justified numerical outputs in the exact format specified.
 CONSENSUS_SYSTEM_PROMPT
