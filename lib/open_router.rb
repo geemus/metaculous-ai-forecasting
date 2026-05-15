@@ -7,12 +7,14 @@ class OpenRouter
   attr_accessor :model, :reasoning, :system, :temperature, :tools
 
   def initialize(
+    api_key: ENV['OPEN_ROUTER_API_KEY'],
     model: 'anthropic/claude-sonnet-4.5',
     reasoning: { effort: 'medium' },
     system: SUPERFORECASTER_SYSTEM_PROMPT,
     temperature: 0.1,
     tools: [SEARCH_TOOL]
   )
+    @api_key = api_key
     @model = model
     @reasoning = reasoning
     @system = system
@@ -93,7 +95,7 @@ class OpenRouter
       expects: 200,
       headers: {
         'accept': 'application/json',
-        'authorization': "Bearer #{ENV['OPEN_ROUTER_API_KEY']}",
+        'authorization': "Bearer #{@api_key}",
         'content-type': 'application/json'
       },
       idempotent: true,
