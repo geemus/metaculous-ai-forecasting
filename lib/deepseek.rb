@@ -7,7 +7,7 @@ class DeepSeek
   attr_accessor :model, :system, :temperature, :tools
 
   def initialize(
-    model: 'deepseek-reasoner',
+    model: 'deepseek-v4-pro',
     system: SUPERFORECASTER_SYSTEM_PROMPT,
     temperature: 0.1,
     tools: []
