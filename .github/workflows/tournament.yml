@@ -39,6 +39,7 @@ jobs:
       METACULUS_BOT_API_TOKEN: ${{ secrets.METACULUS_BOT_API_TOKEN }}
       METACULUS_BOT_ID: ${{ secrets.METACULUS_BOT_ID }}
       OPEN_ROUTER_API_KEY: ${{ secrets.OPEN_ROUTER_API_KEY }}
+      OPEN_ROUTER_OPENAI_API_KEY: ${{ secrets.OPEN_ROUTER_OPENAI_API_KEY }}
       PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
     uses: ./.github/workflows/forecast.yml
     with:
