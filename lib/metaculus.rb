@@ -208,27 +208,27 @@ class Metaculus
       data = percentiles.dup
 
       # adjust any values exactly at bounds
-      range_size = (scaling['range_max'] - scaling['range_min']).abs
+      range_size = (upper_bound - lower_bound).abs
       buffer = range_size > 100 ? 1 : 0.01 * range_size
       data.each do |key, value|
-        if !scaling['open_lower_bound'] && value <= scaling['range_min'] + buffer
-          data[key] = scaling['range_min'] + buffer
+        if !scaling['open_lower_bound'] && value <= lower_bound + buffer
+          data[key] = lower_bound + buffer
         end
-        if !scaling['open_upper_bound'] && value >= scaling['range_max'] - buffer
-          data[key] = scaling['range_max'] - buffer
+        if !scaling['open_upper_bound'] && value >= upper_bound - buffer
+          data[key] = upper_bound - buffer
         end
       end
 
       # set cdf values outside of range
       if scaling['open_lower_bound']
-        data[0.01 * data.keys.min] = scaling['range_min'] if scaling['range_min'] < data[data.keys.min]
+        data[0.01 * data.keys.min] = lower_bound if lower_bound < data[data.keys.min]
       else
-        data[0.0] = scaling['range_min']
+        data[0.0] = lower_bound
       end
       if scaling['open_upper_bound']
-        data[99.9] = scaling['range_max'] if scaling['range_max'] > data[data.keys.max]
+        data[99.9] = upper_bound if upper_bound > data[data.keys.max]
       else
-        data[100.0] = scaling['range_max']
+        data[100.0] = upper_bound
       end
 
       # normalize percentiles
