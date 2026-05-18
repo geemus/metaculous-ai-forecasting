@@ -4,8 +4,9 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "13 * * * *" # every hour at 13 minutes past the hour
-    - cron: "33 * * * *" # every hour at 33 minutes past the hour
-    - cron: "53 * * * *" # every hour at 53 minutes past the hour
+    - cron: "28 * * * *" # every hour at 28 minutes past the hour
+    - cron: "43 * * * *" # every hour at 43 minutes past the hour
+    - cron: "58 * * * *" # every hour at 58 minutes past the hour
 
 jobs:
   query:
