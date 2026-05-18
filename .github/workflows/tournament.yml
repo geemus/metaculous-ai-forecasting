@@ -3,7 +3,7 @@ name: Tournaments
 on:
   workflow_dispatch:
   schedule:
-    - cron: "5/20 * * * *" # run every 30 minutes, starting at 5 past the hour
+    - cron: "13/20 * * * *" # run every 20 minutes, starting at 5 past the hour
 
 jobs:
   query:
