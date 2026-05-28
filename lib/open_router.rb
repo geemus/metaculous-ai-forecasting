@@ -8,7 +8,7 @@ class OpenRouter
 
   def initialize(
     api_key: ENV['OPEN_ROUTER_API_KEY'],
-    model: 'anthropic/claude-sonnet-4.5',
+    model:,
     reasoning: { effort: 'medium' },
     system: SUPERFORECASTER_SYSTEM_PROMPT,
     temperature: 0.1,
