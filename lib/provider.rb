@@ -30,7 +30,7 @@ module Provider
 
       case provider_symbol
       when :anthropic
-        args[:model] ||= 'anthropic/claude-opus-4.6'
+        args[:model] ||= 'anthropic/claude-opus-4.8'
       when :openai
         args[:model] ||= 'openai/gpt-5.4'
         args[:api_key] ||= ENV['OPEN_ROUTER_OPENAI_API_KEY'] || ENV['OPEN_ROUTER_API_KEY']
