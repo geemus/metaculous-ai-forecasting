@@ -78,7 +78,7 @@ class OpenRouter
       self.eval(*messages)
     end
   rescue JSON::ParserError
-    retries = defined?(retries) ? retries + 1 : 1
+    retries = (retries || 0) + 1
     retry if retries <= 3
     raise
   rescue Excon::Error => e
