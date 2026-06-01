@@ -20,7 +20,6 @@ cache(post_id, 'research.json') do
     system: RESEARCHER_SYSTEM_PROMPT,
     tools: [SEARCH_TOOL]
   )
-  @think = false
   @forecast_prompt = FORECAST_PROMPT_TEMPLATE.result(binding)
   @research_prompt = RESEARCH_PROMPT_TEMPLATE.result(binding)
   cache_write(post_id, 'inputs/research.md', @research_prompt)
