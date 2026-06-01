@@ -81,5 +81,21 @@ module Tools
       Formatador.display_line "\n[bold][green]Thinking[faint](#{thoughts})[/]"
       'Thought thoughts.'
     end
+
+    # Shared tool-call dispatch.  Used by all tool-capable clients
+    # (OpenRouter, DeepSeek, Perplexity) so that tool routing stays in
+    # one place — especially important as #120 adds `submit_forecast`.
+    def dispatch(tool_call)
+      arguments = JSON.parse(tool_call.dig('function', 'arguments'))
+      tool = tool_call.dig('function', 'name')
+      case tool
+      when 'search'
+        search(arguments).content
+      when 'think'
+        think(arguments)
+      else
+        raise "Unknown Tool Requested: `#{tool}`"
+      end
+    end
   end
 end
