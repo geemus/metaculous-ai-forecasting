@@ -31,6 +31,20 @@ ruby consensus.rb <post_id>
 ruby forecast.rb 578 0
 ```
 
+## Workflow
+
+### Branching and PRs
+
+- Always create a feature branch for new work. Never push directly to `main`.
+- Name branches descriptively: `feature/<thing>`, `fix/<thing>`, `refactor/<thing>`.
+- Open a PR from the feature branch against `main`. Use `gh pr create`.
+
+### Issue spec sync
+
+- Before writing code, smoke-test any new library API with a quick `ruby -e` one-liner. Specs in issues sometimes assume operators or functions that don't match the library's actual API. Verify first.
+- When implementation diverges from the issue spec (different operators, function names, API shape, simplified approach), update the issue body to reflect what was actually built. The spec in the issue should stay accurate for future readers.
+- Use `gh issue edit <n> --body-file -` to update the spec in-place.
+
 ## Architecture
 
 This is a multi-stage AI forecasting pipeline that submits probability forecasts to [Metaculus](https://metaculus.com) tournaments. It runs on GitHub Actions (triggered by `tournament.yml` every 20 minutes) and uses multiple LLM providers in parallel to generate diverse, calibrated forecasts.
