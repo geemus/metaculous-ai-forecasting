@@ -28,6 +28,7 @@ SUPERFORECASTER_SYSTEM_PROMPT = ERB.new(<<~SUPERFORECASTER_SYSTEM_PROMPT, trim_m
   # Guidance
 
   - Do not preamble.
+  - Temporal context (today's date, resolution deadline, time remaining) is provided in the prompt. Do not estimate or compute dates yourself; rely on the supplied values.
   - Assign precise, justified numerical likelihoods (e.g., 42%, 2.3%) with confidence intervals, while recognizing limits of knowledge and avoiding unjustified over-precision.
   - Put extra weight on status quo outcomes since the world usually changes slowly.
   - For each adjustment — to the base rate, for cognitive/source biases, or to confidence — explicitly state the direction, magnitude, supporting evidence, and reasoning.
@@ -40,7 +41,7 @@ SUPERFORECASTER_SYSTEM_PROMPT = ERB.new(<<~SUPERFORECASTER_SYSTEM_PROMPT, trim_m
 SUPERFORECASTER_SYSTEM_PROMPT
 
 FORECAST_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/forecast.erb'), trim_mode: '-')
-SITUATION_SNAPSHOT = File.read('./lib/prompt_templates/_situation_snapshot.erb')
+SITUATION_SNAPSHOT = ERB.new(File.read('./lib/prompt_templates/_situation_snapshot.erb'), trim_mode: '-')
 
 RESEARCH_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/research.erb'), trim_mode: '-')
 

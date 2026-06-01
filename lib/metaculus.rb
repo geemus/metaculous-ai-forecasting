@@ -319,11 +319,68 @@ class Metaculus
       @lower_bound ||= scaling['nominal_min'] || scaling['range_min']
     end
 
+    def resolve_time
+      ts = question['scheduled_resolve_time'] || question['actual_resolve_time']
+      ts && Time.parse(ts)
+    end
+
+    def placeholder_resolve?
+      rt = resolve_time
+      rt && rt.year >= 2099
+    end
+
+    def time_until_resolve
+      rt = resolve_time
+      return nil unless rt
+      return 'Already resolved' if rt <= Time.now
+      return 'No fixed resolution date' if placeholder_resolve?
+
+      days = ((rt - Time.now) / 86_400).floor
+      parts = ["#{days} day#{'s' unless days == 1}"]
+      years = (days / 365.25).round(1)
+      parts << "(≈ #{years} year#{'s' if years != 1})" if years >= 0.5
+      parts.join(' ')
+    end
+
+    def close_time
+      ts = question['scheduled_close_time'] || question['actual_close_time']
+      ts && Time.parse(ts)
+    end
+
+    def time_until_close
+      ct = close_time
+      return nil unless ct
+      return 'Already closed' if ct <= Time.now
+      days = ((ct - Time.now) / 86_400).floor
+      "#{days} day#{'s' unless days == 1}"
+    end
+
     def metadata_content
       @metadata_content ||= begin
         content = []
         asked_on = Time.parse(data['created_at'])
         content << "Asked On: #{asked_on.strftime('%B %d, %Y')}"
+
+        # Resolution date and time remaining
+        if (rt = resolve_time)
+          if placeholder_resolve?
+            content << "Scheduled Resolution: No fixed resolution date"
+          elsif rt <= Time.now
+            content << "Scheduled Resolution: #{rt.strftime('%B %d, %Y')} (Already resolved)"
+          else
+            content << "Scheduled Resolution: #{rt.strftime('%B %d, %Y')} (#{time_until_resolve})"
+          end
+        end
+
+        # Close date
+        if (ct = close_time)
+          if ct <= Time.now
+            content << "Forecasting Closes: #{ct.strftime('%B %d, %Y')} (Already closed)"
+          else
+            content << "Forecasting Closes: #{ct.strftime('%B %d, %Y')} (#{time_until_close})"
+          end
+        end
+
         unless lower_bound.nil?
           content << if scaling['open_lower_bound']
                        "Nominal Lower Bound: #{lower_bound}"
@@ -331,7 +388,7 @@ class Metaculus
                        "Lower Bound: #{lower_bound}"
                      end
         end
-        content << "Units: #{units}" unless units.empty?
+        content << "Units: #{units}" unless units.nil? || units.empty?
         unless upper_bound.nil?
           content << if scaling['open_upper_bound']
                        "Nominal Upper Bound: #{upper_bound}"
