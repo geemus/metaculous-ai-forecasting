@@ -27,9 +27,9 @@ SEARCH_TOOL = {
           type: 'string',
           description: 'Full sentences or paragraphs to prompt web search with context and instructions.'
         }
-      }
-    },
-    required: ['prompt']
+      },
+      required: ['prompt']
+    }
   }
 }.freeze
 

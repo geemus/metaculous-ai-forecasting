@@ -17,7 +17,10 @@ cache_write(post_id, 'inputs/system.superforecaster.md', SUPERFORECASTER_SYSTEM_
 provider = FORECASTERS[forecaster_index]
 Formatador.display "\n[bold][green]# Superforecaster[#{forecaster_index}: #{provider}]: Forecasting(#{post_id})…[/] "
 cache(post_id, "forecasts/forecast.#{forecaster_index}.json") do
-  llm_args = { system: SUPERFORECASTER_SYSTEM_PROMPT, temperature: 0.9, tools: [CALCULATOR_TOOL] }
+  # Perplexity Chat Completions doesn't support function calling (requires Agent API).
+  # Use CALCULATOR_TOOL for providers that support it (OpenRouter/Anthropic, OpenAI, DeepSeek).
+  tools = provider == :perplexity ? [] : [CALCULATOR_TOOL]
+  llm_args = { system: SUPERFORECASTER_SYSTEM_PROMPT, temperature: 0.9, tools: tools }
   llm = Provider.new(provider, **llm_args)
   forecast_prompt = prompt_with_type(llm, question, SHARED_FORECAST_PROMPT_TEMPLATE)
   cache_write(post_id, "inputs/forecast.#{forecaster_index}.md", forecast_prompt)
