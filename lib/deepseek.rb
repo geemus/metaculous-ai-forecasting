@@ -51,19 +51,8 @@ class DeepSeek
     else
       messages.last['tool_calls'] = response.tool_calls
       response.tool_calls.each do |tool_call|
-        arguments = JSON.parse(tool_call.dig('function', 'arguments'))
-        tool = tool_call.dig('function', 'name')
-        content = case tool
-                  when 'search'
-                    Tools.search(arguments).content
-                  when 'think'
-                    Tools.think(arguments)
-                  else
-                    raise "Unknown Tool Requested: `#{tool}`"
-                  end
-
         messages << {
-          'content' => content,
+          'content' => Tools.dispatch(tool_call),
           'role' => 'tool',
           'tool_call_id' => tool_call['id']
         }
