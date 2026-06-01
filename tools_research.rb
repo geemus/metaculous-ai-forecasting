@@ -18,7 +18,7 @@ cache(post_id, 'research.json') do
     model: 'anthropic/claude-opus-4.8',
     reasoning: { effort: 'high' },
     system: RESEARCHER_SYSTEM_PROMPT,
-    tools: [SEARCH_TOOL]
+    tools: [SEARCH_TOOL, CALCULATOR_TOOL]
   )
   @forecast_prompt = FORECAST_PROMPT_TEMPLATE.result(binding)
   @research_prompt = RESEARCH_PROMPT_TEMPLATE.result(binding)
