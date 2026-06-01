@@ -116,6 +116,7 @@ FORMAT_REINFORCEMENT
 
 def prompt_with_type(llm, question, prompt_template)
   forecast_context = FORECAST_PROMPT_TEMPLATE.result(binding)
+  situation_snapshot = SITUATION_SNAPSHOT.result(binding)
   prompt = prompt_template.result(binding)
   prompt += case question.type
             when 'binary'
