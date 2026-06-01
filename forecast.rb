@@ -19,7 +19,7 @@ Formatador.display "\n[bold][green]# Superforecaster[#{forecaster_index}: #{prov
 cache(post_id, "forecasts/forecast.#{forecaster_index}.json") do
   # Perplexity Chat Completions doesn't support function calling (requires Agent API).
   # Use CALCULATOR_TOOL for providers that support it (OpenRouter/Anthropic, OpenAI, DeepSeek).
-  tools = provider == :perplexity ? [] : [CALCULATOR_TOOL]
+  tools = provider == :perplexity ? [] : [CALCULATOR_TOOL, BAYESIAN_UPDATE_TOOL]
   llm_args = { system: SUPERFORECASTER_SYSTEM_PROMPT, temperature: 0.9, tools: tools }
   llm = Provider.new(provider, **llm_args)
   forecast_prompt = prompt_with_type(llm, question, SHARED_FORECAST_PROMPT_TEMPLATE)
