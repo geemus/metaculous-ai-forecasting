@@ -50,7 +50,7 @@ news.rb → tools_research.rb → forecast.rb (×4 forecasters) → revise_forec
 - **`lib/metaculus.rb`** - Metaculus API client. `Question` class wraps question data; handles all 4 question types (binary, numeric, discrete, multiple_choice).
 - **`lib/prompts.rb`** - System prompts and ERB templates. `SUPERFORECASTER_SYSTEM_PROMPT` encodes the Bayesian methodology (base rates, explicit adjustments, uncertainty calibration).
 - **`lib/response.rb`** - Parses LLM responses across providers. Extracts XML-tagged forecast values (`<probability>`, `<percentiles>`, `<probabilities>`).
-- **`lib/tools.rb`** - Two tools: `SEARCH_TOOL` (calls Perplexity sonar-pro) and `THINK_TOOL` (structured reasoning).
+- **`lib/tools.rb`** - Defines `SEARCH_TOOL` (calls Perplexity sonar-pro for web search) and `Tools.dispatch` (centralized tool-call router used by OpenRouter, DeepSeek, and Perplexity).
 - **`lib/utility.rb`** - File-based caching in `tmp/{post_id}/`. All prompts and outputs are cached for auditability.
 
 ### Question Types & Output Formats

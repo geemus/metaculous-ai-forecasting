@@ -31,31 +31,6 @@ SEARCH_TOOL = {
   }
 }.freeze
 
-THINK_TOOL = {
-  type: 'function',
-  function: {
-    name: 'think',
-    description: <<~DESCRIPTION,
-      Think out loud, take notes, form plans.
-
-      # Usage
-      - Has no external effects.
-
-      # Relevance
-      - Skip for trivial single-step tasks.
-    DESCRIPTION
-    parameters: {
-      type: 'object',
-      properties: {
-        thoughts: {
-          type: 'string',
-          description: 'The thoughts, notes, or plans.'
-        }
-      }
-    }
-  }
-}.freeze
-
 module Tools
   class << self
     def search(arguments)
@@ -76,12 +51,6 @@ module Tools
       )
     end
 
-    def think(arguments)
-      thoughts = arguments['thoughts']
-      Formatador.display_line "\n[bold][green]Thinking[faint](#{thoughts})[/]"
-      'Thought thoughts.'
-    end
-
     # Shared tool-call dispatch.  Used by all tool-capable clients
     # (OpenRouter, DeepSeek, Perplexity) so that tool routing stays in
     # one place — especially important as #120 adds `submit_forecast`.
@@ -91,8 +60,6 @@ module Tools
       case tool
       when 'search'
         search(arguments).content
-      when 'think'
-        think(arguments)
       else
         raise "Unknown Tool Requested: `#{tool}`"
       end
