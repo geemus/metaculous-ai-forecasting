@@ -11,6 +11,8 @@ module ResponseHelpers
     @percentiles ||= begin
       percentiles = {}
       extracted_content('percentiles').split("\n").each do |line|
+        line = line.strip
+        next if line.empty?
         key, value = line.split(': ', 2)
         key = key.split('Percentile ', 2).last
         value = value.split(' ', 2).first
@@ -43,8 +45,10 @@ module ResponseHelpers
     @probabilities ||= begin
       probabilities = {}
       extracted_content('probabilities').split("\n").each do |line|
+        line = line.strip
+        next if line.empty?
         key, value = line.split(': ', 2)
-        probabilities[key] = parse_probability(value)
+        probabilities[key.strip] = parse_probability(value)
       end
       probabilities
     end
