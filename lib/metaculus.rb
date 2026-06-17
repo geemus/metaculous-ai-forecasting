@@ -12,7 +12,7 @@ class Metaculus
 
   def get_post(id)
     start_time = Time.now
-    excon_response = connection.get(path: "/api/posts/#{id}/")
+    excon_response = with_retry { connection.get(path: "/api/posts/#{id}/") }
     duration = Time.now - start_time
     Formatador.display_line(
       format(
@@ -31,17 +31,19 @@ class Metaculus
   end
 
   def list_tournament_questions(tournament_id)
-    excon_response = connection.get(
-      path: '/api/posts/',
-      query: {
-        forecast_type: %w[binary discrete multiple_choice numeric].join(','),
-        not_forecaster_id: ENV['METACULUS_BOT_ID'],
-        include_description: true,
-        offset: 0,
-        statuses: 'open',
-        tournaments: [tournament_id]
-      }
-    )
+    excon_response = with_retry do
+      connection.get(
+        path: '/api/posts/',
+        query: {
+          forecast_type: %w[binary discrete multiple_choice numeric].join(','),
+          not_forecaster_id: ENV['METACULUS_BOT_ID'],
+          include_description: true,
+          offset: 0,
+          statuses: 'open',
+          tournaments: [tournament_id]
+        }
+      )
+    end
     data = JSON.parse(excon_response.body)
     questions = data['results'].map { |datum| Question.new(data: datum) }
     questions.reject! { |question| question.data['status'] == 'closed' }
@@ -56,13 +58,15 @@ class Metaculus
   end
 
   def get_comments(post_id)
-    excon_response = connection.get(
-      path: '/api2/comments/',
-      query: {
-        question: post_id,
-        author: ENV['METACULUS_BOT_ID']
-      }
-    )
+    excon_response = with_retry do
+      connection.get(
+        path: '/api2/comments/',
+        query: {
+          question: post_id,
+          author: ENV['METACULUS_BOT_ID']
+        }
+      )
+    end
     JSON.parse(excon_response.body)
   rescue Excon::Error => e
     puts e.response.inspect
@@ -74,10 +78,12 @@ class Metaculus
   end
 
   def get_question_with_posts(id)
-    excon_response = connection.get(
-      path: "/api2/questions/#{id}/",
-      query: { include: 'posts' }
-    )
+    excon_response = with_retry do
+      connection.get(
+        path: "/api2/questions/#{id}/",
+        query: { include: 'posts' }
+      )
+    end
     JSON.parse(excon_response.body)
   rescue Excon::Error => e
     puts e.response.inspect
@@ -89,18 +95,20 @@ class Metaculus
   end
 
   def list_resolved_tournament_questions(tournament_id)
-    excon_response = connection.get(
-      path: '/api/posts/',
-      query: {
-        forecast_type: %w[binary discrete multiple_choice numeric].join(','),
-        forecaster_id: ENV['METACULUS_BOT_ID'],
-        include_description: true,
-        limit: 100,
-        statuses: 'resolved',
-        tournaments: [tournament_id],
-        with_cp: true
-      }
-    )
+    excon_response = with_retry do
+      connection.get(
+        path: '/api/posts/',
+        query: {
+          forecast_type: %w[binary discrete multiple_choice numeric].join(','),
+          forecaster_id: ENV['METACULUS_BOT_ID'],
+          include_description: true,
+          limit: 100,
+          statuses: 'resolved',
+          tournaments: [tournament_id],
+          with_cp: true
+        }
+      )
+    end
     data = JSON.parse(excon_response.body)
     questions = data['results'].map { |datum| Question.new(data: datum) }
     questions.reject! { |question| question.data['status'] == 'closed' }
@@ -114,11 +122,13 @@ class Metaculus
     Formatador.display_line "\n[bold][green]# Metaculus: Submitting Comment…[/] "
     body = data.to_json
     puts body
-    connection.post(
-      path: '/api/comments/create/',
-      body: data.to_json,
-      expects: 201
-    )
+    with_retry do
+      connection.post(
+        path: '/api/comments/create/',
+        body: data.to_json,
+        expects: 201
+      )
+    end
   rescue Excon::Error => e
     puts e.response.inspect
     exit(1)
@@ -128,11 +138,13 @@ class Metaculus
     Formatador.display_line "\n[bold][green]# Metaculus: Submitting Forecast…[/] "
     body = data.to_json
     puts body
-    connection.post(
-      path: '/api/questions/forecast/',
-      body: body,
-      expects: 201
-    )
+    with_retry do
+      connection.post(
+        path: '/api/questions/forecast/',
+        body: body,
+        expects: 201
+      )
+    end
   rescue Excon::Error => e
     puts e.response.inspect
     exit(1)
@@ -150,6 +162,24 @@ class Metaculus
         'content-type': 'application/json'
       }
     )
+  end
+
+  def with_retry(max_retries: 3, &block)
+    retries = 0
+    begin
+      block.call
+    rescue Excon::Error::TooManyRequests => e
+      retries += 1
+      if retries <= max_retries
+        retry_after = e.response&.headers&.dig('Retry-After')&.to_i || 5
+        Formatador.display_line(
+          "[yellow]# Metaculus: Rate-limited (429), waiting #{retry_after}s (retry #{retries}/#{max_retries})...[/]"
+        )
+        sleep(retry_after)
+        retry
+      end
+      raise
+    end
   end
 
   class Question
