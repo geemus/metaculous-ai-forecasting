@@ -13,7 +13,11 @@ data = []
 questions.reject! { |q| q.spot_peer_score.nil? }
 questions.sort_by!(&:spot_peer_score)
 questions.reverse!
-questions.each do |q|
+questions.each_with_index do |q, i|
+  # Rate-limit: sleep between iterations to avoid 429s from Metaculus API.
+  # Each question calls q.my_comment which may hit /api2/questions/{id}/?include=posts.
+  sleep(1) if i.positive?
+
   data << <<~QUESTION
     <forecast>
       <id>#{q.post_id}</id>
