@@ -494,7 +494,7 @@ class Metaculus
     end
 
     def error_summary
-      res = question['resolution']
+      res = question['resolution']&.to_f
       return 'Not yet resolved' if res.nil?
 
       latest = question.dig('my_forecasts', 'latest')
