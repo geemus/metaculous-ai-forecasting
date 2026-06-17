@@ -460,10 +460,10 @@ class Metaculus
       when 'numeric'
         raw.to_s
       when 'discrete'
-        label = options[raw]
+        label = options ? options[raw] : nil
         label ? "#{raw} (#{label})" : raw.to_s
       when 'multiple_choice'
-        options[raw] || raw.to_s
+        options ? options[raw] || raw.to_s : raw.to_s
       else
         raw.to_s
       end
@@ -500,9 +500,13 @@ class Metaculus
           "CDF array (#{cdf.length} points)"
         end
       when 'multiple_choice'
-        options.zip(values).map do |opt, prob|
-          "#{opt}: #{(prob * 100).round(1)}%"
-        end.join(', ')
+        if options
+          options.zip(values).map do |opt, prob|
+            "#{opt}: #{(prob * 100).round(1)}%"
+          end.join(', ')
+        else
+          values.each_with_index.map { |v, i| "opt #{i}: #{(v * 100).round(1)}%" }.join(', ')
+        end
       else
         values.inspect
       end
@@ -557,7 +561,7 @@ class Metaculus
         correct_idx = res.to_i
         prob_assigned = values[correct_idx] || 0
         surprisal = ((1 - prob_assigned) * 100).round(1)
-        correct_option = options[correct_idx] || "option #{correct_idx}"
+        correct_option = options ? (options[correct_idx] || "option #{correct_idx}") : "option #{correct_idx}"
         "Surprisal: #{surprisal}% (assigned #{(prob_assigned * 100).round(1)}% to correct answer '#{correct_option}')"
       else
         'Unknown question type'
