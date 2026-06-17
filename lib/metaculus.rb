@@ -69,6 +69,21 @@ class Metaculus
     []
   end
 
+  def self.get_question_with_posts(id)
+    new.get_question_with_posts(id)
+  end
+
+  def get_question_with_posts(id)
+    excon_response = connection.get(
+      path: "/api2/questions/#{id}/",
+      query: { include: 'posts' }
+    )
+    JSON.parse(excon_response.body)
+  rescue Excon::Error => e
+    puts e.response.inspect
+    nil
+  end
+
   def self.list_resolved_tournament_questions(tournament_id)
     new.list_resolved_tournament_questions(tournament_id)
   end
@@ -550,13 +565,24 @@ class Metaculus
     end
 
     def my_comment
-      comments = Metaculus.get_comments(post_id)
-      return 'No comments found' if comments.nil? || comments.empty?
+      # Try local cache first
+      comment_path = "./tmp/#{post_id}/consensus/comment.json"
+      if File.exist?(comment_path)
+        comment_data = JSON.parse(File.read(comment_path))
+        return comment_data['text'] if comment_data['text']
+      end
 
-      latest = comments.is_a?(Array) ? comments.first : comments['results']&.first
-      return 'No comment text' unless latest
+      # Try API endpoint that embeds posts in question detail
+      question_data = Metaculus.get_question_with_posts(post_id)
+      if question_data
+        posts = question_data['posts'] || question_data['included'] || []
+        my_post = posts.find { |p| p['author'] && p['author']['id'].to_s == ENV['METACULUS_BOT_ID'].to_s }
+        return my_post['content'] if my_post && my_post['content']
+      end
 
-      latest['text'] || latest[:text] || 'No comment text available'
+      'Comments unavailable (API restricted on this endpoint)'
+    rescue StandardError
+      'Comments unavailable (API restricted on this endpoint)'
     end
 
     def submit(response)

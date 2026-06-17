@@ -34,7 +34,7 @@ provider = :deepseek
 llm = Provider.new(provider, system: '')
 
 retro_prompt = <<~RETRO_PROMPT
-  I am participating in a forecasting tournament. Below are my recent forecasts with scores, resolutions, predictions, error analyses, and my reasoning comments.
+  I am participating in a forecasting tournament. Below are my recent forecasts with scores, resolutions, predictions, error analyses, and my reasoning comments (may be unavailable for some questions — see note).
 
   <forecasts>
   #{data.join.strip}
@@ -43,7 +43,7 @@ retro_prompt = <<~RETRO_PROMPT
   Review this data thoroughly, then:
     - identify commonalities among the lowest and highest scores
     - analyze error patterns: direction (over/under confident), magnitude, and question-type trends
-    - evaluate reasoning quality: did my comments reveal flawed assumptions, missing base rates, or confirmation bias?
+    - where comment text is available: evaluate reasoning quality — did comments reveal flawed assumptions, missing base rates, or confirmation bias? If comments are unavailable, note this and rely on score/prediction patterns instead
     - identify distinctions between highest and lowest scores
     - recommend how lower scores could be improved upon (skipping questions is NOT an option)
     - identify which question types I perform best/worst on and why
