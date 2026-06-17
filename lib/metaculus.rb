@@ -460,10 +460,30 @@ class Metaculus
       when 'numeric'
         raw.to_s
       when 'discrete'
-        label = options ? options[raw] : nil
-        label ? "#{raw} (#{label})" : raw.to_s
+        if options
+          label = if raw.is_a?(Integer)
+                    options[raw]
+                  else
+                    # raw may be a string label; find it in the array
+                    idx = options.index(raw)
+                    idx ? options[idx] : raw.to_s
+                  end
+          label ? "#{raw} (#{label})" : raw.to_s
+        else
+          raw.to_s
+        end
       when 'multiple_choice'
-        options ? options[raw] || raw.to_s : raw.to_s
+        if options
+          if raw.is_a?(Integer)
+            options[raw] || raw.to_s
+          else
+            # raw may be a string label; find it in the array
+            idx = options.index(raw)
+            idx ? options[idx] : raw.to_s
+          end
+        else
+          raw.to_s
+        end
       else
         raw.to_s
       end
