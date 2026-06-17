@@ -51,6 +51,24 @@ class Metaculus
     exit(1)
   end
 
+  def self.get_comments(post_id)
+    new.get_comments(post_id)
+  end
+
+  def get_comments(post_id)
+    excon_response = connection.get(
+      path: '/api2/comments/',
+      query: {
+        question: post_id,
+        author: ENV['METACULUS_BOT_ID']
+      }
+    )
+    JSON.parse(excon_response.body)
+  rescue Excon::Error => e
+    puts e.response.inspect
+    []
+  end
+
   def self.list_resolved_tournament_questions(tournament_id)
     new.list_resolved_tournament_questions(tournament_id)
   end
@@ -410,6 +428,135 @@ class Metaculus
 
     def spot_peer_score
       @spot_peer_score ||= question.dig('my_forecasts', 'score_data', 'spot_peer_score')
+    end
+
+    def resolution
+      raw = question['resolution']
+      return 'Unresolved' if raw.nil?
+
+      case type
+      when 'binary'
+        case raw
+        when 0.0, 0 then 'No'
+        when 1.0, 1 then 'Yes'
+        when -1 then 'Ambiguous'
+        else raw.to_s
+        end
+      when 'numeric'
+        raw.to_s
+      when 'discrete'
+        label = options[raw]
+        label ? "#{raw} (#{label})" : raw.to_s
+      when 'multiple_choice'
+        options[raw] || raw.to_s
+      else
+        raw.to_s
+      end
+    end
+
+    def my_prediction
+      latest = question.dig('my_forecasts', 'latest')
+      return 'No forecast' unless latest
+
+      values = latest['forecast_values']
+      return 'No forecast values' unless values
+
+      case type
+      when 'binary'
+        p_yes = (values[1] * 100).round(1)
+        "#{p_yes}% Yes"
+      when 'numeric', 'discrete'
+        cdf = values
+        x_axis = scaling['continuous_range']
+        if x_axis && !x_axis.empty?
+          idx = cdf.index { |v| v >= 0.5 } || (cdf.length - 1)
+          x_val = x_axis[idx]
+          range = upper_bound - lower_bound
+          x_span = x_axis.last - x_axis.first
+          actual = if x_span.positive?
+                     (lower_bound + x_val * range / x_span).round(2)
+                   else
+                     x_val.round(2)
+                   end
+          unit_str = units.empty? ? '' : " #{units}"
+          "#{actual}#{unit_str} (P50)"
+        else
+          # fallback: show first few CDF values
+          "CDF array (#{cdf.length} points)"
+        end
+      when 'multiple_choice'
+        options.zip(values).map do |opt, prob|
+          "#{opt}: #{(prob * 100).round(1)}%"
+        end.join(', ')
+      else
+        values.inspect
+      end
+    end
+
+    def error_summary
+      res = question['resolution']
+      return 'Not yet resolved' if res.nil?
+
+      latest = question.dig('my_forecasts', 'latest')
+      return 'No forecast to compare' unless latest
+
+      values = latest['forecast_values']
+      return 'No forecast values' unless values
+
+      case type
+      when 'binary'
+        if res == -1
+          return 'Ambiguous resolution'
+        end
+
+        p_yes = values[1]
+        diff = (res - p_yes).abs
+        direction = if p_yes > res
+                      'overconfident in Yes'
+                    elsif p_yes < res
+                      'underconfident in Yes'
+                    else
+                      'perfect'
+                    end
+        format('Error: %<diff>.1f%% (%<direction>s)', diff: diff * 100, direction: direction)
+      when 'numeric', 'discrete'
+        cdf = values
+        x_axis = scaling['continuous_range']
+        if x_axis && !x_axis.empty?
+          idx = cdf.index { |v| v >= 0.5 } || (cdf.length - 1)
+          p50_x = x_axis[idx]
+          range = upper_bound - lower_bound
+          x_span = x_axis.last - x_axis.first
+          p50 = if x_span.positive?
+                  lower_bound + p50_x * range / x_span
+                else
+                  p50_x
+                end
+          abs_error = (res.to_f - p50).abs.round(2)
+          unit_str = units.empty? ? '' : " #{units}"
+          "Absolute error: #{abs_error}#{unit_str} (resolved #{res}, predicted P50 #{p50.round(2)})"
+        else
+          'Cannot compute error (no scaling range)'
+        end
+      when 'multiple_choice'
+        correct_idx = res.to_i
+        prob_assigned = values[correct_idx] || 0
+        surprisal = ((1 - prob_assigned) * 100).round(1)
+        correct_option = options[correct_idx] || "option #{correct_idx}"
+        "Surprisal: #{surprisal}% (assigned #{(prob_assigned * 100).round(1)}% to correct answer '#{correct_option}')"
+      else
+        'Unknown question type'
+      end
+    end
+
+    def my_comment
+      comments = Metaculus.get_comments(post_id)
+      return 'No comments found' if comments.nil? || comments.empty?
+
+      latest = comments.is_a?(Array) ? comments.first : comments['results']&.first
+      return 'No comment text' unless latest
+
+      latest['text'] || latest[:text] || 'No comment text available'
     end
 
     def submit(response)

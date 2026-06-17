@@ -16,8 +16,14 @@ questions.reverse!
 questions.each do |q|
   data << <<~QUESTION
     <forecast>
-    <spot_peer_score>#{q.spot_peer_score.round}</spot_peer_score>
-    <title>#{q.title}</title>
+      <id>#{q.post_id}</id>
+      <title>#{q.title}</title>
+      <type>#{q.type}</type>
+      <spot_peer_score>#{q.spot_peer_score.round}</spot_peer_score>
+      <resolution>#{q.resolution}</resolution>
+      <my_prediction>#{q.my_prediction}</my_prediction>
+      <error>#{q.error_summary}</error>
+      <my_comment>#{q.my_comment}</my_comment>
     </forecast>
   QUESTION
 end
@@ -28,16 +34,20 @@ provider = :deepseek
 llm = Provider.new(provider, system: '')
 
 retro_prompt = <<~RETRO_PROMPT
-I am participating in a forecasting tournament. Below are the titles of some of my recent forecasts and my score, where higher is better.
+  I am participating in a forecasting tournament. Below are my recent forecasts with scores, resolutions, predictions, error analyses, and my reasoning comments.
 
   <forecasts>
   #{data.join.strip}
   </forecasts>
 
-  Review this data, then:
+  Review this data thoroughly, then:
     - identify commonalities among the lowest and highest scores
+    - analyze error patterns: direction (over/under confident), magnitude, and question-type trends
+    - evaluate reasoning quality: did my comments reveal flawed assumptions, missing base rates, or confirmation bias?
     - identify distinctions between highest and lowest scores
     - recommend how lower scores could be improved upon (skipping questions is NOT an option)
+    - identify which question types I perform best/worst on and why
+    - recommend specific, actionable improvements to my forecasting process
     - recommend how to improve this prompt to better analyze results and provide recommendations
 RETRO_PROMPT
 
