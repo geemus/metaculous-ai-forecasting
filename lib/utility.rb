@@ -89,11 +89,21 @@ def mechanical_baseline(question, forecasts)
   case question.type
   when 'binary'
     pooled = Aggregation.pool_binary(forecasts.map(&:probability))
-    "Log-odds pool (extremization a=#{Aggregation.extremization_factor}): #{(pooled * 100).round(1)}%"
+    a = Aggregation.extremization_factor
+    if a == 1.0
+      "Log-odds mean: #{(pooled * 100).round(1)}%"
+    else
+      "Log-odds pool (extremization a=#{a}): #{(pooled * 100).round(1)}%"
+    end
   when 'multiple_choice'
     pooled = Aggregation.pool_multiple_choice(forecasts.map(&:probabilities))
     lines = pooled.map { |k, v| "  #{k}: #{(v * 100).round(1)}%" }
-    "Softmax-of-log pool (extremization a=#{Aggregation.extremization_factor}):\n#{lines.join("\n")}"
+    a = Aggregation.extremization_factor
+    if a == 1.0
+      "Softmax-of-log mean:\n#{lines.join("\n")}"
+    else
+      "Softmax-of-log pool (extremization a=#{a}):\n#{lines.join("\n")}"
+    end
   when 'numeric', 'discrete'
     keys = forecasts.first.percentiles.keys.sort
     arrays = forecasts.map { |f| keys.map { |k| f.percentiles[k] } }
