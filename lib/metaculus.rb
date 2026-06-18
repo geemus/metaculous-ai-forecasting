@@ -12,7 +12,7 @@ class Metaculus
 
   def get_post(id)
     start_time = Time.now
-    excon_response = connection.get(path: "/api/posts/#{id}/")
+    excon_response = with_retry { connection.get(path: "/api/posts/#{id}/") }
     duration = Time.now - start_time
     Formatador.display_line(
       format(
@@ -31,17 +31,19 @@ class Metaculus
   end
 
   def list_tournament_questions(tournament_id)
-    excon_response = connection.get(
-      path: '/api/posts/',
-      query: {
-        forecast_type: %w[binary discrete multiple_choice numeric].join(','),
-        not_forecaster_id: ENV['METACULUS_BOT_ID'],
-        include_description: true,
-        offset: 0,
-        statuses: 'open',
-        tournaments: [tournament_id]
-      }
-    )
+    excon_response = with_retry do
+      connection.get(
+        path: '/api/posts/',
+        query: {
+          forecast_type: %w[binary discrete multiple_choice numeric].join(','),
+          not_forecaster_id: ENV['METACULUS_BOT_ID'],
+          include_description: true,
+          offset: 0,
+          statuses: 'open',
+          tournaments: [tournament_id]
+        }
+      )
+    end
     data = JSON.parse(excon_response.body)
     questions = data['results'].map { |datum| Question.new(data: datum) }
     questions.reject! { |question| question.data['status'] == 'closed' }
@@ -56,17 +58,36 @@ class Metaculus
   end
 
   def get_comments(post_id)
-    excon_response = connection.get(
-      path: '/api2/comments/',
-      query: {
-        question: post_id,
-        author: ENV['METACULUS_BOT_ID']
-      }
-    )
+    excon_response = with_retry do
+      connection.get(
+        path: '/api2/comments/',
+        query: {
+          question: post_id,
+          author: ENV['METACULUS_BOT_ID']
+        }
+      )
+    end
     JSON.parse(excon_response.body)
   rescue Excon::Error => e
     puts e.response.inspect
     []
+  end
+
+  def self.get_question_with_posts(id)
+    new.get_question_with_posts(id)
+  end
+
+  def get_question_with_posts(id)
+    excon_response = with_retry do
+      connection.get(
+        path: "/api2/questions/#{id}/",
+        query: { include: 'posts' }
+      )
+    end
+    JSON.parse(excon_response.body)
+  rescue Excon::Error => e
+    puts e.response.inspect
+    nil
   end
 
   def self.list_resolved_tournament_questions(tournament_id)
@@ -74,18 +95,20 @@ class Metaculus
   end
 
   def list_resolved_tournament_questions(tournament_id)
-    excon_response = connection.get(
-      path: '/api/posts/',
-      query: {
-        forecast_type: %w[binary discrete multiple_choice numeric].join(','),
-        forecaster_id: ENV['METACULUS_BOT_ID'],
-        include_description: true,
-        limit: 100,
-        statuses: 'resolved',
-        tournaments: [tournament_id],
-        with_cp: true
-      }
-    )
+    excon_response = with_retry do
+      connection.get(
+        path: '/api/posts/',
+        query: {
+          forecast_type: %w[binary discrete multiple_choice numeric].join(','),
+          forecaster_id: ENV['METACULUS_BOT_ID'],
+          include_description: true,
+          limit: 100,
+          statuses: 'resolved',
+          tournaments: [tournament_id],
+          with_cp: true
+        }
+      )
+    end
     data = JSON.parse(excon_response.body)
     questions = data['results'].map { |datum| Question.new(data: datum) }
     questions.reject! { |question| question.data['status'] == 'closed' }
@@ -99,11 +122,13 @@ class Metaculus
     Formatador.display_line "\n[bold][green]# Metaculus: Submitting Comment…[/] "
     body = data.to_json
     puts body
-    connection.post(
-      path: '/api/comments/create/',
-      body: data.to_json,
-      expects: 201
-    )
+    with_retry do
+      connection.post(
+        path: '/api/comments/create/',
+        body: data.to_json,
+        expects: 201
+      )
+    end
   rescue Excon::Error => e
     puts e.response.inspect
     exit(1)
@@ -113,11 +138,13 @@ class Metaculus
     Formatador.display_line "\n[bold][green]# Metaculus: Submitting Forecast…[/] "
     body = data.to_json
     puts body
-    connection.post(
-      path: '/api/questions/forecast/',
-      body: body,
-      expects: 201
-    )
+    with_retry do
+      connection.post(
+        path: '/api/questions/forecast/',
+        body: body,
+        expects: 201
+      )
+    end
   rescue Excon::Error => e
     puts e.response.inspect
     exit(1)
@@ -135,6 +162,24 @@ class Metaculus
         'content-type': 'application/json'
       }
     )
+  end
+
+  def with_retry(max_retries: 3, &block)
+    retries = 0
+    begin
+      block.call
+    rescue Excon::Error::TooManyRequests => e
+      retries += 1
+      if retries <= max_retries
+        retry_after = e.response&.headers&.dig('Retry-After')&.to_i || 5
+        Formatador.display_line(
+          "[yellow]# Metaculus: Rate-limited (429), waiting #{retry_after}s (retry #{retries}/#{max_retries})...[/]"
+        )
+        sleep(retry_after)
+        retry
+      end
+      raise
+    end
   end
 
   class Question
@@ -445,10 +490,30 @@ class Metaculus
       when 'numeric'
         raw.to_s
       when 'discrete'
-        label = options[raw]
-        label ? "#{raw} (#{label})" : raw.to_s
+        if options
+          label = if raw.is_a?(Integer)
+                    options[raw]
+                  else
+                    # raw may be a string label; find it in the array
+                    idx = options.index(raw)
+                    idx ? options[idx] : raw.to_s
+                  end
+          label ? "#{raw} (#{label})" : raw.to_s
+        else
+          raw.to_s
+        end
       when 'multiple_choice'
-        options[raw] || raw.to_s
+        if options
+          if raw.is_a?(Integer)
+            options[raw] || raw.to_s
+          else
+            # raw may be a string label; find it in the array
+            idx = options.index(raw)
+            idx ? options[idx] : raw.to_s
+          end
+        else
+          raw.to_s
+        end
       else
         raw.to_s
       end
@@ -485,9 +550,13 @@ class Metaculus
           "CDF array (#{cdf.length} points)"
         end
       when 'multiple_choice'
-        options.zip(values).map do |opt, prob|
-          "#{opt}: #{(prob * 100).round(1)}%"
-        end.join(', ')
+        if options
+          options.zip(values).map do |opt, prob|
+            "#{opt}: #{(prob * 100).round(1)}%"
+          end.join(', ')
+        else
+          values.each_with_index.map { |v, i| "opt #{i}: #{(v * 100).round(1)}%" }.join(', ')
+        end
       else
         values.inspect
       end
@@ -542,7 +611,7 @@ class Metaculus
         correct_idx = res.to_i
         prob_assigned = values[correct_idx] || 0
         surprisal = ((1 - prob_assigned) * 100).round(1)
-        correct_option = options[correct_idx] || "option #{correct_idx}"
+        correct_option = options ? (options[correct_idx] || "option #{correct_idx}") : "option #{correct_idx}"
         "Surprisal: #{surprisal}% (assigned #{(prob_assigned * 100).round(1)}% to correct answer '#{correct_option}')"
       else
         'Unknown question type'
@@ -550,13 +619,24 @@ class Metaculus
     end
 
     def my_comment
-      comments = Metaculus.get_comments(post_id)
-      return 'No comments found' if comments.nil? || comments.empty?
+      # Try local cache first
+      comment_path = "./tmp/#{post_id}/consensus/comment.json"
+      if File.exist?(comment_path)
+        comment_data = JSON.parse(File.read(comment_path))
+        return comment_data['text'] if comment_data['text']
+      end
 
-      latest = comments.is_a?(Array) ? comments.first : comments['results']&.first
-      return 'No comment text' unless latest
+      # Try API endpoint that embeds posts in question detail
+      question_data = Metaculus.get_question_with_posts(post_id)
+      if question_data
+        posts = question_data['posts'] || question_data['included'] || []
+        my_post = posts.find { |p| p['author'] && p['author']['id'].to_s == ENV['METACULUS_BOT_ID'].to_s }
+        return my_post['content'] if my_post && my_post['content']
+      end
 
-      latest['text'] || latest[:text] || 'No comment text available'
+      'Comments unavailable (API restricted on this endpoint)'
+    rescue StandardError
+      'Comments unavailable (API restricted on this endpoint)'
     end
 
     def submit(response)
