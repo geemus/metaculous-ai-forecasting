@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative '../aggregation'
+
 module ResponseHelpers
   def extracted_content(*tags)
     extract_xml(content, *tags).last
@@ -57,7 +59,7 @@ module ResponseHelpers
   def probability
     @probability ||= begin
       probability = parse_probability(extracted_content('probability'))
-      clamped = probability.clamp(0.001, 0.999)
+      clamped = probability.clamp(Aggregation::EPSILON, 1.0 - Aggregation::EPSILON)
       warn "WARNING: probability #{probability} clamped to #{clamped}" if clamped != probability
       clamped
     end
@@ -70,6 +72,10 @@ module ResponseHelpers
     value = text.to_f
     value /= 100.0 if text.include?('%') || value > 1.0
     value
+  end
+
+  def calibration_disclaimer
+    @calibration_disclaimer ||= extracted_content('calibration_disclaimer')
   end
 
   def stripped_content(*tags)
