@@ -30,7 +30,8 @@ SUPERFORECASTER_SYSTEM_PROMPT = ERB.new(<<~SUPERFORECASTER_SYSTEM_PROMPT, trim_m
   - Do not preamble.
   - Temporal context (today's date, resolution deadline, time remaining) is provided in the prompt. Do not estimate or compute dates yourself; rely on the supplied values.
   - Assign precise, justified numerical likelihoods (e.g., 42%, 2.3%) with confidence intervals, while recognizing limits of knowledge and avoiding unjustified over-precision.
-  - Put extra weight on status quo outcomes since the world usually changes slowly.
+  - Start with a reference-class base rate from historical data. Then adjust upwards or downwards based on case-specific evidence, explicitly noting the direction and strength of each adjustment.
+  - For numeric forecasts, produce a P50 that minimises symmetric absolute error. To do this, consider the historical distribution, recent trends, and the tendency of extremes to regress toward the mean. Supply P10 and P90 to express uncertainty.
   - For each adjustment — to the base rate, for cognitive/source biases, or to confidence — explicitly state the direction, magnitude, supporting evidence, and reasoning.
   - Express uncertainty using both confidence intervals and verbal probabilities (e.g., "very likely" = 85-95%)
   - Provide separate uncertainty estimates for different components (parameter uncertainty, model uncertainty, outcome uncertainty)
@@ -48,10 +49,8 @@ RESEARCH_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/research.er
 SHARED_FORECAST_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/shared_forecast.erb'), trim_mode: '-')
 
 BINARY_FORECAST_PROMPT = <<~BINARY_FORECAST_PROMPT
-    - A plausible scenario resulting in a No outcome. Provide a brief narrative and estimate its likelihood, explaining how it contributes to your overall probability. For the 2-3 most critical assumption, estimate how much your probability distribution would change if it were false, and provide the revised probabilities.
-    - A plausible scenario resulting in a Yes outcome. Provide a brief narrative and estimate its likelihood, explaining how it contributes to your overall probability. For the 2-3 most critical assumption, estimate how much your probability distribution would change if it were false, and provide the revised probabilities.
   - At the end of your forecast, provide a single, precise final probability in the specified format.
-    - Do not assign a probability below 5% or above 95% without extremely strong justification.
+    - You may assign any probability if supported by strong reasoning. For probabilities below 1% or above 99%, include a separate <calibration_disclaimer> explaining why the extreme value is justified.
     - Write your final prediction in this format (the percent sign is required):
   <probability>
   X%
@@ -59,9 +58,6 @@ BINARY_FORECAST_PROMPT = <<~BINARY_FORECAST_PROMPT
 BINARY_FORECAST_PROMPT
 
 NUMERIC_FORECAST_PROMPT = <<~NUMERIC_FORECAST_PROMPT
-    - The outcome if the current trend continued.
-    - A plausible scenario resulting in a low outcome. Provide a brief narrative and estimate its likelihood, explaining how it contributes to your overall probability. For the 2-3 most critical assumption, estimate how much your probability distribution would change if it were false, and provide the revised probabilities.
-    - A plausible scenario resulting in a high outcome. Provide a brief narrative and estimate its likelihood, explaining how it contributes to your overall probability. For the 2-3 most critical assumptions, estimate how much your probability distribution would change if it were false, and provide the revised probabilities.
   - At the end of your forecast, provide precise, percentile final predictions of values in the given units and range, only include the values and units, do not use ranges of values.
     - Write your final predictions in this format:
   <percentiles>
@@ -84,7 +80,6 @@ NUMERIC_FORECAST_PROMPT
 def multiple_choice_forecast_prompt(question)
   options_format = question.options.map { |opt| "#{opt}: X%" }.join("\n  ")
   <<~MULTIPLE_CHOICE_FORECAST_PROMPT
-      - A plausible scenario resulting in an unexpected outcome for each option. Provide a brief narrative and estimate its likelihood, explaining how it contributes to your overall probability. For the 2-3 most critical assumption, estimate how much your probability distribution would change if it were false, and provide the revised probabilities.
     - At the end of your forecast, provide precise, probabilistic final predictions for each option, only include the probability itself.
       - Predictions for each option must be between 0.1% and 99.9% and their sum must be 100%.
       - Write your final predictions in this format (the percent sign is required on every line):
