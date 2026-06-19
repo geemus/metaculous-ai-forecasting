@@ -20,7 +20,13 @@ The forecasts above have been pooled using a calibrated mechanical aggregator (l
 </baseline>
 <%- end -%>
 
-Today is <%= Time.now.strftime('%B %d, %Y') %>.
+<%- unless question.metadata_content.empty? -%>
+
+Question Metadata:
+<metadata>
+<%= question.metadata_content %>
+</metadata>
+<%- end -%>
 
 # Instructions
 

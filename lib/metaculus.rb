@@ -421,6 +421,7 @@ class Metaculus
     def metadata_content
       @metadata_content ||= begin
         content = []
+        content << "Current Date: #{Time.now.strftime('%B %d, %Y')}"
         asked_on = Time.parse(data['created_at'])
         content << "Asked On: #{asked_on.strftime('%B %d, %Y')}"
 
