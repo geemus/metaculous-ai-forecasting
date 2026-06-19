@@ -134,9 +134,9 @@ class TestAggregation < Minitest::Test
 
   # ─── extremization factor ENV override ──────────────────────────────────────
 
-  def test_extremization_factor_defaults_to_one_point_five
+  def test_extremization_factor_defaults_to_one
     ENV.delete('EXTREMIZATION_FACTOR')
-    assert_in_delta 1.5, Aggregation.extremization_factor, 1e-12
+    assert_in_delta 1.0, Aggregation.extremization_factor, 1e-12
   end
 
   def test_extremization_factor_reads_env

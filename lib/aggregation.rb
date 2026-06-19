@@ -6,7 +6,7 @@
 # averaging the inverse CDF at each quantile.
 module Aggregation
   EPSILON = 1.0e-6
-  DEFAULT_EXTREMIZATION_FACTOR = 1.5
+  DEFAULT_EXTREMIZATION_FACTOR = 1.0
 
   module_function
 
