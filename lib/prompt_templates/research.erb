@@ -8,10 +8,34 @@ Your research will focus on the following forecast context.
 
 # Instructions
 
-1. Decompose the forecast question into 3-5 focused sub-questions (e.g. base rates, current state, key drivers, resolution criteria edge cases). Use these as search queries to target retrieval before proceeding.
-2. List all key assumptions explicitly. For each key assumption, critically evaluate its validity, estimate how much your probability would change if the assumption were invalid, and explain the reasoning behind the adjustment.
-3. Break the analysis down into smaller, measurable components. For each, provide relevant, justified base rates, historical analogs, reference classes, primary evidence, and uncertainties. Explain how these inform the comparative summary.
-4. For each potential outcome, list the strongest supporting and opposing evidence, highlighting key facts and uncertainties for each.
-5. List all evidence gaps. For each evidence gap, provide a numerical estimate of its potential impact on forecast ranges and explain the reasoning behind the estimate.
-6. Conclude with a comparative summary that integrates decomposed risk components, base rates, key assumptions, dissenting views, and cognitive bias corrections.
-7. Coverage gaps: List 2-3 specific categories of evidence that were not found or not searched. For each, estimate the direction and magnitude of impact on the forecast if that evidence existed.
+## Pre-Search (private — do not include in final output)
+Decompose the forecast question into 3–5 focused sub-questions (e.g. base rates, current state, key drivers, resolution criteria edge cases). Use these as search queries to target retrieval before writing the brief. Do not output the sub-questions or raw search results.
+
+## Final Output Format (mandatory)
+Structure your research output as a brief with exactly four sections. Use the section headings exactly as shown. Do not add extra sections, preamble, or closing remarks.
+
+### 1. Base Rate
+What is the historical frequency or long-run average for this class of event?
+- Specify the reference class you are using and justify why it is the most appropriate fit.
+- Provide a concrete range (e.g. "15–25%") based on the reference class data.
+- If no clean reference class exists, construct the best available proxy and flag it explicitly, e.g. `{Less Reliable: No direct reference class; constructed from adjacent domains.}`
+- List the source of the base rate data and any adjustments made to align it with this question.
+
+### 2. Current Indicators
+What are the latest data points, recent announcements, scheduled events, and current market or expert expectations?
+- Factual, time-stamped observations only. Prefer the most recent datapoint for each indicator.
+- Include current polling, market pricing, expert surveys, official statements, or monitoring data where available.
+- Note whether each indicator is improving, deteriorating, or stable relative to the trend that would produce the outcome.
+
+### 3. Surprise Signals
+What credible leaks, expert warnings, pattern breaks, black-swan candidates, or leading indicators could upend the baseline?
+- This is distinct from standard supporting/opposing evidence — focus on potential shocks, discontinuities, or rapid shifts.
+- For each signal, estimate its likelihood and the direction/magnitude of impact if it materializes.
+- If no credible surprise signals exist, state that explicitly rather than omitting the section.
+
+### 4. Uncertainty Range
+What are simple bounds on what is plausible for the outcome?
+- For binary questions: a probability range (e.g. "20–40%").
+- For numeric questions: a range of plausible values with units.
+- Identify the main drivers of uncertainty and classify each as parameter uncertainty, model uncertainty, or outcome uncertainty.
+- Quantify the impact of the largest evidence gaps on the range (e.g. "If evidence X existed, it could shift the estimate by ±5 percentage points").
