@@ -224,6 +224,6 @@ def load_research(post_id, strip_tags: nil)
     tags = strip_tags.is_a?(Array) ? strip_tags : [strip_tags]
     research.stripped_content(*tags)
   else
-    research
+    research.content
   end
 end
