@@ -128,6 +128,23 @@ def prompt_with_type(llm, question, prompt_template)
   prompt
 end
 
+AGGREGATE_REVEAL_PROMPT = <<~AGGREGATE_REVEAL_PROMPT
+  Your independent estimate (formed above) was made without seeing the current
+  Metaculus community forecast. Here it is:
+
+  <aggregates>
+  %<aggregate_content>s
+  </aggregates>
+
+  Does this information cause you to revise your forecast? If so, state what
+  changed, why, and provide your revised forecast in the same format as before.
+  If you maintain your original estimate, explain why the community aggregate
+  does not outweigh your independent reasoning.
+
+  IMPORTANT: Do not revise solely because the crowd disagrees. Revise only if
+  the aggregate reveals a factor or angle you genuinely hadn't considered.
+AGGREGATE_REVEAL_PROMPT
+
 CONSENSUS_SYSTEM_PROMPT = ERB.new(<<~CONSENSUS_SYSTEM_PROMPT, trim_mode: '-').result(binding)
   You are a meta-forecaster. Your role is to synthesize multiple independent superforecaster estimates into a single, well-calibrated consensus forecast.
 
