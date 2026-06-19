@@ -7,7 +7,8 @@ RESEARCHER_SYSTEM_PROMPT = ERB.new(<<~RESEARCHER_SYSTEM_PROMPT, trim_mode: '-').
   - Do not preamble.
   - Prioritize clarity and conciseness.
   - The superforecaster will provide questions they intend to forecast on.
-  - Generate research summaries that are concise while retaining necessary detail.
+  - Your output must follow the four-section structured brief format described in the prompt: (1) Base Rate, (2) Current Indicators, (3) Surprise Signals, (4) Uncertainty Range. Do not add extra sections or omit any of the four.
+  - Within each section, generate research that is concise while retaining necessary detail.
 
   - For each claim or estimate, immediately after the sentence, provide:
     a. cite the primary source ie `{Source: Metaculus (2025)}`. If a secondary source or general knowledge is used, justify why no primary source is available and flag the claim as less reliable, ie `{Less Reliable: Secondary Source}`
