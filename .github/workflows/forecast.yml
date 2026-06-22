@@ -41,7 +41,7 @@ jobs:
     if: ${{ inputs.post_id }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/cache/restore@v5
         with:
           key:  tmp/${{ inputs.post_id }}/outputs/news.md
@@ -78,7 +78,7 @@ jobs:
     if: ${{ inputs.post_id }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/cache/restore@v5
         with:
           key:  tmp/${{ inputs.post_id }}/outputs/news.md
@@ -128,7 +128,7 @@ jobs:
       matrix:
         forecaster_index: [0, 1, 2, 3]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/cache/restore@v5
         with:
           key:  tmp/${{ inputs.post_id }}/research.json
@@ -179,7 +179,7 @@ jobs:
       matrix:
         forecaster_index: [0, 1, 2, 3]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/cache/restore@v5
         with:
           key:  tmp/${{ inputs.post_id }}/research.json
@@ -242,7 +242,7 @@ jobs:
     if: ${{ inputs.post_id }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/cache/restore@v5
         with:
           key:  tmp/${{ inputs.post_id }}/research.json
