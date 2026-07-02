@@ -3,5 +3,6 @@
 
 require_relative 'test_helper'
 require_relative 'test_aggregation'
+require_relative 'test_calculator'
 require_relative 'test_continuous_cdf'
 require_relative 'test_metaculus'
