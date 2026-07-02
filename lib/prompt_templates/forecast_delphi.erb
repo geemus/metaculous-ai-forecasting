@@ -17,7 +17,7 @@ Update your forecast based after reviewing these forecasts from other superforec
 <%- @forecasts.each do |f| -%>
 <%- next if f == @forecast -%>
 <forecast>
-<%= f.stripped_content('think') %>
+<%= f.stripped_content('think', 'forecast_summary') %>
 </forecast>
 <%- end -%>
 </forecasts>

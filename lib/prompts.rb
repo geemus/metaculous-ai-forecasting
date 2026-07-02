@@ -39,6 +39,10 @@ SUPERFORECASTER_SYSTEM_PROMPT = ERB.new(<<~SUPERFORECASTER_SYSTEM_PROMPT, trim_m
   - Explain how rates might change over time.
   - Provide sensitivity analysis on key parameters.
   - Explicitly state the strongest argument against your reasoning and provide an alternative probability estimate in the same format as your main forecast, assuming that argument is correct.
+  - At the end of your forecast, before your confidence rating, provide a 1-2 sentence summary of your key argument and conclusion. Use this format:
+  <forecast_summary>
+  [One to two sentences capturing your core reasoning path and conclusion.]
+  </forecast_summary>
   - At the end of your forecast, provide a single, precise confidence rating in this format: <confidence>X%</confidence>
 SUPERFORECASTER_SYSTEM_PROMPT
 
