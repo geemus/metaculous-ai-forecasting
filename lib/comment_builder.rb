@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'aggregation'
+
 # Assembles a structured pipeline comment from cached run data.
 #
 # Usage:
@@ -267,7 +269,7 @@ module CommentBuilder
   def self.forecast_column_header(question)
     case question.type
     when 'binary' then 'Probability'
-    when 'numeric', 'discrete' then 'P50 (units)'
+    when 'numeric', 'discrete' then 'P50'
     when 'multiple_choice' then 'Top Option'
     else 'Forecast'
     end
@@ -281,7 +283,7 @@ module CommentBuilder
     when 'numeric', 'discrete'
       pcts = forecast.percentiles
       p50 = pcts[50] || pcts['50'] || '—'
-      unit_str = question.units.empty? ? '' : " #{question.units}"
+      unit_str = question.units.to_s.empty? ? '' : " #{question.units}"
       "#{p50}#{unit_str}"
     when 'multiple_choice'
       probs = forecast.probabilities
@@ -391,8 +393,8 @@ module CommentBuilder
       middle = sections[1...-1]
       break if middle.empty?
 
-      longest = middle.max_by(&:length)
-      sections.delete_at(sections.index(longest))
+      _, idx = middle.each_with_index.max_by { |s, _| s.length }
+      sections.delete_at(idx + 1) # +1 because middle is offset by 1 from sections
       comment = sections.join(SECTION_SEPARATOR)
     end
 
