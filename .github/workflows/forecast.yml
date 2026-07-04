@@ -72,6 +72,10 @@ jobs:
         with:
           key:  tmp/${{ inputs.post_id }}/outputs/news_summary.md
           path: tmp/${{ inputs.post_id }}/outputs/news_summary.md
+      - uses: actions/cache/save@v6
+        with:
+          key:  tmp/${{ inputs.post_id }}/news.json
+          path: tmp/${{ inputs.post_id }}/news.json
       - run: |
           echo '<details><summary>Prompt</summary>' >> $GITHUB_STEP_SUMMARY
           echo "$(cat tmp/${{ inputs.post_id }}/inputs/news.md)" >> $GITHUB_STEP_SUMMARY
@@ -97,6 +101,10 @@ jobs:
         with:
           key:  tmp/${{ inputs.post_id }}/outputs/news.md
           path: tmp/${{ inputs.post_id }}/outputs/news.md
+      - uses: actions/cache/restore@v6
+        with:
+          key:  tmp/${{ inputs.post_id }}/outputs/news_summary.md
+          path: tmp/${{ inputs.post_id }}/outputs/news_summary.md
       - uses: actions/cache/restore@v6
         with:
           key:  tmp/${{ inputs.post_id }}/research.json
@@ -261,6 +269,14 @@ jobs:
         with:
           key:  tmp/${{ inputs.post_id }}/research.json
           path: tmp/${{ inputs.post_id }}/research.json
+      - uses: actions/cache/restore@v6
+        with:
+          key:  tmp/${{ inputs.post_id }}/outputs/news_summary.md
+          path: tmp/${{ inputs.post_id }}/outputs/news_summary.md
+      - uses: actions/cache/restore@v6
+        with:
+          key:  tmp/${{ inputs.post_id }}/news.json
+          path: tmp/${{ inputs.post_id }}/news.json
       - uses: actions/cache/restore@v6
         with:
           key:  tmp/${{ inputs.post_id }}/forecasts/revision.0.json

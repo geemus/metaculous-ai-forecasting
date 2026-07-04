@@ -640,7 +640,7 @@ class Metaculus
       'Comments unavailable (API restricted on this endpoint)'
     end
 
-    def submit(response)
+    def submit(response, comment_text: nil)
       forecast_data = case type
                       when 'binary'
                         [{
@@ -663,7 +663,7 @@ class Metaculus
       metaculus = Metaculus.new
       metaculus.post_forecasts(forecast_data)
       cache_write(post_id, 'consensus/forecast.json', forecast_data.to_json)
-      comment_text = response.stripped_content('think')
+      comment_text ||= response.stripped_content('think')
       comment_data = {
         text: comment_text,
         parent: nil,
