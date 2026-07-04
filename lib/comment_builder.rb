@@ -142,7 +142,7 @@ module CommentBuilder
       confidence = forecast.extracted_content('confidence') || 'N/A'
       argument = extract_key_argument(forecast)
 
-      %(<forecaster provider="#{provider}" value="#{value}" pre_revision="#{pre_revision}" confidence="#{confidence}">\n#{argument}\n</forecaster>)
+      %(<forecaster provider="#{xml_escape(provider)}" value="#{xml_escape(value)}" pre_revision="#{xml_escape(pre_revision)}" confidence="#{xml_escape(confidence)}">\n#{xml_escape(argument)}\n</forecaster>)
     end
 
     ["## Forecaster Positions", *elements].join("\n")
@@ -272,6 +272,14 @@ module CommentBuilder
     match&.[](0)
   end
 
+  def xml_escape(value)
+    value.to_s
+         .gsub('&', '&amp;')
+         .gsub('<', '&lt;')
+         .gsub('>', '&gt;')
+         .gsub('"', '&quot;')
+  end
+
   def truncate_if_needed(comment)
     return comment if comment.length <= MAX_COMMENT_LENGTH
 
@@ -282,7 +290,7 @@ module CommentBuilder
       break if comment.length <= MAX_COMMENT_LENGTH
 
       comment = comment.sub(%r{<#{tag}>[\s\S]*?</#{tag}>}) do |match|
-        inner = match.sub(%r{</?#{tag}>}, '').sub(%r{<#{tag}>}, '').strip
+        inner = match.gsub(%r{</?#{tag}>}, '').strip
         truncated = inner[0..500] + "...\n_(truncated for length)_"
         "<#{tag}>\n#{truncated}\n</#{tag}>"
       end
