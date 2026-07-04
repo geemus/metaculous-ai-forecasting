@@ -30,7 +30,7 @@ begin
   consensus = Response.new(provider, json: consensus_json)
   puts consensus.content
 
-  question.submit(consensus)
+  question.submit(consensus, comment_text: CommentBuilder.build_pipeline_comment(post_id, question, consensus, @revised_forecasts))
 rescue StandardError => e
   puts e.message
   puts "! Retries remaining: #{retries_remaining - 1}"
