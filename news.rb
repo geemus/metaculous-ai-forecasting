@@ -93,3 +93,28 @@ NEWS_PROMPT_TEMPLATE
 news_md = news_prompt.result(binding)
 cache_write(post_id, 'outputs/news.md', news_md)
 puts news_md
+
+Formatador.display "\n[bold][green]# News: Summarizing(#{post_id})…[/] "
+news_summary = cache(post_id, 'outputs/news_summary.md') do
+  llm = OpenRouter.new(
+    model: 'anthropic/claude-haiku-4.5',
+    system: 'You are a research assistant summarizing news for a forecasting pipeline. Be concise and factual.',
+    tools: []
+  )
+  summary_prompt = <<~PROMPT
+    Summarize these news articles into a brief roundup. Include:
+    - Article count and date range
+    - 3 key themes or developments across the articles
+    - The 2-3 most relevant articles for the forecast question (with titles)
+
+    #{news_md}
+
+    Format your response as:
+    <news_summary>
+    [Your summary here — 4-6 sentences total]
+    </news_summary>
+  PROMPT
+  summary = llm.eval({ role: 'user', content: summary_prompt })
+  summary.extracted_content('news_summary')
+end
+puts news_summary
