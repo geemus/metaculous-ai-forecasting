@@ -46,6 +46,10 @@ jobs:
         with:
           key:  tmp/${{ inputs.post_id }}/outputs/news.md
           path: tmp/${{ inputs.post_id }}/outputs/news.md
+      - uses: actions/cache/restore@v6
+        with:
+          key:  tmp/${{ inputs.post_id }}/outputs/news_summary.md
+          path: tmp/${{ inputs.post_id }}/outputs/news_summary.md
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '4.0'
@@ -64,6 +68,10 @@ jobs:
         with:
           key:  tmp/${{ inputs.post_id }}/outputs/news.md
           path: tmp/${{ inputs.post_id }}/outputs/news.md
+      - uses: actions/cache/save@v6
+        with:
+          key:  tmp/${{ inputs.post_id }}/outputs/news_summary.md
+          path: tmp/${{ inputs.post_id }}/outputs/news_summary.md
       - run: |
           echo '<details><summary>Prompt</summary>' >> $GITHUB_STEP_SUMMARY
           echo "$(cat tmp/${{ inputs.post_id }}/inputs/news.md)" >> $GITHUB_STEP_SUMMARY
@@ -71,6 +79,12 @@ jobs:
       - run: |
           echo '<details><summary>Result</summary>' >> $GITHUB_STEP_SUMMARY
           echo "$(cat tmp/${{ inputs.post_id }}/outputs/news.md)" >> $GITHUB_STEP_SUMMARY
+          echo '</details>' >> $GITHUB_STEP_SUMMARY
+      - run: |
+          echo '<details><summary>News Summary</summary>' >> $GITHUB_STEP_SUMMARY
+          echo '' >> $GITHUB_STEP_SUMMARY
+          echo "$(cat tmp/${{ inputs.post_id }}/outputs/news_summary.md)" >> $GITHUB_STEP_SUMMARY
+          echo '' >> $GITHUB_STEP_SUMMARY
           echo '</details>' >> $GITHUB_STEP_SUMMARY
 
   research:
