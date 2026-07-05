@@ -16,7 +16,7 @@ module CommentBuilder
       build_pipeline_overview(post_id, question, baseline),
       build_news_summary(post_id),
       build_research_summary(post_id),
-      build_forecaster_positions(question, revised_forecasts),
+      build_forecaster_positions(post_id, question, revised_forecasts),
       build_consensus_analysis(consensus_response),
       build_final_forecast(question, consensus_response)
     ]
@@ -54,7 +54,7 @@ module CommentBuilder
 
     content = '_No news summary available._' if content.nil? || content.empty?
 
-    "## News Summary\n#{content}"
+    "## News Summary\n<news_summary>\n#{content}\n</news_summary>"
   end
 
   def fallback_news_summary(post_id)
@@ -85,7 +85,7 @@ module CommentBuilder
     research_path = cache_path(post_id, 'research.json')
 
     unless File.exist?(research_path)
-      return "## Research Summary\n_No research data available._"
+      return "## Research Summary\n<research_summary>\n_No research data available._\n</research_summary>"
     end
 
     research_json = File.read(research_path)
@@ -93,14 +93,14 @@ module CommentBuilder
     summary = research.extracted_content('research_summary')
 
     if summary && !summary.empty?
-      return "## Research Summary\n#{summary}"
+      return "## Research Summary\n<research_summary>\n#{summary}\n</research_summary>"
     end
 
     # Fallback: extract ### 1-4 sections into bullet points
     fallback = fallback_research_summary(research.content)
-    "## Research Summary\n#{fallback || '_Could not extract research summary._'}"
+    "## Research Summary\n<research_summary>\n#{fallback || '_Could not extract research summary._'}\n</research_summary>"
   rescue StandardError => e
-    "## Research Summary\n_Error loading research: #{e.message}_"
+    "## Research Summary\n<research_summary>\n_Error loading research: #{e.message}_\n</research_summary>"
   end
 
   def fallback_research_summary(content)
@@ -124,40 +124,66 @@ module CommentBuilder
 
   # ─── Forecaster Positions ────────────────────────────────────────────
 
-  def build_forecaster_positions(question, forecasts)
-    header = '| Provider | Forecast | Confidence | Key Argument |'
-    separator = '|----------|----------|------------|-------------|'
+  def build_forecaster_positions(post_id, question, forecasts)
+    originals = load_original_forecasts(post_id)
 
-    rows = forecasts.map do |forecast|
-      provider = forecast.provider.to_s.capitalize
+    elements = forecasts.map do |forecast|
+      provider = forecast.provider.to_s
       value = format_forecast_value(question, forecast)
+
+      # Find matching original forecast to get pre_revision value
+      original = originals.find { |o| o.provider == forecast.provider }
+      pre_revision = if original
+                       format_forecast_value(question, original)
+                     else
+                       value # fallback if original not available
+                     end
+
       confidence = forecast.extracted_content('confidence') || 'N/A'
-      argument = forecast.extracted_content('forecast_summary')
+      argument = extract_key_argument(forecast)
 
-      # Fallback to first sentence of think if forecast_summary is missing
-      if argument.nil? || argument.empty?
-        think = forecast.extracted_content('think')
-        argument = if think && !think.empty?
-                     first_sentence = think.split(/(?<=[.!?])\s+/).first
-                     first_sentence.to_s.strip[0..150]
-                   else
-                     # Last resort: first sentence of non-tag content
-                     stripped = forecast.stripped_content('think', 'forecast_summary', 'confidence',
-                                                          'probability', 'percentiles', 'probabilities',
-                                                          'calibration_disclaimer')
-                     first_sentence = stripped.split(/(?<=[.!?])\s+/).first
-                     first_sentence.to_s.strip[0..150]
-                   end
-      end
-
-      argument = argument.to_s.strip[0..150]
-      argument = argument.gsub("\n", ' ') # Flatten newlines for table cell
-      argument = '_No argument available_' if argument.empty?
-
-      "| #{provider} | #{value} | #{confidence} | #{argument} |"
+      %(<forecaster provider="#{xml_escape(provider)}" value="#{xml_escape(value)}" pre_revision="#{xml_escape(pre_revision)}" confidence="#{xml_escape(confidence)}">\n#{xml_escape(argument)}\n</forecaster>)
     end
 
-    ["## Forecaster Positions", header, separator, *rows].join("\n")
+    ["## Forecaster Positions", *elements].join("\n")
+  end
+
+  def load_original_forecasts(post_id)
+    Provider::FORECASTERS.each_with_index.map do |provider, index|
+      forecast_path = cache_path(post_id, "forecasts/forecast.#{index}.json")
+      next unless File.exist?(forecast_path)
+
+      Response.new(provider, json: File.read(forecast_path))
+    end.compact
+  rescue StandardError => e
+    warn "WARNING: failed to load original forecasts: #{e.message}"
+    []
+  end
+
+  def extract_key_argument(forecast)
+    argument = forecast.extracted_content('forecast_summary')
+
+    # Fallback to first sentence of think if forecast_summary is missing
+    if argument.nil? || argument.empty?
+      think = forecast.extracted_content('think')
+      argument = if think && !think.empty?
+                   first_sentence = think.split(/(?<=[.!?])\s+/).first
+                   first_sentence.to_s.strip[0..150]
+                 else
+                   # Last resort: first sentence of non-tag content
+                   stripped = forecast.stripped_content('think', 'forecast_summary', 'confidence',
+                                                        'probability', 'percentiles', 'probabilities',
+                                                        'calibration_disclaimer')
+                   first_sentence = stripped.split(/(?<=[.!?])\s+/).first
+                   first_sentence.to_s.strip[0..150]
+                 end
+    end
+
+    argument = argument.to_s.strip[0..150]
+    argument = argument.gsub("\n", ' ') # Flatten newlines
+    argument = '_No argument available_' if argument.empty?
+
+    argument
   end
 
   def format_forecast_value(question, forecast)
@@ -195,7 +221,7 @@ module CommentBuilder
 
     content = '_No analysis available._' if content.nil? || content.strip.empty?
 
-    "## Consensus Analysis\n#{content.strip}"
+    "## Consensus Analysis\n<consensus_analysis>\n#{content.strip}\n</consensus_analysis>"
   end
 
   # ─── Final Forecast ──────────────────────────────────────────────────
@@ -246,41 +272,49 @@ module CommentBuilder
     match&.[](0)
   end
 
+  def xml_escape(value)
+    value.to_s
+         .gsub('&', '&amp;')
+         .gsub('<', '&lt;')
+         .gsub('>', '&gt;')
+         .gsub('"', '&quot;')
+  end
+
   def truncate_if_needed(comment)
     return comment if comment.length <= MAX_COMMENT_LENGTH
 
-    # Try to keep: overview, forecaster table, and final forecast intact.
-    # Trim news summary, research summary, and consensus analysis.
-    sections = comment.split(/\n\n---\n\n/)
-    return comment if sections.length < 4
+    # Truncate content within XML blocks, preserving tags and headers.
+    # Order: news_summary, research_summary, consensus_analysis, then forecaster content.
+    truncate_targets = %w[news_summary research_summary consensus_analysis]
+    truncate_targets.each do |tag|
+      break if comment.length <= MAX_COMMENT_LENGTH
 
-    # Section order: [0] Overview, [1] News, [2] Research, [3] Forecaster,
-    #                [4] Consensus Analysis, [5] Final Forecast
-
-    # Progressively trim middle sections until we're under the limit
-    trim_order = [1, 2, 4] # news, research, consensus — trim in this order
-
-    trim_order.each do |idx|
-      break if sections.join("\n\n---\n\n").length <= MAX_COMMENT_LENGTH
-      next unless sections[idx]
-
-      # Truncate the section to just its header + first line
-      lines = sections[idx].split("\n")
-      header = lines[0]
-      first_content = lines[1..].find { |l| !l.strip.empty? && !l.start_with?('|') && !l.start_with?('-') }
-      sections[idx] = if first_content
-                        "#{header}\n#{first_content.strip[0..200]}...\n_(truncated for length)_"
-                      else
-                        "#{header}\n_(truncated for length)_"
-                      end
+      comment = comment.sub(%r{<#{tag}>[\s\S]*?</#{tag}>}) do |match|
+        inner = match.gsub(%r{</?#{tag}>}, '').strip
+        truncated = inner[0..500] + "...\n_(truncated for length)_"
+        "<#{tag}>\n#{truncated}\n</#{tag}>"
+      end
     end
 
-    # If still too long, hard truncate
-    result = sections.join("\n\n---\n\n")
-    if result.length > MAX_COMMENT_LENGTH
-      result = result[0...MAX_COMMENT_LENGTH - 50] + "\n\n...\n_(comment truncated to fit length limit)_"
+    # If still too long, truncate forecaster block contents
+    if comment.length > MAX_COMMENT_LENGTH
+      comment = comment.gsub(%r{<forecaster[^>]*>[\s\S]*?</forecaster>}) do |match|
+        match.sub(%r{(<forecaster[^>]*>)([\s\S]*?)(</forecaster>)}) do
+          opening = Regexp.last_match(1)
+          content = Regexp.last_match(2).strip
+          closing = Regexp.last_match(3)
+          truncated = content.length > 200 ? content[0..200] + '...' : content
+          "#{opening}#{truncated}\n#{closing}"
+        end
+      end
     end
 
-    result
+    # Hard truncate at a safe boundary if still too long
+    if comment.length > MAX_COMMENT_LENGTH
+      safe_end = comment.rindex("\n", MAX_COMMENT_LENGTH - 50) || MAX_COMMENT_LENGTH - 50
+      comment = comment[0...safe_end] + "\n\n...\n_(comment truncated to fit length limit)_"
+    end
+
+    comment
   end
 end
