@@ -64,7 +64,10 @@ rescue StandardError => e
   puts filters.data
 end
 filters = JSON.parse(filters_json)
-puts filters
+query_display = filters['query'] || '(none)'
+categories_display = (filters['categories'] || []).join(', ')
+categories_display = '(none)' if categories_display.empty?
+Formatador.display "[blue]Query: #{query_display}[/] | [blue]Categories: #{categories_display}[/]\n"
 
 Formatador.display "\n[bold][green]# News: Searching(#{post_id})…[/] "
 news_json = cache(post_id, 'news.json') do
@@ -115,6 +118,19 @@ news_summary = cache(post_id, 'outputs/news_summary.md') do
     </news_summary>
   PROMPT
   summary = llm.eval({ role: 'user', content: summary_prompt })
-  summary.extracted_content('news_summary')
+  summary_text = summary.extracted_content('news_summary')
+
+  # Prepend search metadata for debugging
+  query = filters['query']
+  cats = (filters['categories'] || []).join(', ')
+  if (query && !query.empty?) || (cats && !cats.empty?)
+    parts = []
+    parts << "Search query: \"#{query}\"" if query && !query.empty?
+    parts << "Categories: #{cats}" if cats && !cats.empty?
+    metadata = "_#{parts.join(' | ')}_"
+    "#{metadata}\n\n#{summary_text}"
+  else
+    summary_text
+  end
 end
 puts news_summary
