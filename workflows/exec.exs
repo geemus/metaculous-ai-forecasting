@@ -68,7 +68,7 @@
       %{user: "Emit a short, descriptive git branch name derived from the plan (follow the convention type/short-slug, e.g., feat/add-calculator). Output only the branch name — no quotes, markdown, or commentary.", output_key: :branch_name},
       %{user: "Emit a concise one-line PR title for this implementation (max ~80 chars). Output only the title text — no quotes, markdown, or commentary.", output_key: :pr_title}
     ],
-    sensors: [:test],
+    sensors: ["bundle exec rake test"],
     retry_on: :sensors,
     max_retries: 3,
     tools: [
@@ -119,7 +119,7 @@
       %{user: "Review the implementation against the plan. Make fixes as needed (build only). Output a review summary.", output_key: :comment_body},
       %{user: "If the review changed the PR's scope or direction, emit a revised PR title (max ~80 chars). Otherwise repeat the original title. Output only the title text — no quotes, markdown, or commentary.", output_key: :revised_pr_title}
     ],
-    sensors: [:test],
+    sensors: ["bundle exec rake test"],
     retry_on: :sensors,
     max_retries: 3,
     tools: [
