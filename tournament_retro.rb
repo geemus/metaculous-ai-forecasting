@@ -9,6 +9,12 @@ questions = Metaculus.list_resolved_tournament_questions(tournament_id)
 
 puts "NOTE: doesn't paginate, so will miss questions if there are more than 100"
 
+# Extract full XML elements including attributes (for self-closing-like
+# elements like <forecaster provider="..." ...>content</forecaster>)
+def extract_full_elements(text, tag)
+  text.scan(%r{<#{tag}[^>]*>[\s\S]*?</#{tag}>}).map(&:strip)
+end
+
 data = []
 questions.reject! { |q| q.spot_peer_score.nil? }
 questions.sort_by!(&:spot_peer_score)
@@ -114,11 +120,3 @@ RETRO_PROMPT
 
 retro = llm.eval({ 'role': 'user', 'content': retro_prompt })
 puts retro.content
-
-# ─── Helpers ─────────────────────────────────────────────────────────────
-
-# Extract full XML elements including attributes (for self-closing-like
-# elements like <forecaster provider="..." ...>content</forecaster>)
-def extract_full_elements(text, tag)
-  text.scan(%r{<#{tag}[^>]*>[\s\S]*?</#{tag}>}).map(&:strip)
-end
