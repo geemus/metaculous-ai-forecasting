@@ -3,9 +3,11 @@
 Your consensus forecast will be based on the context of these forecasts from other superforecasters.
 
 <forecasts>
+<%- label_index = 0 -%>
 <%- @revised_forecasts.each do |forecast| -%>
-<forecast>
-<%= forecast.stripped_content('think', 'forecast_summary') %>
+<%- label = ('A'.ord + label_index).chr; label_index += 1 -%>
+<forecast label="Forecaster <%= label %>">
+<%= forecast.stripped_content('think') %>
 </forecast>
 <%- end -%>
 </forecasts>

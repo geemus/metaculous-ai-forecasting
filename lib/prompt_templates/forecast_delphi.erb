@@ -14,9 +14,11 @@ Update your forecast after reviewing these forecasts from other superforecasters
 
 <%- end -%>
 <forecasts>
+<%- label_index = 0 -%>
 <%- @forecasts.each do |f| -%>
 <%- next if f == @forecast -%>
-<forecast>
+<%- label = ('A'.ord + label_index).chr; label_index += 1 -%>
+<forecast label="Forecaster <%= label %>">
 <%= f.stripped_content('think') %>
 </forecast>
 <%- end -%>
@@ -44,7 +46,7 @@ Be specific — reference concrete claims, evidence, or reasoning steps, not vag
 
 ## Part 2: Adjustment Decision (with forced linkage)
 
-Decide whether to revise your forecast based on the analysis above. The mechanical aggregate is a reference point, not a target — your primary duty is to the best-reasoned estimate, not to consensus.
+Decide whether to revise your forecast based on the analysis above.
 
 **If you change your forecast:**
 - Name the specific element from a peer forecast that caused the change
