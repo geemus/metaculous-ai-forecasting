@@ -13,7 +13,12 @@ SEARCH_TOOL = {
       - Provides access to information that is newer than or missing from training data.
       - Decompose complex questions into focused sub-queries for better results.
       - Prefer specific, targeted queries over broad ones.
-      - Include date context (e.g. "as of 2025") for time-sensitive topics.
+
+      # Time-Sensitive Queries
+      - Always include the current month and year in queries for time-sensitive topics (e.g. "July 2026 US Drought Monitor latest observed reading").
+      - When you need current conditions, explicitly request "observed," "measured," "latest reading," or "actual" data — not forecasts or projections.
+      - If a search returns a projection or forecast, follow up with a second search specifically for the most recent actual measurement.
+      - Prefer direct data sources (government monitoring, exchange data, official statistics) over news summaries that may reference older data.
 
       # Relevance
       - Use for current events, recent developments, or missing information.

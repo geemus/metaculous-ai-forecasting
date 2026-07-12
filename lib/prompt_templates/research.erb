@@ -2,6 +2,8 @@
 
 Your research will focus on the following forecast context.
 
+**Today's date: <%= Time.now.strftime('%B %d, %Y') %>** — all searches must use this as the reference date. Reject any data point whose observation date is unclear or unstated.
+
 <%= @forecast_prompt -%>
 
 <%= @news_output -%>
@@ -10,6 +12,8 @@ Your research will focus on the following forecast context.
 
 ## Pre-Search (private — do not include in final output)
 Decompose the forecast question into 3–5 focused sub-questions (e.g. base rates, current state, key drivers, resolution criteria edge cases). Use these as search queries to target retrieval before writing the brief. Do not output the sub-questions or raw search results.
+
+**Before writing the brief, for each current-state indicator you find, verify: (a) is this an observation or a projection? (b) what is the date of the most recent actual measurement? If you only have a projection, re-search for the observation.**
 
 ## Final Output Format (mandatory)
 Structure your research output as a brief with exactly four sections. Use the section headings exactly as shown. Do not add extra sections, preamble, or closing remarks.
