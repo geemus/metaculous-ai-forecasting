@@ -4,7 +4,7 @@ Before reviewing peer forecasts, briefly consider: if your initial forecast turn
 
 # Context
 
-Update your forecast based after reviewing these forecasts from other superforecasters.
+Update your forecast after reviewing these forecasts from other superforecasters.
 
 <%- summary = forecast_peer_summary(question, @forecasts, @forecast) -%>
 <%- if summary -%>
@@ -14,13 +14,25 @@ Update your forecast based after reviewing these forecasts from other superforec
 
 <%- end -%>
 <forecasts>
+<%- label_index = 0 -%>
 <%- @forecasts.each do |f| -%>
 <%- next if f == @forecast -%>
-<forecast>
-<%= f.stripped_content('think', 'forecast_summary') %>
+<%- label = ('A'.ord + label_index).chr; label_index += 1 -%>
+<forecast label="Forecaster <%= label %>">
+<%= f.stripped_content('think') %>
 </forecast>
 <%- end -%>
 </forecasts>
+
+<%- if @mechanical_baseline -%>
+# Mechanical aggregate (for reference)
+
+The raw forecasts above have been pooled using a calibrated mechanical aggregator (log-odds mean for binary/multiple-choice; quantile average for numeric/discrete). This is **one input among several** — not a target to converge toward. Diverging from it is expected when the reasoning on one side is stronger. Use it to calibrate whether your revision moves you closer to or further from the center of gravity, but weight it below individual reasoning quality.
+
+<baseline>
+<%= @mechanical_baseline %>
+</baseline>
+<%- end -%>
 
 # Instructions
 

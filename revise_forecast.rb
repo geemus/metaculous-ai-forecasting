@@ -13,6 +13,7 @@ exit if should_skip_forecast?(question, post_id)
 
 @research_output = load_research(post_id, strip_tags: "research_summary")
 @forecasts = load_forecasts(post_id, type: 'forecast')
+@mechanical_baseline = mechanical_baseline(question, @forecasts)
 
 provider = FORECASTERS[forecaster_index]
 @forecast = @forecasts[forecaster_index]

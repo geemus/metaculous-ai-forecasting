@@ -3,9 +3,11 @@
 Your consensus forecast will be based on the context of these forecasts from other superforecasters.
 
 <forecasts>
+<%- label_index = 0 -%>
 <%- @revised_forecasts.each do |forecast| -%>
-<forecast>
-<%= forecast.stripped_content('think', 'forecast_summary') %>
+<%- label = ('A'.ord + label_index).chr; label_index += 1 -%>
+<forecast label="Forecaster <%= label %>">
+<%= forecast.stripped_content('think') %>
 </forecast>
 <%- end -%>
 </forecasts>
@@ -13,7 +15,7 @@ Your consensus forecast will be based on the context of these forecasts from oth
 <%- if @mechanical_baseline -%>
 # Mechanical aggregate baseline
 
-The forecasts above have been pooled using a calibrated mechanical aggregator (log-odds mean for binary and multiple-choice; quantile average for numeric/discrete). This baseline is empirically well-calibrated relative to medians or arithmetic means and should serve as your starting point.
+The forecasts above have been pooled using a calibrated mechanical aggregator (log-odds mean for binary and multiple-choice; quantile average for numeric/discrete). This baseline is **one input among several** — use it to orient yourself in the range of estimates, but prioritize reasoning quality over mechanical proximity.
 
 <baseline>
 <%= @mechanical_baseline %>
