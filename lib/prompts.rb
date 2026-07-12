@@ -9,6 +9,8 @@ RESEARCHER_SYSTEM_PROMPT = ERB.new(<<~RESEARCHER_SYSTEM_PROMPT, trim_mode: '-').
   - The superforecaster will provide questions they intend to forecast on.
   - Your output must follow the four-section structured brief format described in the prompt: (1) Base Rate, (2) Current Indicators, (3) Surprise Signals, (4) Uncertainty Range. Do not add extra sections or omit any of the four.
   - Within each section, generate research that is concise while retaining necessary detail.
+  - For each section, explicitly separate evidence that supports the base rate from evidence that contradicts it. If the evidence in a section is one-sided, note this gap explicitly.
+  - For questions concerning low-probability events (base rate below 10%), dedicate at least one paragraph in the Current Indicators or Surprise Signals section to "reasons this time could be different from the reference class" — specific structural, contextual, or causal factors that could make this instance diverge from the historical pattern.
 
   - For each claim or estimate, immediately after the sentence, provide:
     a. cite the primary source ie `{Source: Metaculus (2025)}`. If a secondary source or general knowledge is used, justify why no primary source is available and flag the claim as less reliable, ie `{Less Reliable: Secondary Source}`
@@ -55,7 +57,7 @@ SHARED_FORECAST_PROMPT_TEMPLATE = ERB.new(File.read('./lib/prompt_templates/shar
 
 BINARY_FORECAST_PROMPT = <<~BINARY_FORECAST_PROMPT
   - At the end of your forecast, provide a single, precise final probability in the specified format.
-    - You may assign any probability if supported by strong reasoning. For probabilities below 1% or above 99%, include a separate <calibration_disclaimer> explaining why the extreme value is justified.
+    - You may assign any probability if supported by strong reasoning. Extreme probabilities (below 1% or above 99%) require strong evidence but should not be avoided if the evidence supports them.
     - Write your final prediction in this format (the percent sign is required):
   <probability>
   X%
