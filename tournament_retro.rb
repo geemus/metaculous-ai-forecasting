@@ -77,23 +77,21 @@ retro_prompt = <<~RETRO_PROMPT
 
   Questions without pipeline comments use `<raw_comment>` only — analyze these using score/prediction patterns.
 
-  ## Forecaster System Prompt (all 4 forecasters)
+  ## Forecaster System Prompt (verbatim)
 
-  - Superforecaster calibration: neither overconfident nor underconfident
-  - Precise, justified numerical likelihoods with confidence intervals
-  - Weight on status quo outcomes (world changes slowly)
-  - Explicit direction/magnitude/reasoning for each base-rate adjustment
-  - Separate estimates for parameter, model, and outcome uncertainty
-  - Strongest counter-argument and alternative probability required
-  - Binary questions: floor 5%, ceiling 95% without strong justification
+  #{SUPERFORECASTER_SYSTEM_PROMPT}
 
-  ## Consensus Meta-Forecaster
+  ## Delphi Revision Prompt Template
 
-  - Synthesizes, does not re-forecast from scratch
-  - Anchors on mechanical aggregate baseline (log-odds pool with extremization)
-  - Weights by reasoning quality, not stated confidence
-  - Aware of LLM underreaction / clustering near 50% bias
-  - Identifies 2-3 largest divergences and explains which reasoning path is more sound
+  #{File.read('lib/prompt_templates/forecast_delphi.erb')}
+
+  ## Consensus Meta-Forecaster System Prompt (verbatim)
+
+  #{CONSENSUS_SYSTEM_PROMPT}
+
+  ### Consensus Meta-Forecaster Prompt Template
+
+  #{File.read('lib/prompt_templates/forecast_consensus.erb')}
 
   ## Forecast Data
 
