@@ -18,6 +18,17 @@ RESEARCHER_SYSTEM_PROMPT = ERB.new(<<~RESEARCHER_SYSTEM_PROMPT, trim_mode: '-').
     e. combine multiple labels using `;`, ie `{Uncertain: Lack of historical precedent and limited empirical data; Criteria Misaligned: Definitional ambiguity could introduce up to 1% error}`.
   - For repeated claims or evidence, use 'See: [Section Header]' and do not paraphrase or restate. Example: 'See: Base Rates and Historical Analogs.'
 
+  ## Data Freshness
+  - For every indicator you report, determine the date of the most recent actual measurement or observation. Distinguish between:
+    a. **Observations** — ground-truth measurements of what has already happened (e.g. "US Drought Monitor reading for July 8, 2026").
+    b. **Projections** — model forecasts of what may happen in the future (e.g. "NOAA drought outlook issued June 15, 2026, covering July–September 2026").
+  - Projections age rapidly. If the most recent data you find for an indicator is a projection:
+    a. Flag it explicitly: `{Stale: Projection issued YYYY-MM-DD; no recent observation found.}`
+    b. Search again for the most recent actual measurement — use terms like "observed," "measured," "latest reading," "as of [current month/year]."
+    c. If no observation exists yet (e.g. the event is still unfolding), note that the projection is the best available data and flag the uncertainty this introduces.
+  - For each indicator, note the observation date (not the publication date of an article referencing it). Prefer direct data sources (government monitoring, exchange data, official statistics) over news summaries.
+  - If an indicator's most recent observation is more than 2× the typical measurement interval old (e.g. weekly data that is 3+ weeks stale), flag it: `{Stale: Last observation YYYY-MM-DD, expected cadence: weekly.}`
+
   ## Market and Financial Forecasts
   - Incorporate sector trends, relevant indices, macroeconomic context, and recent news.
   - Include market sentiment, technical indicators, and recent volatility where relevant.
@@ -156,7 +167,7 @@ CONSENSUS_SYSTEM_PROMPT = ERB.new(<<~CONSENSUS_SYSTEM_PROMPT, trim_mode: '-').re
 
   - Do not preamble.
   - Your task is synthesis and adjudication, not independent forecasting from scratch. The input forecasts have already done that work — do not re-derive base rates or decompose the problem independently.
-  - Anchor on the mechanical aggregate baseline supplied with the forecasts. It pools the inputs in a calibrated way (log-odds mean for binary/multiple-choice; quantile averaging for distributions) and is the right starting point. Departures from the baseline must be justified by reasoning quality, not by raw disagreement.
+  - A mechanical aggregate baseline is supplied with the forecasts (log-odds mean for binary/multiple-choice; quantile averaging for distributions). Treat it as one input among several — it pools the raw numbers in a calibrated way, but it does not evaluate reasoning quality. Use it to orient yourself in the range of estimates, but weight reasoning quality and evidence strength above mechanical proximity.
   - Weight forecasts by both stated confidence and epistemic quality. A well-evidenced, tightly-reasoned forecast should carry more weight than a thin one even at the same confidence score.
   - Assign precise, justified numerical outputs in the exact format specified.
 CONSENSUS_SYSTEM_PROMPT
