@@ -13,7 +13,7 @@ Your consensus forecast will be based on the context of these forecasts from oth
 <%- if @mechanical_baseline -%>
 # Mechanical aggregate baseline
 
-The forecasts above have been pooled using a calibrated mechanical aggregator (log-odds mean for binary and multiple-choice; quantile average for numeric/discrete). This baseline is empirically well-calibrated relative to medians or arithmetic means and should serve as your starting point.
+The forecasts above have been pooled using a calibrated mechanical aggregator (log-odds mean for binary and multiple-choice; quantile average for numeric/discrete). This baseline is **one input among several** — use it to orient yourself in the range of estimates, but prioritize reasoning quality over mechanical proximity.
 
 <baseline>
 <%= @mechanical_baseline %>

@@ -4,7 +4,7 @@ Before reviewing peer forecasts, briefly consider: if your initial forecast turn
 
 # Context
 
-Update your forecast based after reviewing these forecasts from other superforecasters.
+Update your forecast after reviewing these forecasts from other superforecasters.
 
 <%- summary = forecast_peer_summary(question, @forecasts, @forecast) -%>
 <%- if summary -%>
@@ -22,6 +22,35 @@ Update your forecast based after reviewing these forecasts from other superforec
 <%- end -%>
 </forecasts>
 
+<%- if @mechanical_baseline -%>
+# Mechanical aggregate (for reference)
+
+The raw forecasts above have been pooled using a calibrated mechanical aggregator (log-odds mean for binary/multiple-choice; quantile average for numeric/discrete). This is **one input among several** — not a target to converge toward. Diverging from it is expected when the reasoning on one side is stronger. Use it to calibrate whether your revision moves you closer to or further from the center of gravity, but weight it below individual reasoning quality.
+
+<baseline>
+<%= @mechanical_baseline %>
+</baseline>
+<%- end -%>
+
+<%- if @forecasts.any? { |f| f != @forecast && f.summary } -%>
+# Reasoning disagreement summary
+
+The forecasters disagreed on these key points (extracted from their forecast summaries):
+
+<disagreements>
+<%- @forecasts.each do |f| -%>
+<%- next if f == @forecast -%>
+<%- if f.summary -%>
+<%= f.summary %>
+<%- end -%>
+<%- end -%>
+</disagreements>
+<%- end -%>
+
+# Calibration reminder
+
+When integrating peer feedback, apply a calibration adjustment: independent superforecaster estimates tend to be overconfident at the extremes (below 10% and above 90%) and underconfident in the middle range (30-70%). If your peers' estimates are more moderate than yours, consider whether your position genuinely warrants the extremity or whether regression toward the base rate is appropriate. This is not an instruction to moderate — only to self-audit.
+
 # Instructions
 
 ## Part 1: Agreement/Disagreement Analysis (mandatory, before any revision)
@@ -34,7 +63,7 @@ Be specific — reference concrete claims, evidence, or reasoning steps, not vag
 
 ## Part 2: Adjustment Decision (with forced linkage)
 
-Decide whether to revise your forecast based on the analysis above.
+Decide whether to revise your forecast based on the analysis above. The mechanical aggregate is a reference point, not a target — your primary duty is to the best-reasoned estimate, not to consensus.
 
 **If you change your forecast:**
 - Name the specific element from a peer forecast that caused the change

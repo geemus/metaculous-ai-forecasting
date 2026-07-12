@@ -78,6 +78,10 @@ module ResponseHelpers
     @calibration_disclaimer ||= extracted_content('calibration_disclaimer')
   end
 
+  def summary
+    @summary ||= extracted_content('forecast_summary')
+  end
+
   def stripped_content(*tags)
     strip_xml(content, *tags)
   end
