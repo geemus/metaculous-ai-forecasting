@@ -6,7 +6,6 @@ GEM
     dentaku (3.5.7)
       bigdecimal
       concurrent-ruby
-    docile (1.4.1)
     drb (2.2.3)
     erb (6.0.4)
     excon (1.5.0)
@@ -24,12 +23,7 @@ GEM
     reline (0.6.3)
       io-console (~> 0.5)
     rubyzip (3.4.1)
-    simplecov (0.22.0)
-      docile (~> 1.1)
-      simplecov-html (~> 0.11)
-      simplecov_json_formatter (~> 0.1)
-    simplecov-html (0.13.1)
-    simplecov_json_formatter (0.1.4)
+    simplecov (1.0.0)
 
 PLATFORMS
   ruby
