@@ -8,7 +8,7 @@ GEM
       concurrent-ruby
     drb (2.2.3)
     erb (6.0.4)
-    excon (1.5.0)
+    excon (1.6.0)
       logger
     formatador (1.2.3)
       reline
