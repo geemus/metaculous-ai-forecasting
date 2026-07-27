@@ -24,6 +24,16 @@ Update your forecast after reviewing these forecasts from other superforecasters
 <%- end -%>
 </forecasts>
 
+<%- if question.aggregate_content && !question.aggregate_content.empty? -%>
+# Metaculus Community Aggregate (for reference)
+
+The current Metaculus community forecast is shown below. The crowd may have identified factors you overlooked. Review it as a checklist — does it surface evidence or reasoning you genuinely missed? If not, your independent analysis should prevail. **Do not revise solely because the crowd disagrees with you.**
+
+<aggregates>
+<%= question.aggregate_content %>
+</aggregates>
+<%- end -%>
+
 <%- if @mechanical_baseline -%>
 # Mechanical aggregate (for reference)
 
