@@ -32,5 +32,36 @@ cache(post_id, "forecasts/revision.#{forecaster_index}.json") do
   )
   puts revision.content
   cache_write(post_id, "outputs/revision.#{forecaster_index}.md", revision.content)
+
+  # Measure anchoring delta: how much did external signals (peers + community + mechanical) shift the blind estimate?
+  begin
+    FileUtils.mkdir_p(cache_path(post_id, 'forecasts/deltas'))
+
+    delta = case question.type
+            when 'binary'
+              blind_prob = @forecast.probability
+              revision_prob = revision.probability
+              (revision_prob - blind_prob).abs
+            when 'numeric', 'discrete'
+              blind_p50 = @forecast.percentiles[50]
+              revision_p50 = revision.percentiles[50]
+              norm = question.upper_bound - question.lower_bound
+              norm.positive? ? ((revision_p50 - blind_p50).abs / norm) : 0.0
+            when 'multiple_choice'
+              blind_probs = @forecast.probabilities
+              revision_probs = revision.probabilities
+              common_keys = blind_probs.keys & revision_probs.keys
+              if common_keys.any?
+                common_keys.sum { |k| (revision_probs[k] - blind_probs[k]).abs } / common_keys.size.to_f
+              else
+                0.0
+              end
+            end
+
+    cache_write(post_id, "forecasts/deltas/blind_vs_revision.#{forecaster_index}.txt", delta.round(6).to_s)
+  rescue StandardError => e
+    warn "WARNING: failed to measure revision anchoring delta: #{e.message}"
+  end
+
   revision.to_json
 end

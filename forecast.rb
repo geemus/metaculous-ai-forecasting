@@ -23,61 +23,12 @@ cache(post_id, "forecasts/forecast.#{forecaster_index}.json") do
   llm_args = { system: SUPERFORECASTER_SYSTEM_PROMPT, temperature: 0.9, tools: tools }
   llm = Provider.new(provider, **llm_args)
 
-  # Turn 1: forecast WITHOUT community aggregates (blind estimate)
-  @include_aggregates = false
+  # Blind estimate: no external signals (community aggregate shown later during Delphi revision)
   forecast_prompt_blind = prompt_with_type(llm, question, SHARED_FORECAST_PROMPT_TEMPLATE)
   cache_write(post_id, "inputs/forecast.#{forecaster_index}.blind.md", forecast_prompt_blind)
   blind_response = llm.eval({ 'role': 'user', 'content': forecast_prompt_blind })
   cache_write(post_id, "outputs/forecast.#{forecaster_index}.blind.md", blind_response.content)
-
-  # Turn 2: show aggregates and ask for revision (skip if no aggregates exist)
-  final_response = if question.aggregate_content && !question.aggregate_content.empty?
-                     aggregate_prompt = format(AGGREGATE_REVEAL_PROMPT, aggregate_content: question.aggregate_content)
-                     cache_write(post_id, "inputs/forecast.#{forecaster_index}.aggregate.md", aggregate_prompt)
-                     final = llm.eval(
-                       { 'role': 'user', 'content': forecast_prompt_blind },
-                       { 'role': 'assistant', 'content': blind_response.content },
-                       { 'role': 'user', 'content': aggregate_prompt }
-                     )
-                     puts final.content
-                     cache_write(post_id, "outputs/forecast.#{forecaster_index}.md", final.content)
-                     final
-                   else
-                     puts blind_response.content
-                     blind_response
-                   end
-
-  # Measure anchoring delta between blind and final estimate
-  begin
-    blind_parsed = Response.new(provider, json: blind_response.to_json)
-    final_parsed = Response.new(provider, json: final_response.to_json)
-
-    delta = case question.type
-            when 'binary'
-              blind_prob = blind_parsed.probability
-              final_prob = final_parsed.probability
-              (final_prob - blind_prob).abs
-            when 'numeric', 'discrete'
-              blind_p50 = blind_parsed.percentiles[50]
-              final_p50 = final_parsed.percentiles[50]
-              # Normalize by the full range for comparability across questions
-              norm = question.upper_bound - question.lower_bound
-              norm.positive? ? ((final_p50 - blind_p50).abs / norm) : 0.0
-            when 'multiple_choice'
-              blind_probs = blind_parsed.probabilities
-              final_probs = final_parsed.probabilities
-              common_keys = blind_probs.keys & final_probs.keys
-              if common_keys.any?
-                common_keys.sum { |k| (final_probs[k] - blind_probs[k]).abs } / common_keys.size.to_f
-              else
-                0.0
-              end
-            end
-
-    cache_write(post_id, "forecasts/anchoring_delta.#{forecaster_index}.txt", delta.round(4).to_s)
-  rescue StandardError => e
-    warn "WARNING: failed to measure anchoring delta: #{e.message}"
-  end
-
-  final_response.to_json
+  puts blind_response.content
+  cache_write(post_id, "outputs/forecast.#{forecaster_index}.md", blind_response.content)
+  blind_response.to_json
 end
