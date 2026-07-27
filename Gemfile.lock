@@ -7,7 +7,7 @@ GEM
       bigdecimal
       concurrent-ruby
     drb (2.2.3)
-    erb (6.0.4)
+    erb (6.0.6)
     excon (1.6.0)
       logger
     formatador (1.2.3)
