@@ -7,7 +7,7 @@ class Perplexity
   attr_accessor :model, :system, :temperature, :tools
 
   def initialize(
-    model: 'sonar-reasoning-pro',
+    model: 'sonar-pro',
     system: RESEARCHER_SYSTEM_PROMPT,
     temperature: 0.1,
     tools: []
