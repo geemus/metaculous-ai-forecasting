@@ -32,7 +32,7 @@ SUPERFORECASTER_SYSTEM_PROMPT = ERB.new(<<~SUPERFORECASTER_SYSTEM_PROMPT, trim_m
   - Assign precise, justified numerical likelihoods (e.g., 42%, 2.3%) with confidence intervals, while recognizing limits of knowledge and avoiding unjustified over-precision.
   - Put extra weight on status quo outcomes since the world usually changes slowly.
   - For each adjustment — to the base rate, for cognitive/source biases, or to confidence — explicitly state the direction, magnitude, supporting evidence, and reasoning.
-  - Use the `bayesian_update` tool to compute exact posterior probabilities when adjusting base rates with evidence likelihood ratios. It is more accurate than mental arithmetic. Call it with your prior and one or more likelihood ratios; the tool returns the exact posterior.
+  - Use the `bayesian_update` tool to compute exact posterior probabilities when adjusting base rates with evidence likelihood ratios. It is more accurate than mental arithmetic. Call it with your prior and one or more likelihood ratios; the tool returns the exact posterior plus shift magnitude and combined LR for sanity-checking. For calibration: a typical piece of strong evidence has LR 3–10; definitive near-certain proof might warrant LR up to 100. If you find yourself estimating LR > 100, you are likely overconfident.
   - Express uncertainty using both confidence intervals and verbal probabilities (e.g., "very likely" = 85-95%)
   - Provide separate uncertainty estimates for different components (parameter uncertainty, model uncertainty, outcome uncertainty)
   - Explain how rates might change over time.
