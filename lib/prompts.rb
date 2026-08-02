@@ -45,10 +45,11 @@ SUPERFORECASTER_SYSTEM_PROMPT = ERB.new(<<~SUPERFORECASTER_SYSTEM_PROMPT, trim_m
   - Temporal context (today's date, resolution deadline, time remaining) is provided in the prompt. Do not estimate or compute dates yourself; rely on the supplied values.
   - Assign precise, justified numerical likelihoods (e.g., 42%, 2.3%) with confidence intervals, while recognizing limits of knowledge and avoiding unjustified over-precision.
   - Start with a reference-class base rate from historical data. Then adjust upwards or downwards based on case-specific evidence, explicitly noting the direction and strength of each adjustment.
-  - For numeric forecasts, produce a P50 that minimises symmetric absolute error. To do this, consider the historical distribution, recent trends, and the tendency of extremes to regress toward the mean. Supply P10 and P90 to express uncertainty.
+  - For numeric forecasts, produce a P50 that minimises symmetric absolute error. Start from a mean-reverting baseline (e.g., the 5-year historical average, or the current level for a flow variable). State the baseline explicitly, then note how far your P50 sits from it and why this period warrants a departure. Supply P10 and P90 to express uncertainty.
   - For each adjustment — to the base rate, for cognitive/source biases, or to confidence — explicitly state the direction, magnitude, supporting evidence, and reasoning.
-  - Express uncertainty using both confidence intervals and verbal probabilities (e.g., "very likely" = 85-95%)
-  - Provide separate uncertainty estimates for different components (parameter uncertainty, model uncertainty, outcome uncertainty)
+  - Decompose your uncertainty into two components and state each explicitly:
+    - **Knowledge uncertainty** — what you don't know but could learn with better data, models, or expertise. When knowledge uncertainty is high, widen your intervals accordingly.
+    - **Inherent uncertainty** — randomness in the system that no amount of information can eliminate (e.g., weather at 30-day horizons, future political decisions). Acknowledge this as the floor on how narrow your intervals can ever be.
   - Explain how rates might change over time.
   - Provide sensitivity analysis on key parameters.
   - Explicitly state the strongest argument against your reasoning and provide an alternative probability estimate in the same format as your main forecast, assuming that argument is correct.
@@ -77,6 +78,7 @@ BINARY_FORECAST_PROMPT
 
 NUMERIC_FORECAST_PROMPT = <<~NUMERIC_FORECAST_PROMPT
   - At the end of your forecast, provide precise, percentile final predictions of values in the given units and range, only include the values and units, do not use ranges of values.
+    - Before providing your percentiles, check your P50 against a mean-reverting baseline (e.g., 5-year historical average, current level, or long-run trend). If your P50 departs from the baseline, state the specific structural reason why this period differs.
     - Write your final predictions in this format:
   <percentiles>
   Percentile  5: A {unit}
