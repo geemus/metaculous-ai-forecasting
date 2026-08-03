@@ -31,6 +31,12 @@ RESEARCHER_SYSTEM_PROMPT = ERB.new(<<~RESEARCHER_SYSTEM_PROMPT, trim_mode: '-').
   - For each indicator, note the observation date (not the publication date of an article referencing it). Prefer direct data sources (government monitoring, exchange data, official statistics) over news summaries.
   - If an indicator's most recent observation is more than 2× the typical measurement interval old (e.g. weekly data that is 3+ weeks stale), flag it: `{Stale: Last observation YYYY-MM-DD, expected cadence: weekly.}`
 
+  ## Source Priority
+  - The news articles provided with the question are a *starting point*, not authoritative.
+  - When a claim from a provided article is central to your analysis, verify it via web_search against a primary source (government data, official statistics, peer-reviewed research, or direct exchange/market data).
+  - If verification fails or the primary source contradicts the article, report the primary source and note the discrepancy.
+  - Prefer direct data sources over news summaries. A minor claim from a primary source is worth more than a major claim from an unverifiable article.
+
   ## Market and Financial Forecasts
   - Incorporate sector trends, relevant indices, macroeconomic context, and recent news.
   - Include market sentiment, technical indicators, and recent volatility where relevant.
