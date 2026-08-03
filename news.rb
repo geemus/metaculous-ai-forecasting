@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+require 'set'
 require_relative 'lib/asknews'
 require_relative 'lib/script_helpers'
 
@@ -27,21 +28,30 @@ CATEGORIES = %w[
 ].freeze
 
 filter_prompt = ERB.new(<<~FILTER_PROMPT_TEMPLATE, trim_mode: '-').result(binding)
-  You are an expert researcher preparing to research this forecast question and background:
+  You are an expert researcher preparing to research this forecast question:
 
-  Forecast Question:
   <question>
   <%= question.title %>
   </question>
 
-  Forecast Background:
+  Background:
   <background>
   <%= question.background %>
   </background>
 
-  - Before responding, show step-by-step reasoning in clear, logical order starting with `<<<<<< think` on the line before and ending with `>>>>>>` on the line after.
-  - Provide a set of the most relevant searchable keywords for general news focusing on core concepts and omitting methodologies to find related information as a comma-separated list, starting with `<query>` on the line before and ending with `</query>` on the line after.
-  - Provide the three or fewer best matching categories among [#{CATEGORIES.join(', ')}] as a comma-separated list, starting with `<categories>` on the line before and ending with `</categories>` on the line after.
+  The news you find will inform a probability forecast. You must surface a balanced picture covering BOTH:
+  - Factors that INCREASE the probability of the forecasted outcome
+  - Factors that DECREASE the probability (mitigation, resilience, opposing trends)
+
+  Prefer queries about empirical developments, expert assessments, and real-world data over speculative opinion pieces or AI-generated predictions.
+
+  Before responding, show your reasoning inside `<<<<<< think` / `>>>>>>` tags:
+  - What are the 2-3 strongest arguments on each side of this question?
+  - What types of recent news would update your assessment in either direction?
+  - Then synthesize a search query that covers both sides evenly.
+
+  Provide the search query as a comma-separated keyword list inside `<query>...</query>` tags.
+  Provide up to 3 relevant categories from [#{CATEGORIES.join(', ')}] inside `<categories>...</categories>` tags.
 FILTER_PROMPT_TEMPLATE
 
 Formatador.display "\n[bold][green]# News: Generating Filters[anthropic/claude-haiku-4-5](#{post_id})…[/] "
@@ -78,7 +88,33 @@ news_json = cache(post_id, 'news.json') do
 end
 
 news = JSON.parse(news_json)
-articles = news['as_dicts'][0...6]
+
+# Filter out low-credibility sources
+BLOCKLISTED_DOMAINS = %w[
+  ren.tv tsargrad.tv epochtimes.com
+].freeze
+all_articles = news['as_dicts'].reject do |a|
+  source_url = a['source_url'] || ''
+  BLOCKLISTED_DOMAINS.any? { |domain| source_url.include?(domain) }
+end
+
+# Remove truncated articles (summary cut off by the API)
+all_articles.reject! { |a| (a['summary'] || '').include?('[truncated:') }
+
+# Deduplicate near-identical articles from the same source
+articles = []
+seen = Set.new
+all_articles.each do |a|
+  title = (a['eng_title'] || '').downcase.gsub(/[^a-z0-9\s]/, '')
+  source_id = a['source_id'] || ''
+  key = "#{source_id}::#{title[0..80]}"
+  unless seen.include?(key)
+    seen.add(key)
+    articles << a
+  end
+end
+articles = articles[0...10]
+
 news_prompt = ERB.new(<<~NEWS_PROMPT_TEMPLATE, trim_mode: '-')
   Forecast Related News:
   <articles>
@@ -120,17 +156,13 @@ news_summary = cache(post_id, 'outputs/news_summary.md') do
   summary = llm.eval({ role: 'user', content: summary_prompt })
   summary_text = summary.extracted_content('news_summary')
 
-  # Prepend search metadata for debugging
+  # Log search metadata for debugging (not included in cached output)
   query = filters['query']
   cats = (filters['categories'] || []).join(', ')
   if (query && !query.empty?) || (cats && !cats.empty?)
-    parts = []
-    parts << "Search query: \"#{query}\"" if query && !query.empty?
-    parts << "Categories: #{cats}" if cats && !cats.empty?
-    metadata = "_#{parts.join(' | ')}_"
-    "#{metadata}\n\n#{summary_text}"
-  else
-    summary_text
+    Formatador.display "[blue]Search query: \"#{query}\" | Categories: #{cats}[/]\n"
   end
+
+  summary_text
 end
 puts news_summary

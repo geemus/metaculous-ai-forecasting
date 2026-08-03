@@ -17,7 +17,7 @@ class AskNews
       path: '/v1/news/search',
       query: params.merge(
         {
-          # diversify_sources: true,
+          diversify_sources: true,
           doc_end_delimiter: '</article>',
           doc_start_delimiter: '<article>',
           entity_guarantee_op: 'OR',
