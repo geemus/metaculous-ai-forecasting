@@ -12,7 +12,7 @@ class OpenRouter
     reasoning: { effort: 'medium' },
     system: SUPERFORECASTER_SYSTEM_PROMPT,
     temperature: 0.1,
-    tools: [SEARCH_TOOL]
+    tools: [CALCULATOR_TOOL]
   )
     @api_key = api_key
     @model = model

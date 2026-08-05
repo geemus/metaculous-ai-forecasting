@@ -2,21 +2,20 @@
 
 require './lib/deepseek'
 require './lib/open_router'
-require './lib/perplexity'
 
 module Provider
   # Forecasters list
   FORECASTERS = %i[
     anthropic
     openai
-    perplexity
+    gemini
     deepseek
   ].freeze
 
   # Map provider symbols to their class names
   PROVIDER_CLASSES = {
     anthropic: OpenRouter,
-    perplexity: Perplexity,
+    gemini: OpenRouter,
     deepseek: DeepSeek,
     openai: OpenRouter
   }.freeze
@@ -31,6 +30,8 @@ module Provider
       case provider_symbol
       when :anthropic
         args[:model] ||= 'anthropic/claude-sonnet-4.5'
+      when :gemini
+        args[:model] ||= 'google/gemini-2.5-pro'
       when :openai
         args[:model] ||= 'openai/gpt-4.1-mini'
         args[:api_key] ||= ENV['OPEN_ROUTER_OPENAI_API_KEY'] || ENV['OPEN_ROUTER_API_KEY']

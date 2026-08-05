@@ -57,17 +57,17 @@ news.rb → tools_research.rb → forecast.rb (×4 forecasters) → revise_forec
 
 1. **News** (`news.rb`) - Fetches and categorizes relevant news via AskNews API
 2. **Research** (`tools_research.rb`) - Deep research using Claude Opus with web search tools
-3. **Forecast** (`forecast.rb`) - 4 independent forecasters (Anthropic, OpenAI, Perplexity, DeepSeek)
+3. **Forecast** (`forecast.rb`) - 4 independent forecasters (Anthropic, OpenAI, Gemini, DeepSeek)
 4. **Revise** (`revise_forecast.rb`) - Each forecaster sees peers' estimates and revises
 5. **Consensus** (`consensus.rb`) - Final consolidated forecast submitted to Metaculus
 
 ### Key Files
 
-- **`lib/provider.rb`** - Multi-provider LLM factory. `Provider::FORECASTERS = [:anthropic, :openai, :perplexity, :deepseek]`. Both `:anthropic` and `:openai` route through OpenRouter; `:perplexity` and `:deepseek` use their own clients.
+- **`lib/provider.rb`** - Multi-provider LLM factory. `Provider::FORECASTERS = [:anthropic, :openai, :gemini, :deepseek]`. `:anthropic`, `:openai`, and `:gemini` route through OpenRouter; `:deepseek` uses its own client. (Perplexity is still used for web search in the research phase via the Agent API in `tools_research.rb`, but is no longer a forecaster.)
 - **`lib/metaculus.rb`** - Metaculus API client. `Question` class wraps question data; handles all 4 question types (binary, numeric, discrete, multiple_choice).
 - **`lib/prompts.rb`** - System prompts and ERB templates. `SUPERFORECASTER_SYSTEM_PROMPT` encodes the Bayesian methodology (base rates, explicit adjustments, uncertainty calibration).
 - **`lib/response.rb`** - Parses LLM responses across providers. Extracts XML-tagged forecast values (`<probability>`, `<percentiles>`, `<probabilities>`).
-- **`lib/tools.rb`** - Defines `SEARCH_TOOL` (calls Perplexity sonar-pro for web search), `CALCULATOR_TOOL` (safe arithmetic via Dentaku), and `Tools.dispatch` (centralized tool-call router used by OpenRouter, DeepSeek, and Perplexity).
+- **`lib/tools.rb`** - Defines `CALCULATOR_TOOL` (safe arithmetic via Dentaku) and `Tools.dispatch` (centralized tool-call router used by OpenRouter and DeepSeek). Web search is centralized upstream in the research phase, so forecasters have no search tool.
 - **`lib/utility.rb`** - File-based caching in `tmp/{post_id}/`. All prompts and outputs are cached for auditability.
 
 ### Question Types & Output Formats
