@@ -66,7 +66,7 @@ retro_prompt = <<~RETRO_PROMPT
   Pipeline-generated questions include structured XML in their comments:
   - `<research_summary>` — The research phase findings used by all forecasters
   - `<forecaster>` — Per-provider forecast with attributes:
-    - `provider` — Model name (anthropic, openai, perplexity, deepseek)
+    - `provider` — Model name (anthropic, openai, gemini, deepseek)
     - `value` — Final (post-revision) forecast value
     - `pre_revision` — Forecast value BEFORE the Delphi revise stage (enables measuring herding vs. refinement)
     - `confidence` — Self-assessed confidence rating

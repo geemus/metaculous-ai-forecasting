@@ -17,10 +17,10 @@ cache_write(post_id, 'inputs/system.superforecaster.md', SUPERFORECASTER_SYSTEM_
 provider = FORECASTERS[forecaster_index]
 Formatador.display "\n[bold][green]# Superforecaster[#{forecaster_index}: #{provider}]: Forecasting(#{post_id})…[/] "
 cache(post_id, "forecasts/forecast.#{forecaster_index}.json") do
-  # Perplexity Chat Completions doesn't support function calling (requires Agent API).
-  # Use CALCULATOR_TOOL for providers that support it (OpenRouter/Anthropic, OpenAI, DeepSeek).
-  tools = provider == :perplexity ? [] : [CALCULATOR_TOOL]
-  llm_args = { system: SUPERFORECASTER_SYSTEM_PROMPT, temperature: 0.9, tools: tools }
+  # All forecasters route through function-calling-capable clients.  Web
+  # search is centralized upstream in tools_research.rb (research_summary
+  # is injected above), so forecasters get only CALCULATOR_TOOL.
+  llm_args = { system: SUPERFORECASTER_SYSTEM_PROMPT, temperature: 0.9, tools: [CALCULATOR_TOOL] }
   llm = Provider.new(provider, **llm_args)
 
   # Blind estimate: no external signals (community aggregate shown later during Delphi revision)
