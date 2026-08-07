@@ -49,7 +49,7 @@ module ResponseHelpers
       extracted_content('probabilities').split("\n").each do |line|
         line = line.strip
         next if line.empty?
-        key, value = line.split(': ', 2)
+        key, value = line.rpartition(': ').values_at(0, 2)
         probabilities[key.strip] = parse_probability(value)
       end
       probabilities
