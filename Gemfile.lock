@@ -8,7 +8,7 @@ GEM
       concurrent-ruby (~> 1.1)
       tsort (>= 0.1.1)
     drb (2.2.3)
-    erb (6.0.6)
+    erb (6.0.7)
     excon (1.7.0)
       logger
     formatador (1.2.3)
