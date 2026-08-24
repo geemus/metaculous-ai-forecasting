@@ -29,11 +29,11 @@ module Provider
 
       case provider_symbol
       when :anthropic
-        args[:model] ||= 'anthropic/claude-sonnet-4.5'
+        args[:model] ||= 'anthropic/claude-opus-5'
       when :gemini
-        args[:model] ||= 'google/gemini-2.5-pro'
+        args[:model] ||= 'google/gemini-3.1-pro-preview'
       when :openai
-        args[:model] ||= 'openai/gpt-4.1-mini'
+        args[:model] ||= 'openai/gpt-5.6-sol'
         args[:api_key] ||= ENV['OPEN_ROUTER_OPENAI_API_KEY'] || ENV['OPEN_ROUTER_API_KEY']
       end
 
