@@ -23,7 +23,7 @@ GEM
     rake (13.4.2)
     reline (0.6.3)
       io-console (~> 0.5)
-    rubyzip (3.4.1)
+    rubyzip (3.5.0)
     simplecov (1.1.1)
     tsort (0.2.0)
 
