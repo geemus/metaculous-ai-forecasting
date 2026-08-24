@@ -22,16 +22,10 @@ cache(post_id, 'research.json') do
   start_time = Time.now
 
   begin
-    # Perplexity Agent API with native web_search + custom calculate tool.
-    # Eliminates the OpenRouter→Perplexity Chat Completions double-hop:
-    # the Agent API runs web_search internally, and only pauses for
-    # calculate function calls that we execute locally.
-    #
-    # IMPORTANT: the Agent API is stateless — every HTTP request is
-    # independent.  For multi-turn function calling we accumulate all
-    # prior input items (user message, function_call items, and
-    # function_call_output items) and replay them on each follow-up
-    # call so the model retains full conversation context.
+    # Perplexity Agent API with native tools (web_search, finance_search,
+    # fetch_url). Eliminates the OpenRouter→Perplexity Chat Completions
+    # double-hop: the Agent API runs all tools internally and returns the
+    # final research report in a single request.
     agent = Excon.new(
       'https://api.perplexity.ai/v1/agent',
       expects: 200,
@@ -44,78 +38,33 @@ cache(post_id, 'research.json') do
       read_timeout: 600
     )
 
+    # Cap how many URLs the fetch_url tool retrieves per invocation to
+    # bound latency and keep fetched content from crowding the reasoning
+    # context window. Perplexity accepts 1–10; overridable via env.
+    max_urls = [[Integer(ENV['PERPLEXITY_MAX_URLS'] || 4), 1].max, 10].min
+
     agent_tools = [
       { type: 'web_search' },
-      {
-        type: 'function',
-        name: 'calculate',
-        description: CALCULATOR_TOOL[:function][:description],
-        parameters: CALCULATOR_TOOL[:function][:parameters]
-      }
+      { type: 'finance_search' },
+      { type: 'fetch_url', max_urls: max_urls }
     ]
-
-    # Accumulated input items replayed on every follow-up so the
-    # stateless Agent API retains full conversation context.
-    input_items = [{ type: 'message', role: 'user', content: @research_prompt }]
-
-    # Track tool invocations across all requests for a single summary.
-    total_tally = Hash.new(0)
 
     response = JSON.parse(
       agent.post(body: {
-        model: 'anthropic/claude-opus-4-7',
-        max_output_tokens: 8192,
-        max_steps: 10,
+        model: 'anthropic/claude-opus-5',
+        max_output_tokens: 128000,
+        max_steps: 15,
+        prompt_cache_key: 'high',
+        reasoning: { 'effort': 'high' },
         tool_choice: 'auto',
-        input: input_items,
+        input: [{ type: 'message', role: 'user', content: @research_prompt }],
         instructions: RESEARCHER_SYSTEM_PROMPT,
         tools: agent_tools
       }.to_json).body
     )
 
-    response['output'].map { |item| item['type'] }.tally.each { |type, count| total_tally[type] += count }
-
-    # Handle custom function_call loop — web_search is handled natively by
-    # Perplexity's runtime and never appears as a function_call here.
-    loop do
-      function_calls = response['output'].select { |item| item['type'] == 'function_call' }
-      break if function_calls.empty?
-
-      # Append the model's function_call items to input history.
-      input_items.concat(function_calls)
-
-      function_outputs = function_calls.map do |fc|
-        arguments = JSON.parse(fc['arguments'])
-        result = case fc['name']
-                 when 'calculate'
-                   Tools.calculate(arguments)
-                 else
-                   raise "Unknown function: #{fc['name']}"
-                 end
-        { type: 'function_call_output', call_id: fc['call_id'], output: result }
-      end
-
-      # Append function results to input history.
-      input_items.concat(function_outputs)
-
-      # Replay full input history so the model retains context about
-      # the original research question and prior function calls.
-      response = JSON.parse(
-        agent.post(body: {
-          model: 'anthropic/claude-opus-4-7',
-          max_output_tokens: 8192,
-          max_steps: 10,
-          tool_choice: 'auto',
-          input: input_items,
-          instructions: RESEARCHER_SYSTEM_PROMPT,
-          tools: agent_tools
-        }.to_json).body
-      )
-
-      response['output'].map { |item| item['type'] }.tally.each { |type, count| total_tally[type] += count }
-    end
-
-    summary = total_tally.map { |type, count| "#{type}×#{count}" }.sort.join(', ')
+    summary = response['output'].map { |item| item['type'] }.tally
+      .map { |type, count| "#{type}×#{count}" }.sort.join(', ')
     Formatador.display_line "\n# Researcher: #{summary}"
 
     # Extract text content from the Agent API response.
@@ -160,7 +109,7 @@ cache(post_id, 'research.json') do
         'completion_tokens' => response.dig('usage', 'output_tokens') || 0,
         'total_tokens' => response.dig('usage', 'total_tokens') || 0
       },
-      'model' => response['model'] || 'anthropic/claude-opus-4-7'
+      'model' => response['model'] || 'anthropic/claude-opus-5'
     }
 
     JSON.pretty_generate(openai_compatible)
