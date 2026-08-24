@@ -44,10 +44,15 @@ cache(post_id, 'research.json') do
       read_timeout: 600
     )
 
+    # Cap how many URLs the fetch_url tool retrieves per invocation to
+    # bound latency and keep fetched content from crowding the reasoning
+    # context window. Perplexity accepts 1–10; overridable via env.
+    max_urls = [[Integer(ENV['PERPLEXITY_MAX_URLS'] || 2), 1].max, 10].min
+
     agent_tools = [
       { type: 'web_search' },
       { type: 'finance_search' },
-      { type: 'fetch_url' },
+      { type: 'fetch_url', max_urls: max_urls },
       {
         type: 'function',
         name: 'calculate',
