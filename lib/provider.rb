@@ -31,7 +31,7 @@ module Provider
       when :anthropic
         args[:model] ||= 'anthropic/claude-opus-5'
       when :gemini
-        args[:model] ||= 'google/gemini-3.1-pro-preview'
+        args[:model] ||= 'google/gemini-2.5-pro'
       when :openai
         args[:model] ||= 'openai/gpt-5.6-sol'
         args[:api_key] ||= ENV['OPEN_ROUTER_OPENAI_API_KEY'] || ENV['OPEN_ROUTER_API_KEY']
