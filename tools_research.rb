@@ -46,6 +46,8 @@ cache(post_id, 'research.json') do
 
     agent_tools = [
       { type: 'web_search' },
+      { type: 'finance_search' },
+      { type: 'fetch_url' },
       {
         type: 'function',
         name: 'calculate',
@@ -63,7 +65,7 @@ cache(post_id, 'research.json') do
 
     response = JSON.parse(
       agent.post(body: {
-        model: 'anthropic/claude-opus-4-7',
+        model: 'anthropic/claude-opus-5',
         max_output_tokens: 8192,
         max_steps: 10,
         tool_choice: 'auto',
@@ -102,7 +104,7 @@ cache(post_id, 'research.json') do
       # the original research question and prior function calls.
       response = JSON.parse(
         agent.post(body: {
-          model: 'anthropic/claude-opus-4-7',
+          model: 'anthropic/claude-opus-5',
           max_output_tokens: 8192,
           max_steps: 10,
           tool_choice: 'auto',
@@ -160,7 +162,7 @@ cache(post_id, 'research.json') do
         'completion_tokens' => response.dig('usage', 'output_tokens') || 0,
         'total_tokens' => response.dig('usage', 'total_tokens') || 0
       },
-      'model' => response['model'] || 'anthropic/claude-opus-4-7'
+      'model' => response['model'] || 'anthropic/claude-opus-5'
     }
 
     JSON.pretty_generate(openai_compatible)
