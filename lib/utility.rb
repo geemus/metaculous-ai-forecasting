@@ -202,16 +202,15 @@ end
 
 # Load all forecasts of a given type for all forecasters
 def load_forecasts(post_id, type: 'forecast', forecasters: Provider::FORECASTERS)
-  forecasters.each_with_index.map do |provider, index|
-    forecast_json = cache_read!(post_id, "forecasts/#{type}.#{index}.json")
+  forecasters.map do |provider|
+    forecast_json = cache_read!(post_id, "forecasts/#{type}.#{provider}.json")
     Response.new(provider, json: forecast_json)
   end
 end
 
 # Load a single forecast for a specific forecaster
-def load_forecast(post_id, forecaster_index, type: 'forecast', forecasters: Provider::FORECASTERS)
-  provider = forecasters[forecaster_index]
-  forecast_json = cache_read!(post_id, "forecasts/#{type}.#{forecaster_index}.json")
+def load_forecast(post_id, provider, type: 'forecast')
+  forecast_json = cache_read!(post_id, "forecasts/#{type}.#{provider}.json")
   Response.new(provider, json: forecast_json)
 end
 

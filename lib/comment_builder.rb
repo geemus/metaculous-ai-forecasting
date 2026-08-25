@@ -35,7 +35,7 @@ module CommentBuilder
     lines << "- **Question**: #{question.title}"
     lines << "- **Type**: #{question.type}"
     lines << "- **Post ID**: #{post_id}"
-    lines << '- **Stages**: News → Research → 4 Forecasters → Delphi Revise → Consensus'
+    lines << "- **Stages**: News → Research → #{Provider::FORECASTERS.size} Forecasters → Delphi Revise → Consensus"
     lines << "- **News**: #{news_meta}" if news_meta
     lines << "- **Mechanical Baseline**: #{baseline.split("\n").first}" if baseline
     lines.join("\n")
@@ -149,8 +149,8 @@ module CommentBuilder
   end
 
   def load_original_forecasts(post_id)
-    Provider::FORECASTERS.each_with_index.map do |provider, index|
-      forecast_path = cache_path(post_id, "forecasts/forecast.#{index}.json")
+    Provider::FORECASTERS.map do |provider|
+      forecast_path = cache_path(post_id, "forecasts/forecast.#{provider}.json")
       next unless File.exist?(forecast_path)
 
       Response.new(provider, json: File.read(forecast_path))

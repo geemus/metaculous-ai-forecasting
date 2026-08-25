@@ -6,7 +6,6 @@ require './lib/open_router'
 module Provider
   # Forecasters list
   FORECASTERS = %i[
-    anthropic
     openai
     gemini
     deepseek
