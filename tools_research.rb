@@ -26,16 +26,23 @@ cache(post_id, 'research.json') do
     # fetch_url). Eliminates the OpenRouter→Perplexity Chat Completions
     # double-hop: the Agent API runs all tools internally and returns the
     # final research report in a single request.
+    # Heavy runs (Claude Opus 5 + high reasoning + 15 steps + three tools)
+    # can outlast Perplexity's synchronous request window, which aborts the
+    # connection mid-run (HTTP 499 "client_disconnected" / ECONNRESET). To
+    # survive long runs we submit in background mode and poll the run
+    # status, so the work completes server-side independent of the HTTP
+    # connection.
+    headers = {
+      'accept': 'application/json',
+      'authorization': "Bearer #{ENV['PERPLEXITY_API_KEY']}",
+      'content-type': 'application/json'
+    }
+
     agent = Excon.new(
-      'https://api.perplexity.ai/v1/agent',
-      expects: 200,
-      headers: {
-        'accept': 'application/json',
-        'authorization': "Bearer #{ENV['PERPLEXITY_API_KEY']}",
-        'content-type': 'application/json'
-      },
-      idempotent: true,
-      read_timeout: 600
+      'https://api.perplexity.ai',
+      expects: [200, 202],
+      headers: headers,
+      read_timeout: 60
     )
 
     # Cap how many URLs the fetch_url tool retrieves per invocation to
@@ -49,8 +56,8 @@ cache(post_id, 'research.json') do
       { type: 'fetch_url', max_urls: max_urls }
     ]
 
-    response = JSON.parse(
-      agent.post(body: {
+    submission = JSON.parse(
+      agent.post(path: '/v1/agent', body: {
         model: 'anthropic/claude-opus-5',
         max_output_tokens: 128000,
         max_steps: 15,
@@ -59,9 +66,43 @@ cache(post_id, 'research.json') do
         tool_choice: 'auto',
         input: [{ type: 'message', role: 'user', content: @research_prompt }],
         instructions: RESEARCHER_SYSTEM_PROMPT,
-        tools: agent_tools
+        tools: agent_tools,
+        background: true
       }.to_json).body
     )
+
+    run_id = submission['id'] ||
+      raise("Perplexity background submission missing id: #{submission.inspect}")
+    Formatador.display_line "\n# Researcher: background run #{run_id} (#{submission['status']})"
+
+    # Poll the background run to completion. Each poll is a cheap HTTP GET,
+    # so a transient network error just retries the poll instead of
+    # aborting the whole research phase.
+    poll_deadline = Time.now + Integer(ENV['PERPLEXITY_AGENT_TIMEOUT'] || 1800)
+    poll_interval = Float(ENV['PERPLEXITY_POLL_INTERVAL'] || 15)
+    response = loop do
+      if Time.now >= poll_deadline
+        raise "Timed out after #{(Time.now - start_time).round}s waiting for Perplexity agent run #{run_id}"
+      end
+
+      begin
+        response = JSON.parse(agent.get(path: "/v1/agent/#{run_id}").body)
+      rescue Excon::Error => e
+        warn "Perplexity poll failed (#{e.message}); retrying…"
+        sleep poll_interval
+        next
+      end
+
+      status = response['status']
+      break response if %w[completed failed cancelled incomplete].include?(status)
+
+      sleep poll_interval
+    end
+
+    status = response['status']
+    unless status == 'completed'
+      raise "Perplexity agent run #{run_id} ended with status #{status}: #{response['error'].inspect}"
+    end
 
     summary = response['output'].map { |item| item['type'] }.tally
       .map { |type, count| "#{type}×#{count}" }.sort.join(', ')
@@ -119,7 +160,7 @@ cache(post_id, 'research.json') do
     raise
   rescue Excon::Error => e
     puts e.message
-    puts e.response.body
+    puts e.response&.body
     exit(1)
   end
 end
