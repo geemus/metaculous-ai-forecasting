@@ -148,12 +148,8 @@ jobs:
       forecasters: ${{ steps.forecasters.outputs.forecasters }}
     steps:
       - uses: actions/checkout@v7
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '4.0'
-          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
       - id: forecasters
-        run: echo "forecasters=$(bundle exec ruby bin/forecasters.rb)" >> "$GITHUB_OUTPUT"
+        run: echo "forecasters=$(jq -c . forecasters.json)" >> "$GITHUB_OUTPUT"
 
   forecast:
     needs: [forecasters, research]

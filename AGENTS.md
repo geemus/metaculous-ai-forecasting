@@ -63,7 +63,7 @@ news.rb → tools_research.rb → forecast.rb (×3 forecasters) → revise_forec
 
 ### Key Files
 
-- **`lib/provider.rb`** - Multi-provider LLM factory. `Provider::FORECASTERS = [:openai, :gemini, :deepseek]`. `:openai` and `:gemini` route through OpenRouter; `:deepseek` uses its own client. (`:anthropic` is retained as a provider for the consensus meta-forecaster but is no longer in the forecaster ensemble. Perplexity is still used for web search in the research phase via the Agent API in `tools_research.rb`, but is no longer a forecaster.)
+- **`lib/provider.rb`** - Multi-provider LLM factory. `Provider::FORECASTERS` — the forecaster ensemble (`:openai`, `:gemini`, `:deepseek`) — is loaded from `forecasters.json`, the single source of truth that CI also reads directly. `:openai` and `:gemini` route through OpenRouter; `:deepseek` uses its own client. (`:anthropic` is retained as a provider for the consensus meta-forecaster but is no longer in the forecaster ensemble. Perplexity is still used for web search in the research phase via the Agent API in `tools_research.rb`, but is no longer a forecaster.)
 - **`lib/metaculus.rb`** - Metaculus API client. `Question` class wraps question data; handles all 4 question types (binary, numeric, discrete, multiple_choice).
 - **`lib/prompts.rb`** - System prompts and ERB templates. `SUPERFORECASTER_SYSTEM_PROMPT` encodes the Bayesian methodology (base rates, explicit adjustments, uncertainty calibration).
 - **`lib/response.rb`** - Parses LLM responses across providers. Extracts XML-tagged forecast values (`<probability>`, `<percentiles>`, `<probabilities>`).
