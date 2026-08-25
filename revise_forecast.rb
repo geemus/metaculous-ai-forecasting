@@ -3,10 +3,12 @@
 
 require_relative 'lib/script_helpers'
 
-FORECASTERS = Provider::FORECASTERS
-
 post_id = ARGV[0] || raise('post id argument is required')
-forecaster_index = ARGV[1]&.to_i || raise('forecaster index argv[1] is required')
+provider = ARGV[1]&.to_sym || raise('provider name argv[1] is required')
+
+unless Provider::FORECASTERS.include?(provider)
+  raise ArgumentError, "Unknown forecaster: #{provider}. Expected one of: #{Provider::FORECASTERS.join(', ')}"
+end
 
 question = fetch_question(post_id)
 exit if should_skip_forecast?(question, post_id)
@@ -15,23 +17,22 @@ exit if should_skip_forecast?(question, post_id)
 @forecasts = load_forecasts(post_id, type: 'forecast')
 @mechanical_baseline = mechanical_baseline(question, @forecasts)
 
-provider = FORECASTERS[forecaster_index]
-@forecast = @forecasts[forecaster_index]
+@forecast = @forecasts.find { |f| f.provider == provider }
 
-Formatador.display "\n[bold][green]# Superforecaster[#{forecaster_index}: #{provider}]: Revising Forecast(#{post_id})…[/] "
-cache(post_id, "forecasts/revision.#{forecaster_index}.json") do
+Formatador.display "\n[bold][green]# Superforecaster[#{provider}]: Revising Forecast(#{post_id})…[/] "
+cache(post_id, "forecasts/revision.#{provider}.json") do
   llm_args = { system: SUPERFORECASTER_SYSTEM_PROMPT, temperature: 0.5, tools: [CALCULATOR_TOOL] }
   llm = Provider.new(provider, **llm_args)
   forecast_prompt = prompt_with_type(llm, question, SHARED_FORECAST_PROMPT_TEMPLATE)
   forecast_delphi_prompt = FORECAST_DELPHI_PROMPT_TEMPLATE.result(binding)
-  cache_write(post_id, "inputs/revision.#{forecaster_index}.md", forecast_delphi_prompt)
+  cache_write(post_id, "inputs/revision.#{provider}.md", forecast_delphi_prompt)
   revision = llm.eval(
     { 'role': 'user', 'content': forecast_prompt },
     { 'role': 'assistant', 'content': @forecast.content },
     { 'role': 'user', 'content': forecast_delphi_prompt }
   )
   puts revision.content
-  cache_write(post_id, "outputs/revision.#{forecaster_index}.md", revision.content)
+  cache_write(post_id, "outputs/revision.#{provider}.md", revision.content)
 
   # Measure anchoring delta: how much did external signals (peers + community + mechanical) shift the blind estimate?
   begin
@@ -58,7 +59,7 @@ cache(post_id, "forecasts/revision.#{forecaster_index}.json") do
               end
             end
 
-    cache_write(post_id, "forecasts/deltas/blind_vs_revision.#{forecaster_index}.txt", delta.round(6).to_s)
+    cache_write(post_id, "forecasts/deltas/blind_vs_revision.#{provider}.txt", delta.round(6).to_s)
   rescue StandardError => e
     warn "WARNING: failed to measure revision anchoring delta: #{e.message}"
   end

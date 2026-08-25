@@ -1,16 +1,15 @@
 # frozen_string_literal: true
 
+require 'json'
+
 require './lib/deepseek'
 require './lib/open_router'
 
 module Provider
-  # Forecasters list
-  FORECASTERS = %i[
-    anthropic
-    openai
-    gemini
-    deepseek
-  ].freeze
+  # Forecaster ensemble. Single source of truth is forecasters.json, which
+  # CI also reads directly (see .github/workflows/forecast.yml).
+  FORECASTERS_PATH = File.expand_path('../forecasters.json', __dir__)
+  FORECASTERS = JSON.parse(File.read(FORECASTERS_PATH)).map(&:to_sym).freeze
 
   # Map provider symbols to their class names
   PROVIDER_CLASSES = {

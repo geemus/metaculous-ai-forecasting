@@ -11,8 +11,8 @@ The `gh` CLI is available and authenticated — use it for issues, PRs, and othe
 # Install dependencies
 bundle install
 
-# Run a single forecast (post_id, forecaster_index 0-3)
-ruby forecast.rb <post_id> [forecaster_index]
+# Run a single forecast (post_id, provider name)
+ruby forecast.rb <post_id> <provider>
 
 # Run end-to-end pipeline for a question
 ruby ete.rb <post_id>
@@ -28,7 +28,7 @@ ruby consensus.rb <post_id>
 
 # Use test question IDs (defined in lib/utility.rb) to avoid skip logic
 # Binary: 578, Numeric: 14333, Multiple Choice: 22427, Discrete: 38880
-ruby forecast.rb 578 0
+ruby forecast.rb 578 openai
 ```
 
 ## Workflow
@@ -52,18 +52,18 @@ This is a multi-stage AI forecasting pipeline that submits probability forecasts
 ### Pipeline Stages
 
 ```
-news.rb → tools_research.rb → forecast.rb (×4 forecasters) → revise_forecast.rb (×4) → consensus.rb
+news.rb → tools_research.rb → forecast.rb (×3 forecasters) → revise_forecast.rb (×3) → consensus.rb
 ```
 
 1. **News** (`news.rb`) - Fetches and categorizes relevant news via AskNews API
 2. **Research** (`tools_research.rb`) - Deep research using Claude Opus with web search tools
-3. **Forecast** (`forecast.rb`) - 4 independent forecasters (Anthropic, OpenAI, Gemini, DeepSeek)
+3. **Forecast** (`forecast.rb`) - 3 independent forecasters (OpenAI, Gemini, DeepSeek)
 4. **Revise** (`revise_forecast.rb`) - Each forecaster sees peers' estimates and revises
 5. **Consensus** (`consensus.rb`) - Final consolidated forecast submitted to Metaculus
 
 ### Key Files
 
-- **`lib/provider.rb`** - Multi-provider LLM factory. `Provider::FORECASTERS = [:anthropic, :openai, :gemini, :deepseek]`. `:anthropic`, `:openai`, and `:gemini` route through OpenRouter; `:deepseek` uses its own client. (Perplexity is still used for web search in the research phase via the Agent API in `tools_research.rb`, but is no longer a forecaster.)
+- **`lib/provider.rb`** - Multi-provider LLM factory. `Provider::FORECASTERS` — the forecaster ensemble (`:openai`, `:gemini`, `:deepseek`) — is loaded from `forecasters.json`, the single source of truth that CI also reads directly. `:openai` and `:gemini` route through OpenRouter; `:deepseek` uses its own client. (`:anthropic` is retained as a provider for the consensus meta-forecaster but is no longer in the forecaster ensemble. Perplexity is still used for web search in the research phase via the Agent API in `tools_research.rb`, but is no longer a forecaster.)
 - **`lib/metaculus.rb`** - Metaculus API client. `Question` class wraps question data; handles all 4 question types (binary, numeric, discrete, multiple_choice).
 - **`lib/prompts.rb`** - System prompts and ERB templates. `SUPERFORECASTER_SYSTEM_PROMPT` encodes the Bayesian methodology (base rates, explicit adjustments, uncertainty calibration).
 - **`lib/response.rb`** - Parses LLM responses across providers. Extracts XML-tagged forecast values (`<probability>`, `<percentiles>`, `<probabilities>`).

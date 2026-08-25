@@ -141,14 +141,24 @@ jobs:
           echo "$(cat tmp/${{ inputs.post_id }}/outputs/research.md)" >> $GITHUB_STEP_SUMMARY
           echo '</details>' >> $GITHUB_STEP_SUMMARY
 
+  forecasters:
+    if: ${{ inputs.post_id }}
+    runs-on: ubuntu-latest
+    outputs:
+      forecasters: ${{ steps.forecasters.outputs.forecasters }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: forecasters
+        run: echo "forecasters=$(jq -c . forecasters.json)" >> "$GITHUB_OUTPUT"
+
   forecast:
-    needs: research
+    needs: [forecasters, research]
     if: ${{ inputs.post_id }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        forecaster_index: [0, 1, 2, 3]
+        forecaster: ${{ fromJSON(needs.forecasters.outputs.forecasters) }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/cache/restore@v6
@@ -157,13 +167,13 @@ jobs:
           path: tmp/${{ inputs.post_id }}/research.json
       - uses: actions/cache/restore@v6
         with:
-          key:  tmp/${{ inputs.post_id }}/forecasts/forecast.${{ matrix.forecaster_index }}.json
-          path: tmp/${{ inputs.post_id }}/forecasts/forecast.${{ matrix.forecaster_index }}.json
+          key:  tmp/${{ inputs.post_id }}/forecasts/forecast.${{ matrix.forecaster }}.json
+          path: tmp/${{ inputs.post_id }}/forecasts/forecast.${{ matrix.forecaster }}.json
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '4.0'
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-      - run: bundle exec ruby forecast.rb ${{ inputs.post_id }} ${{ matrix.forecaster_index }}
+      - run: bundle exec ruby forecast.rb ${{ inputs.post_id }} ${{ matrix.forecaster }}
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
@@ -174,63 +184,52 @@ jobs:
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
       - uses: actions/cache/save@v6
         with:
-          key:  tmp/${{ inputs.post_id }}/forecasts/forecast.${{ matrix.forecaster_index }}.json
-          path: tmp/${{ inputs.post_id }}/forecasts/forecast.${{ matrix.forecaster_index }}.json
+          key:  tmp/${{ inputs.post_id }}/forecasts/forecast.${{ matrix.forecaster }}.json
+          path: tmp/${{ inputs.post_id }}/forecasts/forecast.${{ matrix.forecaster }}.json
       - uses: actions/upload-artifact@v7
         with:
-          name: ${{ inputs.post_id }}.forecast.${{ matrix.forecaster_index }}.json
-          path: tmp/${{ inputs.post_id }}/forecasts/forecast.${{ matrix.forecaster_index }}.json
+          name: ${{ inputs.post_id }}.forecast.${{ matrix.forecaster }}.json
+          path: tmp/${{ inputs.post_id }}/forecasts/forecast.${{ matrix.forecaster }}.json
       - run: |
-          bundle exec ruby forecast_result.rb ${{ inputs.post_id }} ${{ matrix.forecaster_index }} forecast >> $GITHUB_STEP_SUMMARY
+          bundle exec ruby forecast_result.rb ${{ inputs.post_id }} ${{ matrix.forecaster }} forecast >> $GITHUB_STEP_SUMMARY
         continue-on-error: true
       - run: |
           echo '<details><summary>Prompt</summary>' >> $GITHUB_STEP_SUMMARY
-          echo "$(cat tmp/${{ inputs.post_id }}/inputs/forecast.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
+          echo "$(cat tmp/${{ inputs.post_id }}/inputs/forecast.${{ matrix.forecaster }}.md)" >> $GITHUB_STEP_SUMMARY
           echo '</details>' >> $GITHUB_STEP_SUMMARY
       - run: |
           echo '<details><summary>Result</summary>' >> $GITHUB_STEP_SUMMARY
-          echo "$(cat tmp/${{ inputs.post_id }}/outputs/forecast.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
+          echo "$(cat tmp/${{ inputs.post_id }}/outputs/forecast.${{ matrix.forecaster }}.md)" >> $GITHUB_STEP_SUMMARY
           echo '</details>' >> $GITHUB_STEP_SUMMARY
 
   revise_forecast:
-    needs: forecast
+    needs: [forecast, forecasters]
     if: ${{ inputs.post_id }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        forecaster_index: [0, 1, 2, 3]
+        forecaster: ${{ fromJSON(needs.forecasters.outputs.forecasters) }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/cache/restore@v6
         with:
           key:  tmp/${{ inputs.post_id }}/research.json
           path: tmp/${{ inputs.post_id }}/research.json
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: ${{ inputs.post_id }}.forecast.*
+          path: tmp/${{ inputs.post_id }}/forecasts
+          merge-multiple: true
       - uses: actions/cache/restore@v6
         with:
-          key:  tmp/${{ inputs.post_id }}/forecasts/forecast.0.json
-          path: tmp/${{ inputs.post_id }}/forecasts/forecast.0.json
-      - uses: actions/cache/restore@v6
-        with:
-          key:  tmp/${{ inputs.post_id }}/forecasts/forecast.1.json
-          path: tmp/${{ inputs.post_id }}/forecasts/forecast.1.json
-      - uses: actions/cache/restore@v6
-        with:
-          key:  tmp/${{ inputs.post_id }}/forecasts/forecast.2.json
-          path: tmp/${{ inputs.post_id }}/forecasts/forecast.2.json
-      - uses: actions/cache/restore@v6
-        with:
-          key:  tmp/${{ inputs.post_id }}/forecasts/forecast.3.json
-          path: tmp/${{ inputs.post_id }}/forecasts/forecast.3.json
-      - uses: actions/cache/restore@v6
-        with:
-          key:  tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.json
-          path: tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.json
+          key:  tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster }}.json
+          path: tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster }}.json
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '4.0'
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-      - run: bundle exec ruby revise_forecast.rb ${{ inputs.post_id }} ${{ matrix.forecaster_index }}
+      - run: bundle exec ruby revise_forecast.rb ${{ inputs.post_id }} ${{ matrix.forecaster }}
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
@@ -241,22 +240,22 @@ jobs:
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
       - uses: actions/cache/save@v6
         with:
-          key:  tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.json
-          path: tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.json
+          key:  tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster }}.json
+          path: tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster }}.json
       - uses: actions/upload-artifact@v7
         with:
-          name: ${{ inputs.post_id }}.revised_forecast.${{ matrix.forecaster_index }}.json
-          path: tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster_index }}.json
+          name: ${{ inputs.post_id }}.revised_forecast.${{ matrix.forecaster }}.json
+          path: tmp/${{ inputs.post_id }}/forecasts/revision.${{ matrix.forecaster }}.json
       - run: |
-          bundle exec ruby forecast_result.rb ${{ inputs.post_id }} ${{ matrix.forecaster_index }} revision >> $GITHUB_STEP_SUMMARY
+          bundle exec ruby forecast_result.rb ${{ inputs.post_id }} ${{ matrix.forecaster }} revision >> $GITHUB_STEP_SUMMARY
         continue-on-error: true
       - run: |
           echo '<details><summary>Prompt</summary>' >> $GITHUB_STEP_SUMMARY
-          echo "$(cat tmp/${{ inputs.post_id }}/inputs/revision.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
+          echo "$(cat tmp/${{ inputs.post_id }}/inputs/revision.${{ matrix.forecaster }}.md)" >> $GITHUB_STEP_SUMMARY
           echo '</details>' >> $GITHUB_STEP_SUMMARY
       - run: |
           echo '<details><summary>Result</summary>' >> $GITHUB_STEP_SUMMARY
-          echo "$(cat tmp/${{ inputs.post_id }}/outputs/revision.${{ matrix.forecaster_index }}.md)" >> $GITHUB_STEP_SUMMARY
+          echo "$(cat tmp/${{ inputs.post_id }}/outputs/revision.${{ matrix.forecaster }}.md)" >> $GITHUB_STEP_SUMMARY
           echo '</details>' >> $GITHUB_STEP_SUMMARY
 
   consensus:
@@ -277,22 +276,11 @@ jobs:
         with:
           key:  tmp/${{ inputs.post_id }}/news.json
           path: tmp/${{ inputs.post_id }}/news.json
-      - uses: actions/cache/restore@v6
+      - uses: actions/download-artifact@v7
         with:
-          key:  tmp/${{ inputs.post_id }}/forecasts/revision.0.json
-          path: tmp/${{ inputs.post_id }}/forecasts/revision.0.json
-      - uses: actions/cache/restore@v6
-        with:
-          key:  tmp/${{ inputs.post_id }}/forecasts/revision.1.json
-          path: tmp/${{ inputs.post_id }}/forecasts/revision.1.json
-      - uses: actions/cache/restore@v6
-        with:
-          key:  tmp/${{ inputs.post_id }}/forecasts/revision.2.json
-          path: tmp/${{ inputs.post_id }}/forecasts/revision.2.json
-      - uses: actions/cache/restore@v6
-        with:
-          key:  tmp/${{ inputs.post_id }}/forecasts/revision.3.json
-          path: tmp/${{ inputs.post_id }}/forecasts/revision.3.json
+          pattern: ${{ inputs.post_id }}.revised_forecast.*
+          path: tmp/${{ inputs.post_id }}/forecasts
+          merge-multiple: true
       - uses: actions/cache/restore@v6
         with:
           key:  tmp/${{ inputs.post_id }}/forecasts/consensus.json
