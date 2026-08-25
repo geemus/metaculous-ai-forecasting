@@ -59,7 +59,7 @@ cache(post_id, 'research.json') do
     submission = JSON.parse(
       agent.post(path: '/v1/agent', body: {
         model: 'anthropic/claude-opus-5',
-        max_output_tokens: 128000,
+        max_output_tokens: 64000,
         max_steps: 15,
         prompt_cache_key: 'high',
         reasoning: { 'effort': 'high' },
