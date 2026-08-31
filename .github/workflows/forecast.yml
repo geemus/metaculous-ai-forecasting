@@ -216,7 +216,7 @@ jobs:
         with:
           key:  tmp/${{ inputs.post_id }}/research.json
           path: tmp/${{ inputs.post_id }}/research.json
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           pattern: ${{ inputs.post_id }}.forecast.*
           path: tmp/${{ inputs.post_id }}/forecasts
@@ -276,7 +276,7 @@ jobs:
         with:
           key:  tmp/${{ inputs.post_id }}/news.json
           path: tmp/${{ inputs.post_id }}/news.json
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           pattern: ${{ inputs.post_id }}.revised_forecast.*
           path: tmp/${{ inputs.post_id }}/forecasts
